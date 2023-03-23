@@ -1,0 +1,17 @@
+{ pkgs, ... }: {
+  users.users.root = {
+    openssh.authorizedKeys.keys = [
+      "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQChxpw+yaavqsS07H/aOt/wHUZBkKLNAlsEnb5CdxVyqS9f/8kiN8Ug0kfR/g0fRja5lBApKXuVgIpeCQ3ORg7GBdbIp0QWpl0I1s6W6DmBMJ51XKCXTgPXrU7pXjo/Wi+GHIWCUuDEt7gIaanMkOabb72YyYdwUdDsNVOQB8Kd7RgUtuvGL3vqkBUeNpLwVRRziMolG2Cg7b2cMHSO6I0XIq66Hb2cY47k/Aga27IlaoquIc0CqUauV/xLq1IOnJTzk5pzXj/FUYY0MZs7wY9ChEUx1J9I1F11CSzW5np11Nw6gh3EUImjRg/PohxXsYyT/u5sFfB5ksnFNtm/aQ7twAAevMJqAkSNimWvxXmoF4bqUAlMXupcz4KyaVG3qpjuESGXrh8JJoDMmNBdrU/Zw1ARz9cw4BFU58EmLpl5phfVFmdXoTZtF0KS+knOORzFL0htT46hU8i5Rz4dZXKp7qsBG00iGWw4UVQiRGvjP+8/RRZ+xqavL/Jm9NyLj7rckD01kvuhtMe5Y2X8KeJUcreprjozeObIPXqk8UgzeKtYlDUG87rPl7yUlszmDdayz6VbsJjEKbKTeiAvEJRBqD+csdYMXReDbry2n4X14cGaic9H3UUWyMNI7Us5xdsNzuVK9CEIPFb/L3Y9jzpCeePtWfOfED2C4533ZwnkQQ== erpipehe@dip-reisen-2108.it.jyu.fi" 
+      "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDP5AMm2F55RJvkUiCjymuYNnGMS6Ly93SZVYNC9WjelLNQFNB05Rak+97bMcRdOVukmvf5Pz0O+schwmyiz+WaHGyVzeXgsWPxv7n3+OjTMJ1IF7PVE39W2YxBenjJEFTsKZR+jvvHwLBs3veTuI4lbnU03nypqZlowa9czC4XyzaJGZ2L4gEfevLSPy9Yf5PeahyWgahDkDcZTXoNsjMW84dIVUqopOTxsNceqTcdn3nb9Gsi1e02y4Yy4rDe/ik20JHYmLeB4Mzby+aScxibhvjHdCJruW5EvahPOrBsdQ+68btxEMaS5OAwQkLfPqrhggV6SF7p4GyiRFawr0r5 zairex@miaupad" 
+    ];
+  };
+  users.users.zairex = {
+    isNormalUser = true;
+    home = "/home/zairex";
+    extraGroups = [ "wheel" "networkmanager" ];
+    openssh.authorizedKeys.keys = [
+      "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQChxpw+yaavqsS07H/aOt/wHUZBkKLNAlsEnb5CdxVyqS9f/8kiN8Ug0kfR/g0fRja5lBApKXuVgIpeCQ3ORg7GBdbIp0QWpl0I1s6W6DmBMJ51XKCXTgPXrU7pXjo/Wi+GHIWCUuDEt7gIaanMkOabb72YyYdwUdDsNVOQB8Kd7RgUtuvGL3vqkBUeNpLwVRRziMolG2Cg7b2cMHSO6I0XIq66Hb2cY47k/Aga27IlaoquIc0CqUauV/xLq1IOnJTzk5pzXj/FUYY0MZs7wY9ChEUx1J9I1F11CSzW5np11Nw6gh3EUImjRg/PohxXsYyT/u5sFfB5ksnFNtm/aQ7twAAevMJqAkSNimWvxXmoF4bqUAlMXupcz4KyaVG3qpjuESGXrh8JJoDMmNBdrU/Zw1ARz9cw4BFU58EmLpl5phfVFmdXoTZtF0KS+knOORzFL0htT46hU8i5Rz4dZXKp7qsBG00iGWw4UVQiRGvjP+8/RRZ+xqavL/Jm9NyLj7rckD01kvuhtMe5Y2X8KeJUcreprjozeObIPXqk8UgzeKtYlDUG87rPl7yUlszmDdayz6VbsJjEKbKTeiAvEJRBqD+csdYMXReDbry2n4X14cGaic9H3UUWyMNI7Us5xdsNzuVK9CEIPFb/L3Y9jzpCeePtWfOfED2C4533ZwnkQQ== erpipehe@dip-reisen-2108.it.jyu.fi" 
+      "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDP5AMm2F55RJvkUiCjymuYNnGMS6Ly93SZVYNC9WjelLNQFNB05Rak+97bMcRdOVukmvf5Pz0O+schwmyiz+WaHGyVzeXgsWPxv7n3+OjTMJ1IF7PVE39W2YxBenjJEFTsKZR+jvvHwLBs3veTuI4lbnU03nypqZlowa9czC4XyzaJGZ2L4gEfevLSPy9Yf5PeahyWgahDkDcZTXoNsjMW84dIVUqopOTxsNceqTcdn3nb9Gsi1e02y4Yy4rDe/ik20JHYmLeB4Mzby+aScxibhvjHdCJruW5EvahPOrBsdQ+68btxEMaS5OAwQkLfPqrhggV6SF7p4GyiRFawr0r5 zairex@miaupad" 
+    ];
+  };
+}
