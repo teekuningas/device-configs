@@ -1,0 +1,1 @@
+NixOS configurations, see branches.
