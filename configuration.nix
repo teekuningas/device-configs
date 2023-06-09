@@ -58,6 +58,25 @@
     virtualHosts."luonto.teekuningas.net".extraConfig = ''
       reverse_proxy http://localhost:8000
     '';
+
+    virtualHosts."kingofsweden.info".extraConfig = ''
+
+      @apiplone {
+        path_regexp apiplone ^/\+\+api\+\+/(.*)$
+      }
+
+      handle @apiplone {
+        rewrite  @apiplone /VirtualHostBase/https/kingofsweden.info:443/Plone/++api++/VirtualHostRoot/{http.regexp.apiplone.1}
+        reverse_proxy {
+          to localhost:8080
+        }
+      }
+      handle {
+        reverse_proxy  {
+          to localhost:3000
+        }
+      }
+    '';
   };
 
   services.syncthing = {
@@ -89,6 +108,45 @@
     serviceConfig = {
       User = "zairex";
       ExecStart = ''${pkgs.nix}/bin/nix develop /home/zairex/data/luontopeli --command gunicorn -w 2 --pythonpath /home/zairex/data/luontopeli "luontopeli:app"'';
+    };
+  };
+
+  virtualisation = {
+    podman = {
+      enable = true;
+
+      # Create a `docker` alias for podman, to use it as a drop-in replacement
+      dockerCompat = true;
+
+      # Required for containers under podman-compose to be able to talk to each other.
+      defaultNetwork.dnsname.enable = true;
+
+      # For Nixos version > 22.11
+      # defaultNetwork.settings = {
+      #  dns_enabled = true;
+      # };
+    };
+
+    oci-containers.backend = "podman";
+    oci-containers.containers = {
+      plone = {
+        image = "plone/plone-backend";
+        autoStart = true;
+        user = "root";
+        ports = [ "127.0.0.1:8080:8080" ];
+        volumes = [
+         "/home/zairex/data/kingofsweden/var:/data"
+       ];
+      };
+      volto = {
+        image = "plone/plone-frontend";
+        user = "root";
+        autoStart = true;
+        ports = [ "127.0.0.1:3000:3000" ];
+        environment = {
+          RAZZLE_API_PATH = "https://kingofsweden.info";
+        };
+      };
     };
   };
 
