@@ -77,6 +77,22 @@
         }
       }
     '';
+
+    virtualHosts."teekuningas.net".extraConfig = ''
+      root * /var/www/static
+      file_server
+    '';
+
+    virtualHosts."www.teekuningas.net".extraConfig = ''
+      root * /var/www/static
+      file_server
+    '';
+
+    virtualHosts."meggie.teekuningas.net".extraConfig = ''
+      root * /var/www/meggie
+      file_server
+    '';
+
   };
 
   services.syncthing = {
