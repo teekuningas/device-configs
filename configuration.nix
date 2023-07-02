@@ -79,17 +79,17 @@
     '';
 
     virtualHosts."teekuningas.net".extraConfig = ''
-      root * /var/www/static
+      root * /var/data/static
       file_server
     '';
 
     virtualHosts."www.teekuningas.net".extraConfig = ''
-      root * /var/www/static
+      root * /var/data/static
       file_server
     '';
 
     virtualHosts."meggie.teekuningas.net".extraConfig = ''
-      root * /var/www/meggie
+      root * /var/data/meggie
       file_server
     '';
 
@@ -149,18 +149,19 @@
         image = "plone/plone-backend";
         autoStart = true;
         user = "root";
-        ports = [ "127.0.0.1:8080:8080" ];
+        extraOptions = [ "--net=host" ];
         volumes = [
-         "/home/zairex/data/kingofsweden/var:/data"
+         "/var/data/kingofsweden:/data"
        ];
       };
       volto = {
         image = "plone/plone-frontend";
         user = "root";
         autoStart = true;
-        ports = [ "127.0.0.1:3000:3000" ];
+        extraOptions = [ "--net=host" ];
         environment = {
           RAZZLE_API_PATH = "https://kingofsweden.info";
+          RAZZLE_INTERNAL_API_PATH = "http://127.0.0.1:8080/Plone";
         };
       };
     };
