@@ -1,4 +1,16 @@
-{ pkgs, ... }: {
+{ pkgs, ... }:
+let
+  imagellmFrontendVersion = "v0";
+  secretsFile = "/etc/nixos/secrets.nix";
+  secrets =
+    if builtins.pathExists secretsFile
+    then import secretsFile
+    else {
+      OPENAI_API_KEY = "";
+      /* ... other defaults */
+    };
+in
+{
   imports = [
     ./hardware-configuration.nix
     ./networking.nix # generated at runtime by nixos-infect
@@ -117,24 +129,43 @@
 
   services.openssh.enable = true;
 
-  systemd.services.luontopeli = {
-    wantedBy = [ "multi-user.target" ];
-    description = "Gunicorn-server to serve luontopeli";
-    path = with pkgs; [ git ];
-    serviceConfig = {
-      User = "zairex";
-      ExecStart = ''${pkgs.nix}/bin/nix develop /home/zairex/data/luontopeli --command gunicorn -w 2 --pythonpath /home/zairex/data/luontopeli "luontopeli:app"'';
+  systemd.services = {
+    # Luontopeli systemd service
+    luontopeli = {
+      wantedBy = [ "multi-user.target" ];
+      description = "Gunicorn-server to serve luontopeli";
+      path = with pkgs; [ git ];
+      serviceConfig = {
+        User = "zairex";
+        ExecStart = ''${pkgs.nix}/bin/nix develop /home/zairex/data/luontopeli --command gunicorn -w 2 --pythonpath /home/zairex/data/luontopeli "luontopeli:app"'';
+      };
+    };
+
+    runImagellmFrontend = {
+      description = "Download, Load, and Start Imagellm Container";
+      after = [ "network.target" ];
+      wantedBy = [ "multi-user.target" ];
+      serviceConfig = {
+        ExecStartPre = let
+          script = pkgs.writeShellScript "prestart" ''
+            ${pkgs.curl}/bin/curl -L -o /tmp/imagellm-frontend.tar.gz "https://github.com/teekuningas/imagellm/releases/download/${imagellmFrontendVersion}/imagellm-frontend-${imagellmFrontendVersion}.tar.gz"
+            ${pkgs.podman}/bin/podman load -i /tmp/imagellm-frontend.tar.gz
+            rm -f /tmp/imagellm-frontend.tar.gz
+            ${pkgs.podman}/bin/podman rm -f imagellm || true
+          '';
+        in
+          "${script}";
+        ExecStart = "${pkgs.podman}/bin/podman run --rm --name=imagellm localhost/imagellm-frontend:${imagellmFrontendVersion}";
+        ExecStop = "${pkgs.podman}/bin/podman stop imagellm";
+      };
     };
   };
+
 
   virtualisation = {
     podman = {
       enable = true;
-
-      # Create a `docker` alias for podman, to use it as a drop-in replacement
       dockerCompat = true;
-
-      # Required for containers under podman-compose to be able to talk to each other.
       defaultNetwork.dnsname.enable = true;
 
       # For Nixos version > 22.11
@@ -144,37 +175,27 @@
     };
 
     oci-containers.backend = "podman";
-    oci-containers.containers =
-      let
-        secretsFile = "/etc/nixos/secrets.nix";
-        secrets =
-          if builtins.pathExists secretsFile
-          then import secretsFile
-          else {
-            OPENAI_API_KEY = ""; /* ... other defaults */
-          };
-      in
-      {
-        plone = {
-          image = "plone/plone-backend";
-          autoStart = true;
-          user = "root";
-          extraOptions = [ "--net=host" ];
-          volumes = [
-           "/var/data/kingofsweden:/data"
-         ];
-        };
-        volto = {
-          image = "plone/plone-frontend";
-          user = "root";
-          autoStart = true;
-          extraOptions = [ "--net=host" ];
-          environment = {
-            RAZZLE_API_PATH = "https://kingofsweden.info";
-            RAZZLE_INTERNAL_API_PATH = "http://127.0.0.1:8080/Plone";
-          };
-        };
+    oci-containers.containers = {
+      plone = {
+        image = "plone/plone-backend";
+        autoStart = true;
+        user = "root";
+        extraOptions = [ "--net=host" ];
+        volumes = [
+         "/var/data/kingofsweden:/data"
+       ];
       };
+      volto = {
+        image = "plone/plone-frontend";
+        user = "root";
+        autoStart = true;
+        extraOptions = [ "--net=host" ];
+        environment = {
+          RAZZLE_API_PATH = "https://kingofsweden.info";
+          RAZZLE_INTERNAL_API_PATH = "http://127.0.0.1:8080/Plone";
+         };
+      };
+    };
   };
 
   security.sudo.wheelNeedsPassword = false;
