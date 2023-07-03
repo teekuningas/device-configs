@@ -144,27 +144,37 @@
     };
 
     oci-containers.backend = "podman";
-    oci-containers.containers = {
-      plone = {
-        image = "plone/plone-backend";
-        autoStart = true;
-        user = "root";
-        extraOptions = [ "--net=host" ];
-        volumes = [
-         "/var/data/kingofsweden:/data"
-       ];
-      };
-      volto = {
-        image = "plone/plone-frontend";
-        user = "root";
-        autoStart = true;
-        extraOptions = [ "--net=host" ];
-        environment = {
-          RAZZLE_API_PATH = "https://kingofsweden.info";
-          RAZZLE_INTERNAL_API_PATH = "http://127.0.0.1:8080/Plone";
+    oci-containers.containers =
+      let
+        secretsFile = "/etc/nixos/secrets.nix";
+        secrets =
+          if builtins.pathExists secretsFile
+          then import secretsFile
+          else {
+            OPENAI_API_KEY = ""; /* ... other defaults */
+          };
+      in
+      {
+        plone = {
+          image = "plone/plone-backend";
+          autoStart = true;
+          user = "root";
+          extraOptions = [ "--net=host" ];
+          volumes = [
+           "/var/data/kingofsweden:/data"
+         ];
+        };
+        volto = {
+          image = "plone/plone-frontend";
+          user = "root";
+          autoStart = true;
+          extraOptions = [ "--net=host" ];
+          environment = {
+            RAZZLE_API_PATH = "https://kingofsweden.info";
+            RAZZLE_INTERNAL_API_PATH = "http://127.0.0.1:8080/Plone";
+          };
         };
       };
-    };
   };
 
   security.sudo.wheelNeedsPassword = false;
