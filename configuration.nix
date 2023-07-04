@@ -8,7 +8,6 @@ let
     then import secretsFile
     else {
       OPENAI_API_KEY = "";
-      PODMAN_PULL_KEY = "";
       /* ... other defaults */
     };
 in
@@ -143,41 +142,6 @@ in
         ExecStart = ''${pkgs.nix}/bin/nix develop /home/zairex/data/luontopeli --command gunicorn -w 2 --pythonpath /home/zairex/data/luontopeli "luontopeli:app"'';
       };
     };
-
-    imagellmFrontend = {
-      description = "Manage the imagellm frontend container";
-      after = [ "network.target" ];
-      wantedBy = [ "multi-user.target" ];
-      serviceConfig = {
-        ExecStartPre = let
-          script = pkgs.writeShellScript "prestart" ''
-            ${pkgs.podman}/bin/podman login ghcr.io -u teekuningas -p ${secrets.PODMAN_PULL_KEY}
-            ${pkgs.podman}/bin/podman pull ghcr.io/teekuningas/imagellm/imagellm-frontend:${imagellmFrontendVersion}
-            ${pkgs.podman}/bin/podman rm -f imagellm-frontend || true
-          '';
-        in
-          "${script}";
-        ExecStart = "${pkgs.podman}/bin/podman run --rm --name=imagellm-frontend ghcr.io/teekuningas/imagellm/imagellm-frontend:${imagellmFrontendVersion}";
-        ExecStop = "${pkgs.podman}/bin/podman stop imagellm-frontend";
-      };
-    };
-    imagellmApi = {
-      description = "Manage the imagellm api container";
-      after = [ "network.target" ];
-      wantedBy = [ "multi-user.target" ];
-      serviceConfig = {
-        ExecStartPre = let
-          script = pkgs.writeShellScript "prestart" ''
-            ${pkgs.podman}/bin/podman login ghcr.io -u teekuningas -p ${secrets.PODMAN_PULL_KEY}
-            ${pkgs.podman}/bin/podman pull ghcr.io/teekuningas/imagellm-api/imagellm-api:${imagellmApiVersion}
-            ${pkgs.podman}/bin/podman rm -f imagellm-api || true
-          '';
-        in
-          "${script}";
-        ExecStart = "${pkgs.podman}/bin/podman run --rm --name=imagellm-api ghcr.io/teekuningas/imagellm-api/imagellm-api:${imagellmApiVersion}";
-        ExecStop = "${pkgs.podman}/bin/podman stop imagellm-api";
-      };
-    };
   };
 
   virtualisation = {
@@ -201,7 +165,7 @@ in
         extraOptions = [ "--net=host" ];
         volumes = [
          "/var/data/kingofsweden:/data"
-       ];
+        ];
       };
       volto = {
         image = "plone/plone-frontend";
@@ -211,7 +175,17 @@ in
         environment = {
           RAZZLE_API_PATH = "https://kingofsweden.info";
           RAZZLE_INTERNAL_API_PATH = "http://127.0.0.1:8080/Plone";
-         };
+        };
+      };
+
+      imagellmFrontend = {
+        image = "ghcr.io/teekuningas/imagellm/imagellm-frontend:${imagellmFrontendVersion}";
+        autoStart = true;
+      };
+
+      imagellmApi = {
+        image = "ghcr.io/teekuningas/imagellm-api/imagellm-api:${imagellmApiVersion}";
+        autoStart = true;
       };
     };
   };
