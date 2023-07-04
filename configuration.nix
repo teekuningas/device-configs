@@ -1,13 +1,14 @@
 { pkgs, ... }:
 let
-  imagellmFrontendVersion = "v1";
-  imagellmApiVersion = "v0";
+  imagellmFrontendVersion = "v2";
+  imagellmApiVersion = "v1";
   secretsFile = "/etc/nixos/secrets.nix";
   secrets =
     if builtins.pathExists secretsFile
     then import secretsFile
     else {
       OPENAI_API_KEY = "";
+      PODMAN_PULL_KEY = "";
       /* ... other defaults */
     };
 in
@@ -144,24 +145,22 @@ in
     };
 
     imagellmFrontend = {
-      description = "Manage the imagellm container";
+      description = "Manage the imagellm frontend container";
       after = [ "network.target" ];
       wantedBy = [ "multi-user.target" ];
       serviceConfig = {
         ExecStartPre = let
           script = pkgs.writeShellScript "prestart" ''
-            ${pkgs.curl}/bin/curl -L -o /tmp/imagellm-frontend.tar.gz "https://github.com/teekuningas/imagellm/releases/download/${imagellmFrontendVersion}/imagellm-frontend-${imagellmFrontendVersion}.tar.gz"
-            ${pkgs.podman}/bin/podman load -i /tmp/imagellm-frontend.tar.gz
-            rm -f /tmp/imagellm-frontend.tar.gz
-            ${pkgs.podman}/bin/podman rm -f imagellm || true
+            ${pkgs.podman}/bin/podman login ghcr.io -u teekuningas -p ${secrets.PODMAN_PULL_KEY}
+            ${pkgs.podman}/bin/podman pull ghcr.io/teekuningas/imagellm/imagellm-frontend:${imagellmFrontendVersion}
+            ${pkgs.podman}/bin/podman rm -f imagellm-frontend || true
           '';
         in
           "${script}";
-        ExecStart = "${pkgs.podman}/bin/podman run --rm --name=imagellm localhost/imagellm-frontend:${imagellmFrontendVersion}";
-        ExecStop = "${pkgs.podman}/bin/podman stop imagellm";
+        ExecStart = "${pkgs.podman}/bin/podman run --rm --name=imagellm-frontend ghcr.io/teekuningas/imagellm/imagellm-frontend:${imagellmFrontendVersion}";
+        ExecStop = "${pkgs.podman}/bin/podman stop imagellm-frontend";
       };
     };
-
     imagellmApi = {
       description = "Manage the imagellm api container";
       after = [ "network.target" ];
@@ -169,18 +168,16 @@ in
       serviceConfig = {
         ExecStartPre = let
           script = pkgs.writeShellScript "prestart" ''
-            ${pkgs.curl}/bin/curl -L -o /tmp/imagellm-api.tar.gz "https://github.com/teekuningas/imagellm-api/releases/download/${imagellmApiVersion}/imagellm-api-${imagellmApiVersion}.tar.gz"
-            ${pkgs.podman}/bin/podman load -i /tmp/imagellm-api.tar.gz
-            rm -f /tmp/imagellm-api.tar.gz
+            ${pkgs.podman}/bin/podman login ghcr.io -u teekuningas -p ${secrets.PODMAN_PULL_KEY}
+            ${pkgs.podman}/bin/podman pull ghcr.io/teekuningas/imagellm-api/imagellm-api:${imagellmApiVersion}
             ${pkgs.podman}/bin/podman rm -f imagellm-api || true
           '';
         in
           "${script}";
-        ExecStart = "${pkgs.podman}/bin/podman run --rm --name=imagellm-api localhost/imagellm-api:${imagellmApiVersion}";
+        ExecStart = "${pkgs.podman}/bin/podman run --rm --name=imagellm-api ghcr.io/teekuningas/imagellm-api/imagellm-api:${imagellmApiVersion}";
         ExecStop = "${pkgs.podman}/bin/podman stop imagellm-api";
       };
     };
-
   };
 
   virtualisation = {
