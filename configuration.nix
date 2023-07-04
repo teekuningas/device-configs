@@ -1,6 +1,7 @@
 { pkgs, ... }:
 let
-  imagellmFrontendVersion = "v0";
+  imagellmFrontendVersion = "v1";
+  imagellmApiVersion = "v0";
   secretsFile = "/etc/nixos/secrets.nix";
   secrets =
     if builtins.pathExists secretsFile
@@ -130,6 +131,7 @@ in
   services.openssh.enable = true;
 
   systemd.services = {
+
     # Luontopeli systemd service
     luontopeli = {
       wantedBy = [ "multi-user.target" ];
@@ -141,8 +143,8 @@ in
       };
     };
 
-    runImagellmFrontend = {
-      description = "Download, Load, and Start Imagellm Container";
+    imagellmFrontend = {
+      description = "Manage the imagellm container";
       after = [ "network.target" ];
       wantedBy = [ "multi-user.target" ];
       serviceConfig = {
@@ -159,8 +161,27 @@ in
         ExecStop = "${pkgs.podman}/bin/podman stop imagellm";
       };
     };
-  };
 
+    imagellmApi = {
+      description = "Manage the imagellm api container";
+      after = [ "network.target" ];
+      wantedBy = [ "multi-user.target" ];
+      serviceConfig = {
+        ExecStartPre = let
+          script = pkgs.writeShellScript "prestart" ''
+            ${pkgs.curl}/bin/curl -L -o /tmp/imagellm-api.tar.gz "https://github.com/teekuningas/imagellm-api/releases/download/${imagellmApiVersion}/imagellm-api-${imagellmApiVersion}.tar.gz"
+            ${pkgs.podman}/bin/podman load -i /tmp/imagellm-api.tar.gz
+            rm -f /tmp/imagellm-api.tar.gz
+            ${pkgs.podman}/bin/podman rm -f imagellm-api || true
+          '';
+        in
+          "${script}";
+        ExecStart = "${pkgs.podman}/bin/podman run --rm --name=imagellm-api localhost/imagellm-api:${imagellmApiVersion}";
+        ExecStop = "${pkgs.podman}/bin/podman stop imagellm-api";
+      };
+    };
+
+  };
 
   virtualisation = {
     podman = {
