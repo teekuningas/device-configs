@@ -1,15 +1,12 @@
 { pkgs, ... }:
 let
-  imagellmFrontendVersion = "v2";
-  imagellmApiVersion = "v1";
+  imagellmFrontendVersion = "v4";
+  imagellmApiVersion = "v2";
   secretsFile = "/etc/nixos/secrets.nix";
   secrets =
     if builtins.pathExists secretsFile
     then import secretsFile
-    else {
-      OPENAI_API_KEY = "";
-      /* ... other defaults */
-    };
+    else {};
 in
 {
   imports = [
@@ -70,6 +67,24 @@ in
     enable = true;
     virtualHosts."luonto.teekuningas.net".extraConfig = ''
       reverse_proxy http://localhost:8000
+    '';
+
+    virtualHosts."imagellm.teekuningas.net".extraConfig = ''
+      @api {
+        path_regexp api ^/api/(.*)$
+      }
+
+      handle @api {
+        uri strip_prefix /api
+        reverse_proxy {
+          to localhost:8001
+        }
+      }
+      handle {
+        reverse_proxy  {
+          to localhost:9001
+        }
+      }
     '';
 
     virtualHosts."kingofsweden.info".extraConfig = ''
@@ -180,12 +195,22 @@ in
 
       imagellmFrontend = {
         image = "ghcr.io/teekuningas/imagellm/imagellm-frontend:${imagellmFrontendVersion}";
+        ports = ["127.0.0.1:9001:9000"];
         autoStart = true;
+        environment = {
+          API_ADDRESS = "https://imagellm.teekuningas.net/api";
+        };
       };
 
       imagellmApi = {
         image = "ghcr.io/teekuningas/imagellm-api/imagellm-api:${imagellmApiVersion}";
+        ports = ["127.0.0.1:8001:8001"];
         autoStart = true;
+        environment = {
+          OPENAI_API_KEY = secrets.OPENAI_API_KEY;
+          GOOGLE_API_KEY = secrets.GOOGLE_API_KEY;
+          GOOGLE_CX_ID = secrets.GOOGLE_CX_ID;
+        };
       };
     };
   };
