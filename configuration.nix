@@ -1,6 +1,6 @@
 { pkgs, ... }:
 let
-  imagellmFrontendVersion = "v7";
+  imagellmFrontendVersion = "v8";
   imagellmApiVersion = "v5";
   secretsFile = "/etc/nixos/secrets.nix";
   secrets =
