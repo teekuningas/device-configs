@@ -1,7 +1,7 @@
 { pkgs, ... }:
 let
   imagellmFrontendVersion = "v10";
-  imagellmApiVersion = "v5";
+  imagellmApiVersion = "v7";
   secretsFile = "/etc/nixos/secrets.nix";
   secrets =
     if builtins.pathExists secretsFile
@@ -208,6 +208,7 @@ in
         autoStart = true;
         environment = {
           OPENAI_API_KEY = secrets.OPENAI_API_KEY;
+          OPENAI_ORGANIZATION_ID = secrets.OPENAI_ORGANIZATION_ID;
           GOOGLE_API_KEY = secrets.GOOGLE_API_KEY;
           GOOGLE_CX_ID = secrets.GOOGLE_CX_ID;
         };
