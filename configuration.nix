@@ -1,7 +1,7 @@
 { pkgs, ... }:
 let
   imagellmFrontendVersion = "v10";
-  imagellmApiVersion = "v7";
+  imagellmApiVersion = "v8";
   secretsFile = "/etc/nixos/secrets.nix";
   secrets =
     if builtins.pathExists secretsFile
