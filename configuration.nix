@@ -2,6 +2,8 @@
 let
   imagellmFrontendVersion = "v10";
   imagellmApiVersion = "v8";
+  soitbeginsFrontendVersion = "0.1.0";
+  soitbeginsBackendVersion = "0.1.0";
   secretsFile = "/etc/nixos/secrets.nix";
   secrets =
     if builtins.pathExists secretsFile
@@ -83,6 +85,24 @@ in
       handle {
         reverse_proxy  {
           to localhost:9001
+        }
+      }
+    '';
+
+    virtualHosts."soitbegins.teekuningas.net".extraConfig = ''
+      @api {
+        path /api
+      }
+
+      handle @api {
+        uri strip_prefix /api
+        reverse_proxy {
+          to localhost:8011
+        }
+      }
+      handle {
+        reverse_proxy  {
+          to localhost:9011
         }
       }
     '';
@@ -191,6 +211,22 @@ in
           RAZZLE_API_PATH = "https://kingofsweden.info";
           RAZZLE_INTERNAL_API_PATH = "http://127.0.0.1:8080/Plone";
         };
+      };
+
+      soitbeginsFrontend = {
+        image = "ghcr.io/teekuningas/soitbegins/soitbegins-frontend:${soitbeginsFrontendVersion}";
+        ports = ["127.0.0.1:9011:9000"];
+        autoStart = true;
+        environment = {
+          SERVER_API = "wss://soitbegins.teekuningas.net/api";
+          MODEL_EARTH = "https://soitbegins.teekuningas.net/earth.zip";
+        };
+      };
+
+      soitbeginsBackend = {
+        image = "ghcr.io/teekuningas/soitbegins/soitbegins-backend:${soitbeginsBackendVersion}";
+        ports = ["127.0.0.1:8011:8765"];
+        autoStart = true;
       };
 
       imagellmFrontend = {
