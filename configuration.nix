@@ -1,6 +1,6 @@
 { pkgs, ... }:
 let
-  imagellmFrontendVersion = "v10";
+  imagellmFrontendVersion = "v11";
   imagellmApiVersion = "v8";
   soitbeginsFrontendVersion = "0.1.0";
   soitbeginsBackendVersion = "0.1.0";
