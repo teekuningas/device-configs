@@ -67,8 +67,13 @@ in
 
   services.caddy = {
     enable = true;
+
     virtualHosts."luonto.teekuningas.net".extraConfig = ''
       reverse_proxy http://localhost:8000
+    '';
+
+    virtualHosts."gpt.teekuningas.net".extraConfig = ''
+      reverse_proxy http://localhost:3001
     '';
 
     virtualHosts."imagellm.teekuningas.net".extraConfig = ''
@@ -212,7 +217,6 @@ in
           RAZZLE_INTERNAL_API_PATH = "http://127.0.0.1:8080/Plone";
         };
       };
-
       soitbeginsFrontend = {
         image = "ghcr.io/teekuningas/soitbegins/soitbegins-frontend:${soitbeginsFrontendVersion}";
         ports = ["127.0.0.1:9011:9000"];
@@ -222,13 +226,11 @@ in
           MODEL_EARTH = "https://soitbegins.teekuningas.net/earth.zip";
         };
       };
-
       soitbeginsBackend = {
         image = "ghcr.io/teekuningas/soitbegins/soitbegins-backend:${soitbeginsBackendVersion}";
         ports = ["127.0.0.1:8011:8765"];
         autoStart = true;
       };
-
       imagellmFrontend = {
         image = "ghcr.io/teekuningas/imagellm/imagellm-frontend:${imagellmFrontendVersion}";
         ports = ["127.0.0.1:9001:9000"];
@@ -237,7 +239,6 @@ in
           API_ADDRESS = "https://imagellm.teekuningas.net/api";
         };
       };
-
       imagellmApi = {
         image = "ghcr.io/teekuningas/imagellm-api/imagellm-api:${imagellmApiVersion}";
         ports = ["127.0.0.1:8001:8001"];
@@ -248,6 +249,14 @@ in
           GOOGLE_API_KEY = secrets.GOOGLE_API_KEY;
           GOOGLE_CX_ID = secrets.GOOGLE_CX_ID;
         };
+      };
+      chatwithgpt = {
+        image = "ghcr.io/cogentapps/chat-with-gpt:release";
+        ports = ["127.0.0.1:3001:3000"];
+        autoStart = true;
+        volumes = [
+         "/var/data/chatwithgpt:/app/data"
+        ];
       };
     };
   };
