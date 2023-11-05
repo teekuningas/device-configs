@@ -4,6 +4,7 @@ let
   imagellmApiVersion = "v8";
   soitbeginsFrontendVersion = "0.1.0";
   soitbeginsBackendVersion = "0.1.0";
+  vellubotVersion = "0.2.0";
   secretsFile = "/etc/nixos/secrets.nix";
   secrets =
     if builtins.pathExists secretsFile
@@ -26,6 +27,7 @@ in
     wget
     curl
     weechat
+    gnumake
   ];
 
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
@@ -257,6 +259,17 @@ in
         volumes = [
          "/var/data/chatwithgpt:/app/data"
         ];
+      };
+      vellubot = {
+        image = "ghcr.io/teekuningas/vellubot/vellubot:${vellubotVersion}";
+        autoStart = true;
+        environment = {
+          BOT_CHANNEL = "#vellumotest";
+          BOT_NICKNAME = "vellubot";
+          BOT_SERVER = "irc.libera.chat";
+          BOT_PORT = "6667";
+          BOT_SASL_PASSWORD = secrets.VELLUBOT_SASL_PASSWORD;
+        };
       };
     };
   };
