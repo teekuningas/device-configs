@@ -4,7 +4,7 @@ let
   imagellmApiVersion = "v8";
   soitbeginsFrontendVersion = "0.1.0";
   soitbeginsBackendVersion = "0.1.0";
-  vellubotVersion = "0.6.0";
+  vellubotVersion = "0.7.0";
   secretsFile = "/etc/nixos/secrets.nix";
   secrets =
     if builtins.pathExists secretsFile
@@ -269,6 +269,8 @@ in
           BOT_SERVER = "irc.libera.chat";
           BOT_PORT = "6667";
           BOT_SASL_PASSWORD = secrets.VELLUBOT_SASL_PASSWORD;
+          OPENAI_API_KEY = secrets.OPENAI_API_KEY;
+          OPENAI_ORGANIZATION_ID = secrets.OPENAI_ORGANIZATION_ID;
         };
       };
     };
