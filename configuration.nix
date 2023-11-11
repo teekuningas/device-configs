@@ -4,7 +4,7 @@ let
   imagellmApiVersion = "v8";
   soitbeginsFrontendVersion = "0.1.0";
   soitbeginsBackendVersion = "0.1.0";
-  vellubotVersion = "0.9.0";
+  vellubotVersion = "0.11.0";
   secretsFile = "/etc/nixos/secrets.nix";
   secrets =
     if builtins.pathExists secretsFile
