@@ -5,6 +5,7 @@ let
   soitbeginsFrontendVersion = "0.1.0";
   soitbeginsBackendVersion = "0.1.0";
   vellubotVersion = "0.17.0";
+  chatWithGptVersion = "0.1.0";
   secretsFile = "/etc/nixos/secrets.nix";
   secrets =
     if builtins.pathExists secretsFile
@@ -253,7 +254,7 @@ in
         };
       };
       chatwithgpt = {
-        image = "ghcr.io/cogentapps/chat-with-gpt:release";
+        image = "ghcr.io/teekuningas/chat-with-gpt/chat-with-gpt:${chatWithGptVersion}";
         ports = ["127.0.0.1:3001:3000"];
         autoStart = true;
         volumes = [
