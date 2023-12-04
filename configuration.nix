@@ -5,7 +5,7 @@ let
   soitbeginsFrontendVersion = "0.1.0";
   soitbeginsBackendVersion = "0.1.0";
   vellubotVersion = "0.17.0";
-  chatWithGptVersion = "0.1.0";
+  chatWithGptVersion = "0.1.1";
   secretsFile = "/etc/nixos/secrets.nix";
   secrets =
     if builtins.pathExists secretsFile
