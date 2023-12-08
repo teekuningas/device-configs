@@ -160,13 +160,14 @@ in
     overrideFolders = true;
     devices = {
       "miaupad" = { id = "JPKFCWF-SHUEUR6-QMGJDK5-UBLLUPJ-GQXUL46-NVJ44QR-GTG4HBQ-OJTAFQV"; };
+      "miaudesk" = { id = "R5M6JCS-HGSMVJT-3PTMOEH-SETH3JI-77DKK55-2N2JL7U-XEXEVZS-ATCXSAV"; };
       "moto" = { id = "LVCM2CN-QSYEK6L-UK67Z3X-UPWTNF5-NS5GRH3-XFA5MSQ-W6PNFRL-P3WO7QO"; };
       "dip-reisen" = { id = "NRSG4QP-4TWK5XR-XOGNAWZ-N4FU3A4-PBE6DHU-Q2EDHTC-HA4YOTY-433PLQ7"; };
     };
     folders = {
       "obsidian_teekuningas" = {
         path = "/home/zairex/data/obsidian_teekuningas";
-        devices = [ "miaupad" "moto" "dip-reisen" ];
+        devices = [ "miaupad" "moto" "dip-reisen" "miaudesk" ];
       };
     };
   };
