@@ -79,6 +79,10 @@ in
       reverse_proxy http://localhost:3001
     '';
 
+    virtualHosts."next.teekuningas.net".extraConfig = ''
+      reverse_proxy http://localhost:3002
+    '';
+
     virtualHosts."imagellm.teekuningas.net".extraConfig = ''
       @api {
         path_regexp api ^/api/(.*)$
@@ -261,6 +265,16 @@ in
         volumes = [
          "/var/data/chatwithgpt:/app/data"
         ];
+      };
+      nextgpt = {
+        image = "docker.io/yidadaa/chatgpt-next-web:latest";
+        ports = ["127.0.0.1:3002:3000"];
+        autoStart = true;
+        environment = {
+          OPENAI_API_KEY = secrets.OPENAI_API_KEY;
+          OPENAI_ORG_KEY = secrets.OPENAI_ORGANIZATION_ID;
+          CODE = secrets.NEXTGPT_CODE;
+        };
       };
       vellubot = {
         image = "ghcr.io/teekuningas/vellubot/vellubot:${vellubotVersion}";
