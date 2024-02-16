@@ -1,7 +1,7 @@
 { pkgs, ... }:
 let
-  imagellmFrontendVersion = "v11";
-  imagellmApiVersion = "v8";
+  # imagellmFrontendVersion = "v11";
+  # imagellmApiVersion = "v8";
   soitbeginsFrontendVersion = "0.1.0";
   soitbeginsBackendVersion = "0.1.0";
   vellubotVersion = "0.17.0";
@@ -83,23 +83,23 @@ in
       reverse_proxy http://localhost:3002
     '';
 
-    virtualHosts."imagellm.teekuningas.net".extraConfig = ''
-      @api {
-        path_regexp api ^/api/(.*)$
-      }
+    # virtualHosts."imagellm.teekuningas.net".extraConfig = ''
+    #   @api {
+    #     path_regexp api ^/api/(.*)$
+    #   }
 
-      handle @api {
-        uri strip_prefix /api
-        reverse_proxy {
-          to localhost:8001
-        }
-      }
-      handle {
-        reverse_proxy  {
-          to localhost:9001
-        }
-      }
-    '';
+    #   handle @api {
+    #     uri strip_prefix /api
+    #     reverse_proxy {
+    #       to localhost:8001
+    #     }
+    #   }
+    #   handle {
+    #     reverse_proxy  {
+    #       to localhost:9001
+    #     }
+    #   }
+    # '';
 
     virtualHosts."soitbegins.teekuningas.net".extraConfig = ''
       @api {
@@ -239,25 +239,25 @@ in
         ports = ["127.0.0.1:8011:8765"];
         autoStart = true;
       };
-      imagellmFrontend = {
-        image = "ghcr.io/teekuningas/imagellm/imagellm-frontend:${imagellmFrontendVersion}";
-        ports = ["127.0.0.1:9001:9000"];
-        autoStart = true;
-        environment = {
-          API_ADDRESS = "https://imagellm.teekuningas.net/api";
-        };
-      };
-      imagellmApi = {
-        image = "ghcr.io/teekuningas/imagellm-api/imagellm-api:${imagellmApiVersion}";
-        ports = ["127.0.0.1:8001:8001"];
-        autoStart = true;
-        environment = {
-          OPENAI_API_KEY = secrets.OPENAI_API_KEY;
-          OPENAI_ORGANIZATION_ID = secrets.OPENAI_ORGANIZATION_ID;
-          GOOGLE_API_KEY = secrets.GOOGLE_API_KEY;
-          GOOGLE_CX_ID = secrets.GOOGLE_CX_ID;
-        };
-      };
+      # imagellmFrontend = {
+      #   image = "ghcr.io/teekuningas/imagellm/imagellm-frontend:${imagellmFrontendVersion}";
+      #   ports = ["127.0.0.1:9001:9000"];
+      #   autoStart = true;
+      #   environment = {
+      #     API_ADDRESS = "https://imagellm.teekuningas.net/api";
+      #   };
+      # };
+      # imagellmApi = {
+      #   image = "ghcr.io/teekuningas/imagellm-api/imagellm-api:${imagellmApiVersion}";
+      #   ports = ["127.0.0.1:8001:8001"];
+      #   autoStart = true;
+      #   environment = {
+      #     OPENAI_API_KEY = secrets.OPENAI_API_KEY;
+      #     OPENAI_ORGANIZATION_ID = "Kotimaa";
+      #     GOOGLE_API_KEY = secrets.GOOGLE_API_KEY;
+      #     GOOGLE_CX_ID = secrets.GOOGLE_CX_ID;
+      #   };
+      # };
       chatwithgpt = {
         image = "ghcr.io/teekuningas/chat-with-gpt/chat-with-gpt:${chatWithGptVersion}";
         ports = ["127.0.0.1:3001:3000"];
