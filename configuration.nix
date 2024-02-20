@@ -207,7 +207,7 @@ in
     oci-containers.backend = "podman";
     oci-containers.containers = {
       plone = {
-        image = "plone/plone-backend";
+        image = "plone/plone-backend:6.0.9";
         autoStart = true;
         user = "root";
         extraOptions = [ "--net=host" ];
@@ -216,7 +216,7 @@ in
         ];
       };
       volto = {
-        image = "plone/plone-frontend";
+        image = "plone/plone-frontend:17.14.0";
         user = "root";
         autoStart = true;
         extraOptions = [ "--net=host" ];
