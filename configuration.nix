@@ -33,7 +33,7 @@ in
 
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
-  boot.cleanTmpDir = true;
+  boot.tmp.cleanOnBoot = true;
   zramSwap.enable = true;
 
   # Set your time zone.
@@ -64,6 +64,10 @@ in
       22000 # Syncthing
     ];
 
+    # needed to fix podman dns
+    trustedInterfaces = [ "podman0" ];
+    interfaces.podman0.allowedUDPPorts = [ 53 ];
+
     # networking.firewall.allowedUDPPorts = [ ... ];
     # networking.firewall.allowedUDPPortRanges = [ { from = 32768; to = 61000; } ];
   };
@@ -82,24 +86,6 @@ in
     virtualHosts."next.teekuningas.net".extraConfig = ''
       reverse_proxy http://localhost:3002
     '';
-
-    # virtualHosts."imagellm.teekuningas.net".extraConfig = ''
-    #   @api {
-    #     path_regexp api ^/api/(.*)$
-    #   }
-
-    #   handle @api {
-    #     uri strip_prefix /api
-    #     reverse_proxy {
-    #       to localhost:8001
-    #     }
-    #   }
-    #   handle {
-    #     reverse_proxy  {
-    #       to localhost:9001
-    #     }
-    #   }
-    # '';
 
     virtualHosts."soitbegins.teekuningas.net".extraConfig = ''
       @api {
@@ -162,21 +148,27 @@ in
     configDir = "/home/zairex/.config/syncthing";
     overrideDevices = true;
     overrideFolders = true;
-    devices = {
-      "miaupad" = { id = "JPKFCWF-SHUEUR6-QMGJDK5-UBLLUPJ-GQXUL46-NVJ44QR-GTG4HBQ-OJTAFQV"; };
-      "miaudesk" = { id = "R5M6JCS-HGSMVJT-3PTMOEH-SETH3JI-77DKK55-2N2JL7U-XEXEVZS-ATCXSAV"; };
-      "moto" = { id = "LVCM2CN-QSYEK6L-UK67Z3X-UPWTNF5-NS5GRH3-XFA5MSQ-W6PNFRL-P3WO7QO"; };
-      "dip-reisen" = { id = "NRSG4QP-4TWK5XR-XOGNAWZ-N4FU3A4-PBE6DHU-Q2EDHTC-HA4YOTY-433PLQ7"; };
-    };
-    folders = {
-      "obsidian_teekuningas" = {
-        path = "/home/zairex/data/obsidian_teekuningas";
-        devices = [ "miaupad" "moto" "dip-reisen" "miaudesk" ];
+    settings = {
+      devices = {
+        "miaupad" = { id = "JPKFCWF-SHUEUR6-QMGJDK5-UBLLUPJ-GQXUL46-NVJ44QR-GTG4HBQ-OJTAFQV"; };
+        "miaudesk" = { id = "R5M6JCS-HGSMVJT-3PTMOEH-SETH3JI-77DKK55-2N2JL7U-XEXEVZS-ATCXSAV"; };
+        "moto" = { id = "LVCM2CN-QSYEK6L-UK67Z3X-UPWTNF5-NS5GRH3-XFA5MSQ-W6PNFRL-P3WO7QO"; };
+        "dip-reisen" = { id = "NRSG4QP-4TWK5XR-XOGNAWZ-N4FU3A4-PBE6DHU-Q2EDHTC-HA4YOTY-433PLQ7"; };
+      };
+      folders = {
+        "obsidian_teekuningas" = {
+          path = "/home/zairex/data/obsidian_teekuningas";
+          devices = [ "miaupad" "moto" "dip-reisen" "miaudesk" ];
+        };
       };
     };
   };
 
   services.openssh.enable = true;
+  services.fail2ban = {
+    enable = true;
+    maxretry = 5;
+  };
 
   systemd.services = {
 
@@ -196,12 +188,11 @@ in
     podman = {
       enable = true;
       dockerCompat = true;
-      defaultNetwork.dnsname.enable = true;
 
-      # For Nixos version > 22.11
-      # defaultNetwork.settings = {
-      #  dns_enabled = true;
-      # };
+      # defaultNetwork.dnsname.enable = true;
+      defaultNetwork.settings = {
+        dns_enabled = true;
+      };
     };
 
     oci-containers.backend = "podman";
@@ -239,25 +230,6 @@ in
         ports = ["127.0.0.1:8011:8765"];
         autoStart = true;
       };
-      # imagellmFrontend = {
-      #   image = "ghcr.io/teekuningas/imagellm/imagellm-frontend:${imagellmFrontendVersion}";
-      #   ports = ["127.0.0.1:9001:9000"];
-      #   autoStart = true;
-      #   environment = {
-      #     API_ADDRESS = "https://imagellm.teekuningas.net/api";
-      #   };
-      # };
-      # imagellmApi = {
-      #   image = "ghcr.io/teekuningas/imagellm-api/imagellm-api:${imagellmApiVersion}";
-      #   ports = ["127.0.0.1:8001:8001"];
-      #   autoStart = true;
-      #   environment = {
-      #     OPENAI_API_KEY = secrets.OPENAI_API_KEY;
-      #     OPENAI_ORGANIZATION_ID = "Kotimaa";
-      #     GOOGLE_API_KEY = secrets.GOOGLE_API_KEY;
-      #     GOOGLE_CX_ID = secrets.GOOGLE_CX_ID;
-      #   };
-      # };
       chatwithgpt = {
         image = "ghcr.io/teekuningas/chat-with-gpt/chat-with-gpt:${chatWithGptVersion}";
         ports = ["127.0.0.1:3001:3000"];
@@ -292,7 +264,6 @@ in
       };
     };
   };
-
   security.sudo.wheelNeedsPassword = false;
 
   system.stateVersion = "22.11";
