@@ -239,7 +239,7 @@ in
         ];
       };
       nextgpt = {
-        image = "docker.io/yidadaa/chatgpt-next-web:latest";
+        image = "docker.io/yidadaa/chatgpt-next-web:v2.11.2";
         ports = ["127.0.0.1:3002:3000"];
         autoStart = true;
         environment = {
