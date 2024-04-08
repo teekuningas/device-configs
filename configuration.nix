@@ -87,6 +87,10 @@ in
       reverse_proxy http://localhost:3002
     '';
 
+    virtualHosts."lobe.teekuningas.net".extraConfig = ''
+      reverse_proxy http://localhost:3210
+    '';
+
     virtualHosts."soitbegins.teekuningas.net".extraConfig = ''
       @api {
         path /api
@@ -230,14 +234,6 @@ in
         ports = ["127.0.0.1:8011:8765"];
         autoStart = true;
       };
-      chatwithgpt = {
-        image = "ghcr.io/teekuningas/chat-with-gpt/chat-with-gpt:${chatWithGptVersion}";
-        ports = ["127.0.0.1:3001:3000"];
-        autoStart = true;
-        volumes = [
-         "/var/data/chatwithgpt:/app/data"
-        ];
-      };
       nextgpt = {
         image = "docker.io/yidadaa/chatgpt-next-web:v2.11.2";
         ports = ["127.0.0.1:3002:3000"];
@@ -247,6 +243,11 @@ in
           OPENAI_ORG_KEY = secrets.OPENAI_ORGANIZATION_ID;
           CODE = secrets.NEXTGPT_CODE;
         };
+      };
+      lobechat = {
+        image = "docker.io/lobehub/lobe-chat:latest";
+        ports = ["127.0.0.1:3210:3210"];
+        autoStart = true;
       };
       vellubot = {
         image = "ghcr.io/teekuningas/vellubot/vellubot:${vellubotVersion}";
