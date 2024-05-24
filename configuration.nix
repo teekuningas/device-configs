@@ -1,10 +1,8 @@
 { pkgs, ... }:
 let
-  # imagellmFrontendVersion = "v11";
-  # imagellmApiVersion = "v8";
   soitbeginsFrontendVersion = "0.1.0";
   soitbeginsBackendVersion = "0.1.0";
-  vellubotVersion = "0.17.1";
+  vellubotVersion = "0.18.0";
   chatWithGptVersion = "0.1.1";
   secretsFile = "/etc/nixos/secrets.nix";
   secrets =
@@ -81,10 +79,6 @@ in
 
     virtualHosts."gpt.teekuningas.net".extraConfig = ''
       reverse_proxy http://localhost:3001
-    '';
-
-    virtualHosts."next.teekuningas.net".extraConfig = ''
-      reverse_proxy http://localhost:3002
     '';
 
     virtualHosts."lobe.teekuningas.net".extraConfig = ''
@@ -234,16 +228,6 @@ in
         ports = ["127.0.0.1:8011:8765"];
         autoStart = true;
       };
-      nextgpt = {
-        image = "docker.io/yidadaa/chatgpt-next-web:v2.11.2";
-        ports = ["127.0.0.1:3002:3000"];
-        autoStart = true;
-        environment = {
-          OPENAI_API_KEY = secrets.OPENAI_API_KEY;
-          OPENAI_ORG_KEY = secrets.OPENAI_ORGANIZATION_ID;
-          CODE = secrets.NEXTGPT_CODE;
-        };
-      };
       lobechat = {
         image = "docker.io/lobehub/lobe-chat:latest";
         ports = ["127.0.0.1:3210:3210"];
@@ -258,10 +242,14 @@ in
           BOT_SERVER = "irc.libera.chat";
           BOT_PORT = "6667";
           BOT_SASL_PASSWORD = secrets.VELLUBOT_SASL_PASSWORD;
+          SETTINGS_FNAME = "/data/settings.json";
           OPENAI_MAX_TOKENS_OUT = "1024";
           OPENAI_API_KEY = secrets.OPENAI_API_KEY;
           OPENAI_ORGANIZATION_ID = secrets.OPENAI_ORGANIZATION_ID;
         };
+        volumes = [
+         "/var/data/vellubot:/data"
+        ];
       };
     };
   };
