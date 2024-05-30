@@ -229,7 +229,7 @@ in
         autoStart = true;
       };
       lobechat = {
-        image = "docker.io/lobehub/lobe-chat:latest";
+        image = "docker.io/lobehub/lobe-chat:v0.162.11";
         ports = ["127.0.0.1:3210:3210"];
         autoStart = true;
       };
