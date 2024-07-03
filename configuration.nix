@@ -4,6 +4,7 @@ let
   soitbeginsBackendVersion = "0.1.0";
   vellubotVersion = "0.18.0";
   chatWithGptVersion = "0.1.1";
+  luontopeliVersion = "v4";
   secretsFile = "/etc/nixos/secrets.nix";
   secrets =
     if builtins.pathExists secretsFile
@@ -74,7 +75,7 @@ in
     enable = true;
 
     virtualHosts."luonto.teekuningas.net".extraConfig = ''
-      reverse_proxy http://localhost:8000
+      reverse_proxy http://localhost:5000
     '';
 
     virtualHosts."gpt.teekuningas.net".extraConfig = ''
@@ -168,26 +169,11 @@ in
     maxretry = 5;
   };
 
-  systemd.services = {
-
-    # Luontopeli systemd service
-    luontopeli = {
-      wantedBy = [ "multi-user.target" ];
-      description = "Gunicorn-server to serve luontopeli";
-      path = with pkgs; [ git ];
-      serviceConfig = {
-        User = "zairex";
-        ExecStart = ''${pkgs.nix}/bin/nix develop /home/zairex/data/luontopeli --command gunicorn -w 2 --pythonpath /home/zairex/data/luontopeli "luontopeli:app"'';
-      };
-    };
-  };
-
   virtualisation = {
     podman = {
       enable = true;
       dockerCompat = true;
 
-      # defaultNetwork.dnsname.enable = true;
       defaultNetwork.settings = {
         dns_enabled = true;
       };
@@ -232,6 +218,16 @@ in
         image = "docker.io/lobehub/lobe-chat:v0.162.11";
         ports = ["127.0.0.1:3210:3210"];
         autoStart = true;
+      };
+      luontopeli = {
+        image = "ghcr.io/teekuningas/luontopeli/luontopeli:${luontopeliVersion}";
+        ports = ["127.0.0.1:5000:5000"];
+        autoStart = true;
+        environment = {
+          LUONTOPELI_APP_KEY = secrets.LUONTOPELI_APP_KEY;
+          LUONTOPELI_API_TOKEN = secrets.LUONTOPELI_API_TOKEN;
+          LUONTOPELI_HOST = "0.0.0.0";
+        };
       };
       vellubot = {
         image = "ghcr.io/teekuningas/vellubot/vellubot:${vellubotVersion}";
