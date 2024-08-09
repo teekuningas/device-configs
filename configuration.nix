@@ -78,10 +78,6 @@ in
       reverse_proxy http://localhost:5000
     '';
 
-    virtualHosts."gpt.teekuningas.net".extraConfig = ''
-      reverse_proxy http://localhost:3001
-    '';
-
     virtualHosts."lobe.teekuningas.net".extraConfig = ''
       reverse_proxy http://localhost:3210
     '';
@@ -100,6 +96,27 @@ in
       handle {
         reverse_proxy  {
           to localhost:9011
+        }
+      }
+    '';
+
+    virtualHosts."teehetki.teekuningas.net".extraConfig = ''
+      basicauth * {
+        syksy $2a$14$isHiXT5s3PtKmrYRii5cPuANI7Qj8LF853OR8pobUF32Hr0GJgYJS
+      }
+
+      @socket_io {
+        path /socket.io/*
+      }
+
+      handle @socket_io {
+        reverse_proxy {
+          to localhost:5001
+        }
+      }
+      handle {
+        reverse_proxy  {
+          to localhost:3001
         }
       }
     '';
@@ -198,6 +215,23 @@ in
         environment = {
           RAZZLE_API_PATH = "https://kingofsweden.info";
           RAZZLE_INTERNAL_API_PATH = "http://127.0.0.1:8080/Plone";
+        };
+      };
+      teehetkiClient = {
+        image = "ghcr.io/teekuningas/teehetki/teehetki-client:v4";
+        ports = ["127.0.0.1:3001:3000"];
+        autoStart = true;
+        environment = {
+          API_ADDRESS = "wss://teehetki.teekuningas.net";
+        };
+      };
+      teehetkiServer = {
+        image = "ghcr.io/teekuningas/teehetki/teehetki-server:v4";
+        ports = ["127.0.0.1:5001:5000"];
+        autoStart = true;
+        environment = {
+          API_ADDRESS = "https://api.openai.com";
+          OPENAI_API_KEY = secrets.OPENAI_API_KEY;
         };
       };
       soitbeginsFrontend = {
