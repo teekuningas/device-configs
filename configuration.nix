@@ -102,7 +102,7 @@ in
 
     virtualHosts."teehetki.teekuningas.net".extraConfig = ''
       basicauth * {
-        syksy $2a$14$isHiXT5s3PtKmrYRii5cPuANI7Qj8LF853OR8pobUF32Hr0GJgYJS
+        plonerules $2a$14$OpYh7I1bR4Uq.c6YAk1S7O1RBxK/1Z2fMPmFRciv72XGdQNmOKpxO
       }
 
       @socket_io {
@@ -218,7 +218,7 @@ in
         };
       };
       teehetkiClient = {
-        image = "ghcr.io/teekuningas/teehetki/teehetki-client:v4";
+        image = "ghcr.io/teekuningas/teehetki/teehetki-client:v6";
         ports = ["127.0.0.1:3001:3000"];
         autoStart = true;
         environment = {
@@ -226,12 +226,13 @@ in
         };
       };
       teehetkiServer = {
-        image = "ghcr.io/teekuningas/teehetki/teehetki-server:v4";
+        image = "ghcr.io/teekuningas/teehetki/teehetki-server:v6";
         ports = ["127.0.0.1:5001:5000"];
         autoStart = true;
         environment = {
           API_ADDRESS = "https://api.openai.com";
           OPENAI_API_KEY = secrets.OPENAI_API_KEY;
+          LLM_MODEL = "gpt-4o";
         };
       };
       soitbeginsFrontend = {
