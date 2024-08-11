@@ -218,7 +218,7 @@ in
         };
       };
       teehetkiClient = {
-        image = "ghcr.io/teekuningas/teehetki/teehetki-client:v6";
+        image = "ghcr.io/teekuningas/teehetki/teehetki-client:v8";
         ports = ["127.0.0.1:3001:3000"];
         autoStart = true;
         environment = {
@@ -226,7 +226,7 @@ in
         };
       };
       teehetkiServer = {
-        image = "ghcr.io/teekuningas/teehetki/teehetki-server:v6";
+        image = "ghcr.io/teekuningas/teehetki/teehetki-server:v8";
         ports = ["127.0.0.1:5001:5000"];
         autoStart = true;
         environment = {
