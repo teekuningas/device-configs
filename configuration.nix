@@ -1,10 +1,5 @@
 { pkgs, ... }:
 let
-  soitbeginsFrontendVersion = "0.1.0";
-  soitbeginsBackendVersion = "0.1.0";
-  vellubotVersion = "0.18.0";
-  chatWithGptVersion = "0.1.1";
-  luontopeliVersion = "v4";
   secretsFile = "/etc/nixos/secrets.nix";
   secrets =
     if builtins.pathExists secretsFile
@@ -56,11 +51,6 @@ in
       80 # HTTP
       443 # HTTPS
       9000 # Weechat
-      22000 # Syncthing
-    ];
-    allowedUDPPorts = [
-      21027 # Syncthing
-      22000 # Syncthing
     ];
 
     # needed to fix podman dns
@@ -157,28 +147,6 @@ in
 
   };
 
-  services.syncthing = {
-    enable = true;
-    user = "zairex";
-    dataDir = "/home/zairex/data/obsidian_teekuningas";
-    configDir = "/home/zairex/.config/syncthing";
-    overrideDevices = true;
-    overrideFolders = true;
-    settings = {
-      devices = {
-        "miaupad" = { id = "JPKFCWF-SHUEUR6-QMGJDK5-UBLLUPJ-GQXUL46-NVJ44QR-GTG4HBQ-OJTAFQV"; };
-        "miaudesk" = { id = "R5M6JCS-HGSMVJT-3PTMOEH-SETH3JI-77DKK55-2N2JL7U-XEXEVZS-ATCXSAV"; };
-        "dip-reisen" = { id = "NRSG4QP-4TWK5XR-XOGNAWZ-N4FU3A4-PBE6DHU-Q2EDHTC-HA4YOTY-433PLQ7"; };
-      };
-      folders = {
-        "obsidian_teekuningas" = {
-          path = "/home/zairex/data/obsidian_teekuningas";
-          devices = [ "miaupad" "dip-reisen" "miaudesk" ];
-        };
-      };
-    };
-  };
-
   services.openssh.enable = true;
   services.fail2ban = {
     enable = true;
@@ -235,7 +203,7 @@ in
         };
       };
       soitbeginsFrontend = {
-        image = "ghcr.io/teekuningas/soitbegins/soitbegins-frontend:${soitbeginsFrontendVersion}";
+        image = "ghcr.io/teekuningas/soitbegins/soitbegins-frontend:0.1.0";
         ports = ["127.0.0.1:9011:9000"];
         autoStart = true;
         environment = {
@@ -244,7 +212,7 @@ in
         };
       };
       soitbeginsBackend = {
-        image = "ghcr.io/teekuningas/soitbegins/soitbegins-backend:${soitbeginsBackendVersion}";
+        image = "ghcr.io/teekuningas/soitbegins/soitbegins-backend:0.1.0";
         ports = ["127.0.0.1:8011:8765"];
         autoStart = true;
       };
@@ -254,7 +222,7 @@ in
         autoStart = true;
       };
       luontopeli = {
-        image = "ghcr.io/teekuningas/luontopeli/luontopeli:${luontopeliVersion}";
+        image = "ghcr.io/teekuningas/luontopeli/luontopeli:v4";
         ports = ["127.0.0.1:5000:5000"];
         autoStart = true;
         environment = {
@@ -264,7 +232,7 @@ in
         };
       };
       vellubot = {
-        image = "ghcr.io/teekuningas/vellubot/vellubot:${vellubotVersion}";
+        image = "ghcr.io/teekuningas/vellubot/vellubot:0.18.0";
         autoStart = true;
         environment = {
           BOT_CHANNEL = "#vellumo";
