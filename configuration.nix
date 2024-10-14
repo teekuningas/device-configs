@@ -112,6 +112,8 @@
     teams-for-linux
     obsidian
     openconnect
+    starship
+    gnumake
   ];
 
   # This value determines the NixOS release from which the default
