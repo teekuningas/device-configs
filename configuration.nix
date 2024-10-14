@@ -4,7 +4,7 @@
   imports =
     [
       ./hardware-configuration.nix
-      "${builtins.fetchGit { url = "https://github.com/teekuningas/nixos-hardware.git"; ref="add-5490"; rev="8b5682f58c7e6c8c6fea0e7be96d8a37c9f0cafa"; }}/dell/precision/5490"
+      "${builtins.fetchGit { url = "https://github.com/teekuningas/nixos-hardware.git"; ref="add-5490"; rev="211d41b5c4037e9575d96cbe913cb641adbd0126"; }}/dell/precision/5490"
     ];
 
   # Bootloader.
