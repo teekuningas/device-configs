@@ -1,0 +1,17 @@
+http://pi.hole {
+    handle {
+        reverse_proxy localhost:1080
+    }
+}
+
+http://pi.miau {
+    handle {
+        reverse_proxy localhost:8123
+    }
+}
+
+https://miaupi.tail5b278e.ts.net {
+    handle {
+        reverse_proxy localhost:8123
+    }
+}

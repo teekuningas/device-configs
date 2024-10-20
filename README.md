@@ -1,1 +1,1 @@
-NixOS configurations, see branches.
+Raspberry pi configs (Raspberry Pi OS (debian))
