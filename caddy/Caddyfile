@@ -1,17 +1,38 @@
 http://pi.hole {
+    # pihole dashboard
     handle {
         reverse_proxy localhost:1080
     }
 }
 
 http://pi.miau {
+
+    # obsidian notes
+    redir /obsidian /obsidian/index.html
+    handle_path /obsidian* {
+        root * /srv/obsidian_notes
+        file_server
+    }
+
+    # home assistant
     handle {
         reverse_proxy localhost:8123
     }
+
 }
 
 https://miaupi.tail5b278e.ts.net {
+
+    # obsidian notes
+    redir /obsidian /obsidian/index.html
+    handle_path /obsidian* {
+        root * /srv/obsidian_notes
+        file_server
+    }
+
+    # home assistant
     handle {
         reverse_proxy localhost:8123
     }
+
 }

@@ -4,5 +4,6 @@ sudo docker run -d \
     --restart=unless-stopped \
     --network=host \
     -v $(pwd)/Caddyfile:/etc/caddy/Caddyfile:ro \
+    -v /srv:/srv:ro \
     -v /var/run/tailscale/tailscaled.sock:/var/run/tailscale/tailscaled.sock \
     caddy:latest
