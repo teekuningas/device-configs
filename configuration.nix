@@ -52,15 +52,19 @@
 
   # services.xserver.videoDrivers = ["nvidia"];
 
+  services.thermald.enable = true;
+
   hardware.nvidia = {
     powerManagement.enable = false;
-    powerManagement.finegrained = false;
+    powerManagement.finegrained = true;
     nvidiaSettings = true;
     open = true;
     package = config.boot.kernelPackages.nvidiaPackages.beta;
     prime = {
-      sync = {
+      # sync.enable = true;
+      offload = {
         enable = true;
+        enableOffloadCmd = true;
       };
       # intelBusId = "PCI:0:2:0";
       # nvidiaBusId = "PCI:1:0:0";
@@ -115,7 +119,18 @@
     starship
     gnumake
     jq
+    gedit
   ];
+
+  nix.settings.trusted-users = [
+    "erpipehe"
+  ];
+
+  virtualisation.podman = {
+    enable = true;
+    dockerSocket.enable = lib.mkDefault true;
+    dockerCompat = lib.mkDefault true;
+  };
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions
