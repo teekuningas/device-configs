@@ -48,10 +48,6 @@
   services.xserver.displayManager.gdm.enable = true;
   services.xserver.desktopManager.gnome.enable = true;
 
-  # hardware.graphics.enable = true;
-
-  # services.xserver.videoDrivers = ["nvidia"];
-
   services.thermald.enable = true;
 
   hardware.nvidia = {
@@ -61,13 +57,12 @@
     open = true;
     package = config.boot.kernelPackages.nvidiaPackages.beta;
     prime = {
-      # sync.enable = true;
-      offload = {
-        enable = true;
-        enableOffloadCmd = true;
-      };
-      # intelBusId = "PCI:0:2:0";
-      # nvidiaBusId = "PCI:1:0:0";
+      sync.enable = true;
+      # # seems not to work.
+      # offload = {
+      #   enable = true;
+      #   enableOffloadCmd = true;
+      # };
     };
   };
 
@@ -107,8 +102,19 @@
 
   programs.firefox.enable = true;
 
+  programs.neovim = {
+    enable = true;
+    vimAlias = true;
+  };
+
+  services.ollama = {
+    enable = true;
+    acceleration = "cuda";
+  };
+
   environment.systemPackages = with pkgs; [
-    vim
+    python312
+    nodejs
     tmux
     wget
     htop
