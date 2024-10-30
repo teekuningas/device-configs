@@ -112,7 +112,7 @@
     tmux
     wget
     htop
-    git
+    gitFull
     teams-for-linux
     obsidian
     openconnect
@@ -120,6 +120,7 @@
     gnumake
     jq
     gedit
+    podman
   ];
 
   nix.settings.trusted-users = [
