@@ -4,7 +4,6 @@
   imports =
     [
       ./hardware-configuration.nix
-      "${builtins.fetchGit { url = "https://github.com/teekuningas/nixos-hardware.git"; ref="add-5490"; rev="211d41b5c4037e9575d96cbe913cb641adbd0126"; }}/dell/precision/5490"
     ];
 
   # Bootloader.
@@ -50,20 +49,14 @@
 
   services.thermald.enable = true;
 
-  hardware.nvidia = {
-    powerManagement.enable = false;
-    nvidiaSettings = true;
-    open = true;
-    package = config.boot.kernelPackages.nvidiaPackages.beta;
-    prime = {
-      sync.enable = true;
-      # # seems not to work.
-      # offload = {
-      #   enable = true;
-      #   enableOffloadCmd = true;
-      # };
-    };
-  };
+  hardware.graphics.enable = true;
+
+  services.xserver.videoDrivers = ["nvidia"];
+  hardware.nvidia.open = true;
+  # No need to have nvidia reponsible for rendering.
+  boot.blacklistedKernelModules = [
+    "nvidia-drm"
+  ];
 
   # Needed for kernel to support the internal monitor.
   boot.kernelPackages = pkgs.linuxPackages_latest;
