@@ -119,6 +119,7 @@
     jq
     gedit
     podman
+    powertop
   ];
 
   nix.settings.trusted-users = [
