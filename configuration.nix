@@ -106,7 +106,9 @@
   };
 
   environment.systemPackages = with pkgs; [
-    python312
+    (python312.withPackages (ps: with ps; [
+      jupyterlab
+    ]))
     nodejs
     tmux
     wget
