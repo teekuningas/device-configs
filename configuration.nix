@@ -3,6 +3,7 @@
 {
   imports =
     [
+      <nixos-hardware/dell/precision/5490>
       ./hardware-configuration.nix
     ];
 
@@ -52,12 +53,19 @@
 
   hardware.graphics.enable = true;
 
-  services.xserver.videoDrivers = ["nvidia"];
-  hardware.nvidia.open = true;
-  # No need to have nvidia reponsible for rendering.
-  boot.blacklistedKernelModules = [
-    "nvidia-drm"
-  ];
+  # note nixos-hardware import which sets up some of the options
+  hardware.nvidia = {
+    package = config.boot.kernelPackages.nvidiaPackages.beta;
+    powerManagement.enable = true;
+    powerManagement.finegrained = true;
+    nvidiaSettings = true;
+    prime = {
+      offload = {
+        enable = true;
+        enableOffloadCmd = true;
+      };
+    };
+  };
 
   # Needed for kernel to support the internal monitor.
   boot.kernelPackages = pkgs.linuxPackages_latest;
@@ -98,11 +106,6 @@
   programs.neovim = {
     enable = true;
     vimAlias = true;
-  };
-
-  services.ollama = {
-    enable = true;
-    acceleration = "cuda";
   };
 
   environment.systemPackages = with pkgs; [
