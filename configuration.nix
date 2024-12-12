@@ -70,8 +70,8 @@
   # container toolkit
   hardware.nvidia-container-toolkit.enable = true;
 
-  # Needed for kernel to support the internal monitor.
-  boot.kernelPackages = pkgs.linuxPackages_latest;
+  # Needed newer kernel to support the internal monitor.
+  boot.kernelPackages = pkgs.linuxPackages_6_11;
 
   # Configure keymap in X11
   services.xserver.xkb = {
@@ -139,10 +139,15 @@
     enable = true;
     dockerCompat = lib.mkDefault true;
   };
+  # To mitigate problem with "trigger-limit-hit" for podman.service
   systemd.user.sockets.podman.socketConfig = {
-    TriggerLimitIntervalSec = "30s";
-    TriggerLimitBurst = 100;
+    TriggerLimitIntervalSec = "10s";
+    TriggerLimitBurst = 1000;
   };
+  # To remove problem of missing newuidmap binary for podman.service
+  systemd.user.services.podman.path = [
+    "/run/wrappers/"
+  ];
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions
