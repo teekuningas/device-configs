@@ -67,6 +67,9 @@
     };
   };
 
+  # container toolkit
+  hardware.nvidia-container-toolkit.enable = true;
+
   # Needed for kernel to support the internal monitor.
   boot.kernelPackages = pkgs.linuxPackages_latest;
 
@@ -135,6 +138,10 @@
   virtualisation.podman = {
     enable = true;
     dockerCompat = lib.mkDefault true;
+  };
+  systemd.user.sockets.podman.socketConfig = {
+    TriggerLimitIntervalSec = "30s";
+    TriggerLimitBurst = 100;
   };
 
   # This value determines the NixOS release from which the default
