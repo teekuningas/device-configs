@@ -133,6 +133,7 @@
     jq
     gedit
     podman
+    podman-compose
     powertop
   ];
 
