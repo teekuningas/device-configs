@@ -73,10 +73,11 @@
   # Needed newer kernel to support the internal monitor.
   boot.kernelPackages = pkgs.linuxPackages_6_11;
 
-  # Force S3 sleep mode
-  boot.kernelParams = [
-    "mem_sleep_default=deep"
-  ];
+  # Enable swap space
+  swapDevices = [ {
+    device = "/var/lib/swapfile";
+    size = 16*1024;
+  } ];
 
   # Configure keymap in X11
   services.xserver.xkb = {
