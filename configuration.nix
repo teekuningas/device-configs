@@ -121,21 +121,22 @@
     (python312.withPackages (ps: with ps; [
       jupyterlab
     ]))
-    nodejs
-    tmux
-    wget
-    htop
+    gedit
     gitFull
-    teams-for-linux
+    gnumake
+    htop
+    nodejs
     obsidian
     openconnect
-    starship
-    gnumake
     jq
-    gedit
     podman
     podman-compose
     powertop
+    spotify
+    starship
+    teams-for-linux
+    tmux
+    wget
   ];
 
   nix.settings.trusted-users = [
