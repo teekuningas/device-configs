@@ -92,7 +92,7 @@
   services.printing.enable = true;
 
   # Enable sound with pipewire.
-  hardware.pulseaudio.enable = false;
+  services.pulseaudio.enable = false;
   security.rtkit.enable = true;
   services.pipewire = {
     enable = true;
@@ -121,6 +121,19 @@
     (python312.withPackages (ps: with ps; [
       jupyterlab
     ]))
+    (
+      pkgs.buildFHSEnv {
+        name = "uv";
+        targetPkgs = pkgs: with pkgs; [
+          uv
+          zlib
+        ];
+        runScript = "uv";
+        profile = ''
+          export LD_LIBRARY_PATH="${config.hardware.nvidia.package}/lib"
+        '';
+      }
+    )
     gedit
     gitFull
     gnumake
@@ -131,6 +144,7 @@
     jq
     podman
     podman-compose
+    postman
     powertop
     spotify
     starship
