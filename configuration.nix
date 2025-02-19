@@ -2,10 +2,7 @@
 
 {
   imports =
-    [
-      <nixos-hardware/dell/precision/5490>
-      ./hardware-configuration.nix
-    ];
+    [ <nixos-hardware/dell/precision/5490> ./hardware-configuration.nix ];
 
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
@@ -74,10 +71,10 @@
   boot.kernelPackages = pkgs.linuxPackages_6_11;
 
   # Enable swap space
-  swapDevices = [ {
+  swapDevices = [{
     device = "/var/lib/swapfile";
-    size = 16*1024;
-  } ];
+    size = 16 * 1024;
+  }];
 
   # Configure keymap in X11
   services.xserver.xkb = {
@@ -105,8 +102,7 @@
     isNormalUser = true;
     description = "Erkka";
     extraGroups = [ "networkmanager" "wheel" ];
-    packages = with pkgs; [
-    ];
+    packages = with pkgs; [ ];
   };
   nixpkgs.config.allowUnfree = true;
 
@@ -117,23 +113,29 @@
     vimAlias = true;
   };
 
-  environment.systemPackages = with pkgs; [
-    (python312.withPackages (ps: with ps; [
-      jupyterlab
-    ]))
-    (
-      pkgs.buildFHSEnv {
-        name = "uv";
-        targetPkgs = pkgs: with pkgs; [
-          uv
-          zlib
-        ];
-        runScript = "uv";
-        profile = ''
-          export LD_LIBRARY_PATH="${config.hardware.nvidia.package}/lib"
-        '';
-      }
-    )
+  environment.variables = {
+    OLLAMA_HOST = "https://jyu2401-62.tail5b278e.ts.net/ollamapi";
+  };
+
+  environment.systemPackages = let
+    teepkgs = (pkgs.fetchFromGitHub {
+      owner = "teekuningas";
+      repo = "pkgs";
+      rev = "6bf4f544495189d1c0b9563226b866f591949370";
+      sha256 = "sha256-8vTHunVi5KdHMxEI9/1Yu6nyyB214FabCbHLEGuVxKI=";
+    });
+  in (with pkgs; [
+    (python312.withPackages
+      (ps: with ps; [ jupyterlab ps.numpy ps.requests ps.llm ps.llm-ollama ]))
+    (pkgs.callPackage (import "${teepkgs}/pkgs/files-to-prompt") { })
+    (pkgs.buildFHSEnv {
+      name = "uv";
+      targetPkgs = pkgs: with pkgs; [ uv zlib ];
+      runScript = "uv";
+      profile = ''
+        export LD_LIBRARY_PATH="${config.hardware.nvidia.package}/lib"
+      '';
+    })
     gedit
     gitFull
     gnumake
@@ -151,11 +153,9 @@
     teams-for-linux
     tmux
     wget
-  ];
+  ]);
 
-  nix.settings.trusted-users = [
-    "erpipehe"
-  ];
+  nix.settings.trusted-users = [ "erpipehe" ];
 
   virtualisation.podman = {
     enable = true;
@@ -167,9 +167,7 @@
     TriggerLimitBurst = 1000;
   };
   # To remove problem of missing newuidmap binary for podman.service
-  systemd.user.services.podman.path = [
-    "/run/wrappers/"
-  ];
+  systemd.user.services.podman.path = [ "/run/wrappers/" ];
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions
