@@ -107,16 +107,14 @@
     packages = with pkgs; [ ];
   };
 
-  programs.firefox.enable = true;
-
   environment.variables = {
     OLLAMA_HOST = "https://jyu2401-62.tail5b278e.ts.net/ollamapi";
   };
 
+  tee-options.python-packages = [ "llm" "llm-ollama" ];
+
   environment.systemPackages = with pkgs; [
     inputs.teepkgs.packages."${pkgs.system}".files-to-prompt
-    (python312.withPackages
-      (ps: with ps; [ jupyterlab ps.numpy ps.requests ps.llm ps.llm-ollama ]))
     (pkgs.buildFHSEnv {
       name = "uv";
       targetPkgs = pkgs: with pkgs; [ uv zlib ];
@@ -125,13 +123,10 @@
         export LD_LIBRARY_PATH="${config.hardware.nvidia.package}/lib"
       '';
     })
-    gedit
     nodejs
     obsidian
-    openconnect
     podman
     podman-compose
-    postman
     powertop
     spotify
     teams-for-linux
