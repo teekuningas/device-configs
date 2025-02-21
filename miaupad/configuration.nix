@@ -29,7 +29,7 @@
   networking.interfaces.enp3s0.useDHCP = true;
   networking.interfaces.wlp4s0.useDHCP = true;
 
-  networking.nameservers = [ "8.8.8.8" "4.4.4.4" ];
+  # networking.nameservers = [ "8.8.8.8" "4.4.4.4" ];
 
   # Set your time zone.
   time.timeZone = "Europe/Helsinki";
@@ -62,10 +62,7 @@
   services.xserver.xkb.layout = "fi";
   services.xserver.xkb.options = "eurosign:e";
 
-  # Enable touchpad support (enabled default in most desktopManager).
   services.libinput.enable = true;
-
-  hardware.bluetooth.enable = true;
 
   # # Enable opengl
   hardware.graphics.enable = true;
@@ -74,14 +71,16 @@
     libGL
   ];
 
-  # Enable blueman service for bluetooth
-  services.blueman.enable = true;
+  # hardware.bluetooth.enable = true;
+  # services.blueman.enable = true;
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.zairex = {
     isNormalUser = true;
     extraGroups = [ "wheel" ];
   };
+
+  powerManagement.powertop.enable = true;
 
   environment.systemPackages = with pkgs; [
     powertop
