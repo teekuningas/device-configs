@@ -80,7 +80,7 @@
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.zairex = {
     isNormalUser = true;
-    extraGroups = [ "wheel" "docker" ]; # Enable ‘sudo’ for the user.
+    extraGroups = [ "wheel" ];
   };
 
   environment.systemPackages = with pkgs; [
@@ -96,8 +96,6 @@
   # Open ports in the firewall.
   networking.firewall.allowedTCPPorts = [ 8008 8009 8010 ];
   networking.firewall.allowedUDPPortRanges = [ { from = 32768; to = 61000; } ];
-
-  virtualisation.docker.enable = true;
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions
