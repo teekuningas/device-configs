@@ -4,10 +4,11 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
+    nixos-wsl.url = "github:nix-community/NixOS-WSL/main";
     teepkgs.url = "github:teekuningas/pkgs";
   };
 
-  outputs = { self, nixpkgs, nixos-hardware, ... }@inputs: {
+  outputs = { self, nixpkgs, nixos-hardware, nixos-wsl, ... }@inputs: {
     nixosConfigurations.procyon-nixos = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
       specialArgs = { inherit inputs; };
@@ -30,6 +31,17 @@
         ./miaucloud/hardware-configuration.nix
         ./miaucloud/networking.nix
         ./miaucloud/users.nix
+      ];
+    };
+    nixosConfigurations.miaudesk-nixos = nixpkgs.lib.nixosSystem {
+      system = "x86_64-linux";
+      specialArgs = { inherit inputs; };
+      modules = [
+        nixos-wsl.nixosModules.default
+        ./common/base.nix
+        ./common/graphical.nix
+        ./common/python.nix
+        ./miaudesk/configuration.nix
       ];
     };
   };
