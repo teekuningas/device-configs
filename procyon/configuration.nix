@@ -1,9 +1,6 @@
 { config, pkgs, lib, ... }:
 
 {
-  imports =
-    [ <nixos-hardware/dell/precision/5490> ./hardware-configuration.nix ];
-
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
@@ -13,6 +10,11 @@
   # Enable networking
   networking.networkmanager.enable = true;
   networking.networkmanager.dns = "systemd-resolved";
+
+  # extraHosts
+  networking.extraHosts = ''
+    130.234.6.195 www.korkeakoululiikunta.fi
+  '';
 
   # Enable systemd-resolved
   services.resolved.enable = true;
@@ -104,14 +106,8 @@
     extraGroups = [ "networkmanager" "wheel" ];
     packages = with pkgs; [ ];
   };
-  nixpkgs.config.allowUnfree = true;
 
   programs.firefox.enable = true;
-
-  programs.neovim = {
-    enable = true;
-    vimAlias = true;
-  };
 
   environment.variables = {
     OLLAMA_HOST = "https://jyu2401-62.tail5b278e.ts.net/ollamapi";
@@ -137,22 +133,15 @@
       '';
     })
     gedit
-    gitFull
-    gnumake
-    htop
     nodejs
     obsidian
     openconnect
-    jq
     podman
     podman-compose
     postman
     powertop
     spotify
-    starship
     teams-for-linux
-    tmux
-    wget
   ]);
 
   nix.settings.trusted-users = [ "erpipehe" ];
