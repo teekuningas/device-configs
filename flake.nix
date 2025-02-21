@@ -4,12 +4,13 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
+    teepkgs.url = "github:teekuningas/pkgs";
   };
 
   outputs = { self, nixpkgs, nixos-hardware, ... }@inputs: {
-    # Please replace my-nixos with your hostname
     nixosConfigurations.procyon-nixos = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
+      specialArgs = { inherit inputs; };
       modules = [
         nixos-hardware.nixosModules.dell-precision-5490
         ./common/configuration.nix

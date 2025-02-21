@@ -1,4 +1,4 @@
-{ config, pkgs, lib, ... }:
+{ config, pkgs, lib, inputs, ... }:
 
 {
   # Bootloader.
@@ -113,17 +113,10 @@
     OLLAMA_HOST = "https://jyu2401-62.tail5b278e.ts.net/ollamapi";
   };
 
-  environment.systemPackages = let
-    teepkgs = (pkgs.fetchFromGitHub {
-      owner = "teekuningas";
-      repo = "pkgs";
-      rev = "6bf4f544495189d1c0b9563226b866f591949370";
-      sha256 = "sha256-8vTHunVi5KdHMxEI9/1Yu6nyyB214FabCbHLEGuVxKI=";
-    });
-  in (with pkgs; [
+  environment.systemPackages = with pkgs; [
+    inputs.teepkgs.packages."${pkgs.system}".files-to-prompt
     (python312.withPackages
       (ps: with ps; [ jupyterlab ps.numpy ps.requests ps.llm ps.llm-ollama ]))
-    (pkgs.callPackage (import "${teepkgs}/pkgs/files-to-prompt") { })
     (pkgs.buildFHSEnv {
       name = "uv";
       targetPkgs = pkgs: with pkgs; [ uv zlib ];
@@ -142,7 +135,7 @@
     powertop
     spotify
     teams-for-linux
-  ]);
+  ];
 
   nix.settings.trusted-users = [ "erpipehe" ];
 
