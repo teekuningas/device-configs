@@ -44,5 +44,16 @@
         ./miaudesk/configuration.nix
       ];
     };
+    nixosConfigurations.miaupad-nixos = nixpkgs.lib.nixosSystem {
+      system = "x86_64-linux";
+      specialArgs = { inherit inputs; };
+      modules = [
+        ./common/base.nix
+        ./common/graphical.nix
+        ./common/python.nix
+        ./miaupad/configuration.nix
+        ./miaupad/hardware-configuration.nix
+      ];
+    };
   };
 }
