@@ -1,1 +1,1 @@
-NixOS configurations, see branches.
+NixOS configurations.
