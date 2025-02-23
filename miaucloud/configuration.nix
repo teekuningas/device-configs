@@ -181,6 +181,7 @@
         autoStart = true;
         extraOptions = [ "--net=host" ];
         environment = {
+          COREPACK_INTEGRITY_KEYS="0";
           RAZZLE_API_PATH = "https://kingofsweden.info";
           RAZZLE_INTERNAL_API_PATH = "http://127.0.0.1:8080/Plone";
         };
@@ -221,7 +222,7 @@
         # See: https://lobehub.com/docs/self-hosting/server-database/docker-compose
         # After postgres, logto and minio have been configured,
         # this should just work.
-        image = "docker.io/lobehub/lobe-chat-database:1.62.3";
+        image = "docker.io/lobehub/lobe-chat-database:1.62.11";
         ports = ["127.0.0.1:3210:3210"];
         extraOptions = [ "--net=host" "--env-file=/var/data/.secrets/lobechat.env" ];
         environment = {
