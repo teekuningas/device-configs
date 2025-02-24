@@ -11,10 +11,10 @@
   networking.networkmanager.enable = true;
   networking.networkmanager.dns = "systemd-resolved";
 
-  # extraHosts
-  networking.extraHosts = ''
-    130.234.6.195 www.korkeakoululiikunta.fi
-  '';
+  # # extraHosts
+  # networking.extraHosts = ''
+  #   130.234.6.195 www.korkeakoululiikunta.fi
+  # '';
 
   # Enable systemd-resolved
   services.resolved.enable = true;
