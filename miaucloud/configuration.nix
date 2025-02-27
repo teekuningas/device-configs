@@ -222,7 +222,7 @@
         # See: https://lobehub.com/docs/self-hosting/server-database/docker-compose
         # After postgres, logto and minio have been configured,
         # this should just work.
-        image = "docker.io/lobehub/lobe-chat-database:1.62.11";
+        image = "docker.io/lobehub/lobe-chat-database:1.66.1";
         ports = ["127.0.0.1:3210:3210"];
         extraOptions = [ "--net=host" "--env-file=/var/data/.secrets/lobechat.env" ];
         environment = {
