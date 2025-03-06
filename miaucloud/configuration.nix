@@ -200,8 +200,8 @@
         autoStart = true;
         extraOptions = [ "--env-file=/var/data/.secrets/teehetki_server.env" ];
         environment = {
-          API_ADDRESS = "https://api.openai.com";
-          LLM_MODEL = "gpt-4o";
+          API_ADDRESS = "https://erpipehe-openai.openai.azure.com";
+          LLM_MODEL = "gpt-4o-mini";
         };
       };
       soitbeginsFrontend = {
@@ -304,7 +304,7 @@
         };
       };
       vellubot = {
-        image = "ghcr.io/teekuningas/vellubot/vellubot:0.19.0";
+        image = "ghcr.io/teekuningas/vellubot/vellubot:0.19.2";
         autoStart = true;
         extraOptions = [ "--env-file=/var/data/.secrets/vellubot.env" ];
         environment = {
