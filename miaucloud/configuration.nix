@@ -200,8 +200,8 @@
         autoStart = true;
         extraOptions = [ "--env-file=/var/data/.secrets/teehetki_server.env" ];
         environment = {
-          API_ADDRESS = "https://api.openai.com";
-          LLM_MODEL = "gpt-4o";
+          API_ADDRESS = "https://erpipehe-openai.openai.azure.com";
+          LLM_MODEL = "gpt-4o-mini";
         };
       };
       soitbeginsFrontend = {
@@ -222,7 +222,7 @@
         # See: https://lobehub.com/docs/self-hosting/server-database/docker-compose
         # After postgres, logto and minio have been configured,
         # this should just work.
-        image = "docker.io/lobehub/lobe-chat-database:1.62.11";
+        image = "docker.io/lobehub/lobe-chat-database:1.66.6";
         ports = ["127.0.0.1:3210:3210"];
         extraOptions = [ "--net=host" "--env-file=/var/data/.secrets/lobechat.env" ];
         environment = {
@@ -304,7 +304,7 @@
         };
       };
       vellubot = {
-        image = "ghcr.io/teekuningas/vellubot/vellubot:0.19.0";
+        image = "ghcr.io/teekuningas/vellubot/vellubot:0.19.2";
         autoStart = true;
         extraOptions = [ "--env-file=/var/data/.secrets/vellubot.env" ];
         environment = {
