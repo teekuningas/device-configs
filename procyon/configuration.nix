@@ -1,6 +1,33 @@
 { config, pkgs, lib, inputs, ... }:
 
 {
+  nixpkgs.overlays = [
+    (self: super: {
+      # pipewire = super.pipewire.overrideAttrs (oldAttrs: rec {
+      #   version = "1.3.83";
+      #   src = super.fetchFromGitLab {
+      #     domain = "gitlab.freedesktop.org";
+      #     owner = "pipewire";
+      #     repo = "pipewire";
+      #     rev = version;
+      #     sha256 = "sha256-atOvk7AMWZ7A9DnQQunVXlzGAVK3ITU85DkUfUsAJr4=";
+      #   };
+      #   buildInputs = oldAttrs.buildInputs ++ [ super.libebur128 ];
+      # });
+      # libcamera = super.libcamera.overrideAttrs (oldAttrs: rec {
+      #   version = "0.4.0.bugfix";
+      #   src = super.fetchgit {
+      #     url = "https://git.libcamera.org/libcamera/libcamera.git";
+      #     rev = "d748bdc66d3344761292adc8a611b74e4dfeb88f";
+      #     hash = "sha256-5j8VY0eFTpNw2ujKkWzON1ZaqAAYFuptE2dnHevZsXo=";
+      #   };
+      # });
+      # libadwaita = super.libadwaita.overrideAttrs (oldAttrs: rec {
+      #   doCheck = false;
+      # });
+    })
+  ];
+
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
@@ -64,24 +91,7 @@
   # container toolkit
   hardware.nvidia-container-toolkit.enable = true;
 
-  # hardware.ipu6.enable = true;
-  # hardware.ipu6.platform = "ipu6epmtl";
-
-  # newest kernel with patch for webcam
-  boot.kernelPackages = pkgs.linuxPackages_latest.extend ( self: super: {
-    ipu6-drivers = super.ipu6-drivers.overrideAttrs (
-        final: previous: rec {
-          src = builtins.fetchGit {
-            url = "https://github.com/intel/ipu6-drivers.git";
-            ref = "master";
-            rev = "b4ba63df5922150ec14ef7f202b3589896e0301a";
-          };
-          patches = [
-            "${src}/patches/0001-v6.10-IPU6-headers-used-by-PSYS.patch"
-          ] ;
-        }
-    );
-  } );
+  boot.kernelPackages = pkgs.linuxPackages_latest;
 
   # Enable swap space
   swapDevices = [{
