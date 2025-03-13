@@ -8,7 +8,7 @@
   };
 
   config = {
-    tee-options.python-packages = ["numpy" "requests"];
+    tee-options.python-packages = ["numpy" "requests" "flake8"];
     environment.systemPackages = with pkgs; [
       (python312.withPackages (ps: builtins.map (pkgName: ps.${pkgName}) config.tee-options.python-packages))
     ];

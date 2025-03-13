@@ -130,9 +130,10 @@
 
   environment.variables = {
     OLLAMA_HOST = "https://jyu2401-62.tail5b278e.ts.net/ollamapi";
+    OLLAMA_API_BASE = "https://jyu2401-62.tail5b278e.ts.net/ollamapi";
   };
 
-  tee-options.python-packages = [ "llm" "llm-ollama" ];
+  tee-options.python-packages = [ "llm" "llm-ollama" "aider-chat" ];
 
   environment.systemPackages = with pkgs; [
     inputs.teepkgs.packages."${pkgs.system}".files-to-prompt
