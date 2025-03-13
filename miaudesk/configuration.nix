@@ -16,6 +16,7 @@
       "/usr/lib/wsl"
     ]);
     OLLAMA_HOST = "https://jyu2401-62.tail5b278e.ts.net/ollamapi";
+    OLLAMA_API_BASE="https://jyu2401-62.tail5b278e.ts.net/ollamapi";
   };
 
   # Note, to make nvidia work within containers, it was necessary to run nvidia-ctk.
@@ -28,7 +29,7 @@
     daemon.settings.features.cdi = true;
   };
 
-  tee-options.python-packages = [ "llm" "llm-ollama" ];
+  tee-options.python-packages = [ "llm" "llm-ollama" "aider-chat"];
 
   environment.systemPackages = with pkgs; [
     inputs.teepkgs.packages."${pkgs.system}".files-to-prompt
