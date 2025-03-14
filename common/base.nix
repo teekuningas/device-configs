@@ -20,5 +20,6 @@
     starship
     tmux
     wget
+    tree
   ];
 }

@@ -128,6 +128,8 @@
     packages = with pkgs; [ ];
   };
 
+  fonts.packages = builtins.filter lib.attrsets.isDerivation (builtins.attrValues pkgs.nerd-fonts);
+
   environment.variables = {
     # llm, files-to-prompt
     OLLAMA_HOST = "https://jyu2401-62.tail5b278e.ts.net/ollamapi";
