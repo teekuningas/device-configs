@@ -11,12 +11,18 @@
   # Set up nix-ld to allow using non-native nvidia drivers.
   programs.nix-ld.enable = true;
   environment.variables = {
+    # for nvidia-smi / cuda to work
     NIX_LD_LIBRARY_PATH = lib.mkForce (lib.makeLibraryPath [
       "/run/current-system/sw/share/nix-ld"
       "/usr/lib/wsl"
     ]);
+    # llm, files-to-prompt
     OLLAMA_HOST = "https://jyu2401-62.tail5b278e.ts.net/ollamapi";
-    OLLAMA_API_BASE="https://jyu2401-62.tail5b278e.ts.net/ollamapi";
+    # aider
+    OLLAMA_API_BASE = "https://jyu2401-62.tail5b278e.ts.net/ollamapi";
+    AIDER_MODEL = "ollama_chat/gemma3:27b";
+    AIDER_MAP_TOKENS = "8192";
+    AIDER_MAX_CHAT_HISTORY_TOKENS="32768";
   };
 
   # Note, to make nvidia work within containers, it was necessary to run nvidia-ctk.
@@ -29,7 +35,7 @@
     daemon.settings.features.cdi = true;
   };
 
-  tee-options.python-packages = [ "llm" "llm-ollama" "aider-chat"];
+  tee-options.python-packages = [ "llm" "llm-ollama"];
 
   environment.systemPackages = with pkgs; [
     inputs.teepkgs.packages."${pkgs.system}".files-to-prompt
