@@ -135,9 +135,13 @@
     OLLAMA_HOST = "https://jyu2401-62.tail5b278e.ts.net/ollamapi";
     # aider
     OLLAMA_API_BASE = "https://jyu2401-62.tail5b278e.ts.net/ollamapi";
-    AIDER_MODEL = "ollama_chat/gemma3:27b";
+    AIDER_MODEL = "ollama_chat/qwq:32b";
+    AIDER_WEAK_MODEL = "ollama/qwen2.5-coder:32b-instruct-q8_0";
+    AIDER_EDITOR_MODEL = "ollama/qwen2.5-coder:32b-instruct-q8_0";
+    AIDER_EDITOR_EDIT_FORMAT = "editor-whole";
     AIDER_MAP_TOKENS = "8192";
-    AIDER_MAX_CHAT_HISTORY_TOKENS="32768";
+    AIDER_MAX_CHAT_HISTORY_TOKENS = "32768";
+    AIDER_AUTO_ACCEPT_ARCHITECT = "false";
   };
 
   tee-options.python-packages = [ "llm" "llm-ollama" ];
