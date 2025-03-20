@@ -127,6 +127,10 @@
       file_server
     '';
 
+    virtualHosts."openwebui.teekuningas.net".extraConfig = ''
+      reverse_proxy http://localhost:8081
+    '';
+
     virtualHosts."lobe.teekuningas.net".extraConfig = ''
       reverse_proxy http://localhost:3210
     '';
@@ -218,11 +222,34 @@
         ports = ["127.0.0.1:8011:8765"];
         autoStart = true;
       };
+      litellmProxy = {
+        # To proxy openai-type requests to azure-like requests.
+        image = "ghcr.io/berriai/litellm:main-latest";
+        extraOptions = [ "--net=host" "--env-file=/var/data/.secrets/litellm.env" ];
+        volumes = [
+          "/var/data/litellm/config.yaml:/app/config.yaml"
+        ];
+        cmd = [
+          "--config" "/app/config.yaml"
+        ];
+      };
+      openWebui = {
+        image = "ghcr.io/open-webui/open-webui:0.5.20";
+        ports =  ["127.0.0.1:8081:8080"];
+        extraOptions = [ "--net=host" "--env-file=/var/data/.secrets/openwebui.env" ];
+        autoStart = true;
+        environment = {
+          PORT = "8081";
+        };
+        volumes = [
+          "/var/data/openwebui_data:/app/backend/data"
+        ];
+      };
       lobechat = {
         # See: https://lobehub.com/docs/self-hosting/server-database/docker-compose
         # After postgres, logto and minio have been configured,
         # this should just work.
-        image = "docker.io/lobehub/lobe-chat-database:1.68.9";
+        image = "docker.io/lobehub/lobe-chat-database:1.73.0";
         ports = ["127.0.0.1:3210:3210"];
         extraOptions = [ "--net=host" "--env-file=/var/data/.secrets/lobechat.env" ];
         environment = {
@@ -278,13 +305,13 @@
       logto = {
         # See: https://lobehub.com/docs/self-hosting/server-database/docker-compose
         # To init the logto db, go inside container:
-        # $ sudo podman run --net=host --entrypoint="sh" -it svhd/logto
+        # $ sudo podman run --net=host --env-file=/var/data/.secrets/logto.env --entrypoint="sh" -it svhd/logto:<version>
         # and run:
         # $ npm run cli db seed
         # Then navigate to ui and create app for lobe.
         # Sometimes this is needed too:
         # $ npm run cli db alt deploy
-        image = "docker.io/svhd/logto:latest";
+        image = "docker.io/svhd/logto:1.25";
         extraOptions = [ "--net=host" "--env-file=/var/data/.secrets/logto.env" ];
         environment = {
           TRUST_PROXY_HEADER = "1";
