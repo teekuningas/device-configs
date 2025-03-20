@@ -234,7 +234,7 @@
         ];
       };
       openWebui = {
-        image = "ghcr.io/open-webui/open-webui:0.5.20";
+        image = "miaucloud-nixos/open-webui:0.5.20";
         ports =  ["127.0.0.1:8081:8080"];
         extraOptions = [ "--net=host" "--env-file=/var/data/.secrets/openwebui.env" ];
         autoStart = true;
