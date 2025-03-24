@@ -5,10 +5,10 @@
 { config, lib, pkgs, ... }:
 
 {
-  imports =
-    [ # Include the results of the hardware scan.
-      ./hardware-configuration.nix
-    ];
+  imports = [
+    # Include the results of the hardware scan.
+    ./hardware-configuration.nix
+  ];
 
   # Use the GRUB 2 boot loader.
   boot.loader.grub.enable = true;
@@ -17,10 +17,13 @@
 
   networking.hostName = "miaupad-nixos"; # Define your hostname.
 
-  networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
+  networking.wireless.enable =
+    true; # Enables wireless support via wpa_supplicant.
   networking.wireless.userControlled.enable = true;
-  networking.wireless.networks.miaurouter.pskRaw = "0b965df6955e2bb67e616eb784b6d750774424a72fe24cd747885ca366f60dd0";
-  networking.wireless.networks.Kahvipoytaverkko.pskRaw="521da256d31acd0ef1e3c33294594c4c30cced0330580ba0a4e6db6ec2b4bfe4";
+  networking.wireless.networks.miaurouter.pskRaw =
+    "0b965df6955e2bb67e616eb784b6d750774424a72fe24cd747885ca366f60dd0";
+  networking.wireless.networks.Kahvipoytaverkko.pskRaw =
+    "521da256d31acd0ef1e3c33294594c4c30cced0330580ba0a4e6db6ec2b4bfe4";
 
   # The global useDHCP flag is deprecated, therefore explicitly set to false here.
   # Per-interface useDHCP will be mandatory in the future, so this generated config
@@ -51,10 +54,7 @@
     enable = true;
     windowManager.awesome = {
       enable = true;
-      luaModules = with pkgs.luaPackages; [
-        luarocks
-        luadbi-mysql
-      ];
+      luaModules = with pkgs.luaPackages; [ luarocks luadbi-mysql ];
     };
   };
 
@@ -67,9 +67,7 @@
   # # Enable opengl
   hardware.graphics.enable = true;
   hardware.graphics.enable32Bit = true;
-  hardware.graphics.extraPackages = with pkgs; [
-    libGL
-  ];
+  hardware.graphics.extraPackages = with pkgs; [ libGL ];
 
   # hardware.bluetooth.enable = true;
   # services.blueman.enable = true;
@@ -82,9 +80,7 @@
 
   powerManagement.powertop.enable = true;
 
-  environment.systemPackages = with pkgs; [
-    powertop
-  ];
+  environment.systemPackages = with pkgs; [ powertop ];
 
   # Enable the OpenSSH daemon.
   services.openssh.enable = true;
@@ -94,7 +90,10 @@
 
   # Open ports in the firewall.
   networking.firewall.allowedTCPPorts = [ 8008 8009 8010 ];
-  networking.firewall.allowedUDPPortRanges = [ { from = 32768; to = 61000; } ];
+  networking.firewall.allowedUDPPortRanges = [{
+    from = 32768;
+    to = 61000;
+  }];
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions

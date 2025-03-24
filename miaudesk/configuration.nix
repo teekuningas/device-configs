@@ -28,7 +28,17 @@
     daemon.settings.features.cdi = true;
   };
 
-  tee-options.python-packages = [ "llm" "llm-ollama" "jupyterlab" "ipywidgets" "matplotlib" "scipy" "pandas" "geopandas" "folium"];
+  tee-options.python-packages = [
+    "llm"
+    "llm-ollama"
+    "jupyterlab"
+    "ipywidgets"
+    "matplotlib"
+    "scipy"
+    "pandas"
+    "geopandas"
+    "folium"
+  ];
 
   environment.systemPackages = with pkgs; [
     inputs.teepkgs.packages."${pkgs.system}".files-to-prompt

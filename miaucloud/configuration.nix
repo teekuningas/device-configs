@@ -1,9 +1,7 @@
 { config, pkgs, lib, ... }:
 
 {
-  environment.systemPackages = with pkgs; [
-    weechat
-  ];
+  environment.systemPackages = with pkgs; [ weechat ];
 
   boot.tmp.cleanOnBoot = true;
   zramSwap.enable = true;
@@ -163,9 +161,7 @@
       enable = true;
       dockerCompat = true;
 
-      defaultNetwork.settings = {
-        dns_enabled = true;
-      };
+      defaultNetwork.settings = { dns_enabled = true; };
     };
 
     oci-containers.backend = "podman";
@@ -175,9 +171,7 @@
         autoStart = true;
         user = "root";
         extraOptions = [ "--net=host" ];
-        volumes = [
-         "/var/data/kingofsweden:/data"
-        ];
+        volumes = [ "/var/data/kingofsweden:/data" ];
       };
       volto = {
         image = "plone/plone-frontend:18.4.0";
@@ -185,22 +179,20 @@
         autoStart = true;
         extraOptions = [ "--net=host" ];
         environment = {
-          COREPACK_INTEGRITY_KEYS="0";
+          COREPACK_INTEGRITY_KEYS = "0";
           RAZZLE_API_PATH = "https://kingofsweden.info";
           RAZZLE_INTERNAL_API_PATH = "http://127.0.0.1:8080/Plone";
         };
       };
       teehetkiClient = {
         image = "ghcr.io/teekuningas/teehetki/teehetki-client:v10";
-        ports = ["127.0.0.1:3001:3000"];
+        ports = [ "127.0.0.1:3001:3000" ];
         autoStart = true;
-        environment = {
-          API_ADDRESS = "wss://teehetki.teekuningas.net";
-        };
+        environment = { API_ADDRESS = "wss://teehetki.teekuningas.net"; };
       };
       teehetkiServer = {
         image = "ghcr.io/teekuningas/teehetki/teehetki-server:v10";
-        ports = ["127.0.0.1:5001:5000"];
+        ports = [ "127.0.0.1:5001:5000" ];
         autoStart = true;
         extraOptions = [ "--env-file=/var/data/.secrets/teehetki_server.env" ];
         environment = {
@@ -210,7 +202,7 @@
       };
       soitbeginsFrontend = {
         image = "ghcr.io/teekuningas/soitbegins/soitbegins-frontend:0.1.0";
-        ports = ["127.0.0.1:9011:9000"];
+        ports = [ "127.0.0.1:9011:9000" ];
         autoStart = true;
         environment = {
           SERVER_API = "wss://soitbegins.teekuningas.net/api";
@@ -219,39 +211,34 @@
       };
       soitbeginsBackend = {
         image = "ghcr.io/teekuningas/soitbegins/soitbegins-backend:0.1.0";
-        ports = ["127.0.0.1:8011:8765"];
+        ports = [ "127.0.0.1:8011:8765" ];
         autoStart = true;
       };
       litellmProxy = {
         # To proxy openai-type requests to azure-like requests.
         image = "ghcr.io/berriai/litellm:main-latest";
-        extraOptions = [ "--net=host" "--env-file=/var/data/.secrets/litellm.env" ];
-        volumes = [
-          "/var/data/litellm/config.yaml:/app/config.yaml"
-        ];
-        cmd = [
-          "--config" "/app/config.yaml"
-        ];
+        extraOptions =
+          [ "--net=host" "--env-file=/var/data/.secrets/litellm.env" ];
+        volumes = [ "/var/data/litellm/config.yaml:/app/config.yaml" ];
+        cmd = [ "--config" "/app/config.yaml" ];
       };
       openWebui = {
         image = "miaucloud-nixos/open-webui:0.5.20";
-        ports =  ["127.0.0.1:8081:8080"];
-        extraOptions = [ "--net=host" "--env-file=/var/data/.secrets/openwebui.env" ];
+        ports = [ "127.0.0.1:8081:8080" ];
+        extraOptions =
+          [ "--net=host" "--env-file=/var/data/.secrets/openwebui.env" ];
         autoStart = true;
-        environment = {
-          PORT = "8081";
-        };
-        volumes = [
-          "/var/data/openwebui_data:/app/backend/data"
-        ];
+        environment = { PORT = "8081"; };
+        volumes = [ "/var/data/openwebui_data:/app/backend/data" ];
       };
       lobechat = {
         # See: https://lobehub.com/docs/self-hosting/server-database/docker-compose
         # After postgres, logto and minio have been configured,
         # this should just work.
         image = "docker.io/lobehub/lobe-chat-database:1.73.0";
-        ports = ["127.0.0.1:3210:3210"];
-        extraOptions = [ "--net=host" "--env-file=/var/data/.secrets/lobechat.env" ];
+        ports = [ "127.0.0.1:3210:3210" ];
+        extraOptions =
+          [ "--net=host" "--env-file=/var/data/.secrets/lobechat.env" ];
         environment = {
           APP_URL = "https://lobe.teekuningas.net";
           S3_BUCKET = "lobe";
@@ -276,20 +263,18 @@
         # See: https://lobehub.com/docs/self-hosting/server-database/docker-compose
         # Should not need any configuration.
         image = "docker.io/pgvector/pgvector:pg16";
-        volumes = [
-          "/var/data/postgres_data:/var/lib/postgresql/data"
-        ];
+        volumes = [ "/var/data/postgres_data:/var/lib/postgresql/data" ];
         autoStart = true;
-        extraOptions = [ "--net=host" "--env-file=/var/data/.secrets/postgres.env" ];
+        extraOptions =
+          [ "--net=host" "--env-file=/var/data/.secrets/postgres.env" ];
       };
       minio = {
         # See: https://lobehub.com/docs/self-hosting/server-database/docker-compose
         # Must create a bucket "lobe" through ui.
         image = "docker.io/minio/minio:latest";
-        extraOptions = [ "--net=host" "--env-file=/var/data/.secrets/minio.env" ];
-        volumes = [
-          "/var/data/minio_data:/etc/minio/data"
-        ];
+        extraOptions =
+          [ "--net=host" "--env-file=/var/data/.secrets/minio.env" ];
+        volumes = [ "/var/data/minio_data:/etc/minio/data" ];
         environment = {
           MINIO_DOMAIN = "s3-api.teekuningas.net";
           MINIO_API_CORS_ALLOW_ORIGIN = "https://lobe.teekuningas.net";
@@ -298,8 +283,10 @@
         cmd = [
           "server"
           "/etc/minio/data"
-          "--address" "127.0.0.1:9090"
-          "--console-address" "127.0.0.1:9091"
+          "--address"
+          "127.0.0.1:9090"
+          "--console-address"
+          "127.0.0.1:9091"
         ];
       };
       logto = {
@@ -312,23 +299,22 @@
         # Sometimes this is needed too:
         # $ npm run cli db alt deploy
         image = "docker.io/svhd/logto:1.25";
-        extraOptions = [ "--net=host" "--env-file=/var/data/.secrets/logto.env" ];
+        extraOptions =
+          [ "--net=host" "--env-file=/var/data/.secrets/logto.env" ];
         environment = {
           TRUST_PROXY_HEADER = "1";
-          ENDPOINT ="https://auth-api.teekuningas.net";
-          ADMIN_ENDPOINT ="https://auth-ui.teekuningas.net";
+          ENDPOINT = "https://auth-api.teekuningas.net";
+          ADMIN_ENDPOINT = "https://auth-ui.teekuningas.net";
           PORT = "3091";
           ADMIN_PORT = "3092";
         };
       };
       luontopeli = {
         image = "ghcr.io/teekuningas/luontopeli/luontopeli:v4";
-        ports = ["127.0.0.1:5000:5000"];
+        ports = [ "127.0.0.1:5000:5000" ];
         autoStart = true;
         extraOptions = [ "--env-file=/var/data/.secrets/luontopeli.env" ];
-        environment = {
-          LUONTOPELI_HOST = "0.0.0.0";
-        };
+        environment = { LUONTOPELI_HOST = "0.0.0.0"; };
       };
       vellubot = {
         image = "ghcr.io/teekuningas/vellubot/vellubot:0.19.2";
@@ -343,9 +329,7 @@
           OPENAI_MAX_TOKENS_OUT = "1024";
           OPENAI_MODEL = "gpt-4o-mini";
         };
-        volumes = [
-          "/var/data/vellubot:/data"
-        ];
+        volumes = [ "/var/data/vellubot:/data" ];
       };
     };
   };
@@ -353,4 +337,3 @@
 
   system.stateVersion = "22.11";
 }
-

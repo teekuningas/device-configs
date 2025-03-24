@@ -13,14 +13,21 @@
     interfaces = {
       eth0 = {
         ipv4.addresses = [
-          { address="64.226.104.65"; prefixLength=20; }
-          { address="10.19.0.5"; prefixLength=16; }
+          {
+            address = "64.226.104.65";
+            prefixLength = 20;
+          }
+          {
+            address = "10.19.0.5";
+            prefixLength = 16;
+          }
         ];
-        ipv4.routes = [ { address = "64.226.96.1"; prefixLength = 32; } ];
+        ipv4.routes = [{
+          address = "64.226.96.1";
+          prefixLength = 32;
+        }];
       };
-      eth1 = {
-        ipv4.addresses = [];
-      };
+      eth1 = { ipv4.addresses = [ ]; };
     };
   };
   services.udev.extraRules = ''
