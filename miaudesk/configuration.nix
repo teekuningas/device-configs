@@ -28,7 +28,7 @@
     daemon.settings.features.cdi = true;
   };
 
-  tee-options.python-packages = [ "llm" "llm-ollama"];
+  tee-options.python-packages = [ "llm" "llm-ollama" "jupyterlab" "jupyterlab-git"];
 
   environment.systemPackages = with pkgs; [
     inputs.teepkgs.packages."${pkgs.system}".files-to-prompt
@@ -40,6 +40,9 @@
     cudatoolkit
     nvidia-container-toolkit
   ];
+
+  # set ssh-agent to cache keys for e.g. jupyterlab-git
+  programs.ssh.startAgent = true;
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions
