@@ -163,6 +163,11 @@
     teams-for-linux
   ];
 
+  # services.ollama = {
+  #   enable = true;
+  #   acceleration = "cuda";
+  # };
+
   nix.settings.trusted-users = [ "erpipehe" ];
 
   virtualisation.podman = {
