@@ -1,4 +1,4 @@
-FROM ghcr.io/open-webui/open-webui:0.5.20
+FROM ghcr.io/open-webui/open-webui:0.6.0
 
 # Copy the new favicon to the appropriate location within the container
 COPY teaicon.png /app/build/static/favicon.png
