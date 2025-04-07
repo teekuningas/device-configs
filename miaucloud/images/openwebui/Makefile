@@ -1,2 +1,2 @@
 build:
-	sudo podman build -t miaucloud-nixos/open-webui:0.6.0 .
+	sudo podman build -t miaucloud-nixos/open-webui:0.6.2 .
