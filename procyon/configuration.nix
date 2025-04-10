@@ -161,6 +161,7 @@
     powertop
     spotify
     teams-for-linux
+    aider-chat
   ];
 
   # services.ollama = {
