@@ -142,6 +142,7 @@
     "pandas"
     "geopandas"
     "folium"
+    "twine"
   ];
 
   environment.systemPackages = with pkgs; [

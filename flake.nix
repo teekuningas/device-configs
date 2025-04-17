@@ -23,7 +23,7 @@
           ./procyon/configuration.nix
         ];
       };
-      nixosConfigurations.miaucloud-nixos = nixpkgs.lib.nixosSystem {
+      nixosConfigurations.miaucloud-nixos = nixpkgs-small.lib.nixosSystem {
         system = "x86_64-linux";
         specialArgs = { inherit inputs; };
         modules = [
@@ -35,7 +35,7 @@
           ./miaucloud/users.nix
         ];
       };
-      nixosConfigurations.miaudesk-nixos = nixpkgs.lib.nixosSystem {
+      nixosConfigurations.miaudesk-nixos = nixpkgs-small.lib.nixosSystem {
         system = "x86_64-linux";
         specialArgs = { inherit inputs; };
         modules = [
@@ -46,7 +46,7 @@
           ./miaudesk/configuration.nix
         ];
       };
-      nixosConfigurations.miaupad-nixos = nixpkgs.lib.nixosSystem {
+      nixosConfigurations.miaupad-nixos = nixpkgs-small.lib.nixosSystem {
         system = "x86_64-linux";
         specialArgs = { inherit inputs; };
         modules = [
