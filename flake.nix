@@ -18,7 +18,6 @@
           nixos-hardware.nixosModules.dell-precision-5490
           ./common/base.nix
           ./common/graphical.nix
-          ./common/python.nix
           ./procyon/hardware-configuration.nix
           ./procyon/configuration.nix
         ];
