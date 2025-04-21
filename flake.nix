@@ -42,7 +42,6 @@
           nixos-wsl.nixosModules.default
           ./common/base.nix
           ./common/graphical.nix
-          ./common/python.nix
           ./miaudesk/configuration.nix
         ];
       };
