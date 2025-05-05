@@ -48,6 +48,10 @@
   services.caddy = {
     enable = true;
 
+    virtualHosts."vaatteet.teekuningas.net".extraConfig = ''
+      reverse_proxy http://localhost:3011
+    '';
+
     virtualHosts."luonto.teekuningas.net".extraConfig = ''
       reverse_proxy http://localhost:5000
     '';
@@ -330,6 +334,11 @@
           OPENAI_MODEL = "gpt-4o-mini";
         };
         volumes = [ "/var/data/vellubot:/data" ];
+      };
+      clothinv = {
+        image = "ghcr.io/teekuningas/clothinv:0.1.1";
+        ports = [ "127.0.0.1:3011:80" ];
+        autoStart = true;
       };
     };
   };
