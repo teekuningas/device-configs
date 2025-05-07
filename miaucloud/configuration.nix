@@ -336,7 +336,7 @@
         volumes = [ "/var/data/vellubot:/data" ];
       };
       clothinv = {
-        image = "ghcr.io/teekuningas/clothinv:0.1.2";
+        image = "ghcr.io/teekuningas/clothinv:0.1.4";
         ports = [ "127.0.0.1:3011:80" ];
         autoStart = true;
       };
