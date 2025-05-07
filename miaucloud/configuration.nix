@@ -52,6 +52,10 @@
       reverse_proxy http://localhost:3011
     '';
 
+    virtualHosts."clothinv-postgrest.teekuningas.net".extraConfig = ''
+      reverse_proxy http://localhost:4001
+    '';
+
     virtualHosts."luonto.teekuningas.net".extraConfig = ''
       reverse_proxy http://localhost:5000
     '';
@@ -264,13 +268,22 @@
         autoStart = true;
       };
       postgres = {
-        # See: https://lobehub.com/docs/self-hosting/server-database/docker-compose
-        # Should not need any configuration.
         image = "docker.io/pgvector/pgvector:pg16";
         volumes = [ "/var/data/postgres_data:/var/lib/postgresql/data" ];
         autoStart = true;
         extraOptions =
-          [ "--net=host" "--env-file=/var/data/.secrets/postgres.env" ];
+          [ "--net=host" ];
+        # extraOptions =
+        #   [ "--net=host" "--env-file=/var/data/.secrets/postgres.env" ];
+      };
+      postgrest = {
+        image = "docker.io/postgrest/postgrest:latest";
+        autoStart = true;
+        environment = {
+          PGRST_SERVER_PORT = "4001";
+        };
+        extraOptions =
+          [ "--net=host" "--env-file=/var/data/.secrets/postgrest.env" ];
       };
       minio = {
         # See: https://lobehub.com/docs/self-hosting/server-database/docker-compose
