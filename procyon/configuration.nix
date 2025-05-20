@@ -15,17 +15,6 @@
         #   };
         #   buildInputs = oldAttrs.buildInputs ++ [ super.libebur128 ];
         # });
-        # libcamera = super.libcamera.overrideAttrs (oldAttrs: rec {
-        #   version = "0.4.0.bugfix";
-        #   src = super.fetchgit {
-        #     url = "https://git.libcamera.org/libcamera/libcamera.git";
-        #     rev = "d748bdc66d3344761292adc8a611b74e4dfeb88f";
-        #     hash = "sha256-5j8VY0eFTpNw2ujKkWzON1ZaqAAYFuptE2dnHevZsXo=";
-        #   };
-        # });
-        # libadwaita = super.libadwaita.overrideAttrs (oldAttrs: rec {
-        #   doCheck = false;
-        # });
       })
   ];
 
