@@ -158,6 +158,7 @@
     spotify
     teams-for-linux
     aider-chat
+    devenv
   ];
 
   # services.ollama = {
