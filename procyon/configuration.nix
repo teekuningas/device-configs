@@ -127,6 +127,7 @@
       llm-ollama
       datasette
       jupyterlab
+      jupytext
       ipywidgets
       matplotlib
       numpy
