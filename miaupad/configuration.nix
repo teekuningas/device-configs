@@ -79,8 +79,9 @@
   };
 
   powerManagement.powertop.enable = true;
+  services.upower.enable = true;
 
-  environment.systemPackages = with pkgs; [ powertop ];
+  environment.systemPackages = with pkgs; [ powertop upower ];
 
   # Enable the OpenSSH daemon.
   services.openssh.enable = true;

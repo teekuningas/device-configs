@@ -33,6 +33,7 @@
       llm-ollama
       datasette
       jupyterlab
+      jupytext
       ipywidgets
       matplotlib
       numpy
@@ -44,6 +45,7 @@
       folium
       twine
       (ps.callPackage "${inputs.teepkgs}/pkgs/llm-azure/default.nix" {python3Packages = ps;})
+      (ps.callPackage "${inputs.teepkgs}/pkgs/llm-echo/default.nix" {python3Packages = ps;})
       (ps.callPackage "${inputs.teepkgs}/pkgs/ospeak/default.nix" {python3Packages = ps;})
       (ps.callPackage "${inputs.teepkgs}/pkgs/files-to-prompt/default.nix" {python3Packages = ps;})
     ]))
