@@ -4,6 +4,7 @@ sudo docker run -d \
   --restart=unless-stopped \
   -e TZ=Europe/Helsinki \
   -v /opt/homeassistant/config:/config \
+  -v /opt/llamafile:/opt/llamafile \
   -v /run/dbus:/run/dbus:ro \
   --network=host \
   ghcr.io/home-assistant/home-assistant:stable
