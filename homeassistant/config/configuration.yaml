@@ -25,6 +25,10 @@ command_line:
       unique_id: hourly_assistant
       name: Hourly Assistant
       command: >
-        /opt/llamafile/google_gemma-3-4b-it-Q6_K.llamafile --cli --no-display-prompt -p "Please tell me a beautiful little story of maximum 50 words. There is a strict limit, so the story must be under 50 words. Thank you."
-      command_timeout: 90
+        curl -s http://localhost:11434/api/chat -d '{
+          "model": "qwen2.5:3b",
+          "messages": [{"role": "user", "content": "Please tell me a beautiful little story of maximum 50 words. There is a strict limit, so the story must be under 50 words. Thank you."}],
+          "stream": false
+        }' | jq -r .message.content
+      command_timeout: 120
       scan_interval: 3600
