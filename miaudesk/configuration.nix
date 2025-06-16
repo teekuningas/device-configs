@@ -31,6 +31,7 @@
     (python312.withPackages (ps: with ps; [
       llm
       llm-ollama
+      llm-tools-simpleeval
       datasette
       jupyterlab
       jupytext
@@ -46,6 +47,7 @@
       twine
       (ps.callPackage "${inputs.teepkgs}/pkgs/llm-azure/default.nix" {python3Packages = ps;})
       (ps.callPackage "${inputs.teepkgs}/pkgs/llm-echo/default.nix" {python3Packages = ps;})
+      (ps.callPackage "${inputs.teepkgs}/pkgs/llm-fragments-site-text/default.nix" {python3Packages = ps;})
       (ps.callPackage "${inputs.teepkgs}/pkgs/ospeak/default.nix" {python3Packages = ps;})
       (ps.callPackage "${inputs.teepkgs}/pkgs/files-to-prompt/default.nix" {python3Packages = ps;})
     ]))
