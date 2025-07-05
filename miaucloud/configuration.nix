@@ -273,8 +273,6 @@
         autoStart = true;
         extraOptions =
           [ "--net=host" ];
-        # extraOptions =
-        #   [ "--net=host" "--env-file=/var/data/.secrets/postgres.env" ];
       };
       postgrest = {
         image = "docker.io/postgrest/postgrest:latest";
@@ -334,7 +332,7 @@
         environment = { LUONTOPELI_HOST = "0.0.0.0"; };
       };
       vellubot = {
-        image = "ghcr.io/teekuningas/vellubot/vellubot:0.19.2";
+        image = "ghcr.io/teekuningas/vellubot/vellubot:0.19.3";
         autoStart = true;
         extraOptions = [ "--env-file=/var/data/.secrets/vellubot.env" ];
         environment = {
@@ -343,8 +341,9 @@
           BOT_SERVER = "irc.libera.chat";
           BOT_PORT = "6667";
           SETTINGS_FNAME = "/data/settings.json";
+          OPENAI_MAX_TOKENS_IN = "2048";
           OPENAI_MAX_TOKENS_OUT = "1024";
-          OPENAI_MODEL = "gpt-4o-mini";
+          OPENAI_MODEL = "gpt-4o";
         };
         volumes = [ "/var/data/vellubot:/data" ];
       };
