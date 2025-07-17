@@ -332,7 +332,7 @@
         environment = { LUONTOPELI_HOST = "0.0.0.0"; };
       };
       vellubot = {
-        image = "ghcr.io/teekuningas/vellubot/vellubot:0.19.3";
+        image = "ghcr.io/teekuningas/vellubot/vellubot:v0.20.0";
         autoStart = true;
         extraOptions = [ "--env-file=/var/data/.secrets/vellubot.env" ];
         environment = {
