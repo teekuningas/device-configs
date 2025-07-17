@@ -164,6 +164,30 @@
     maxretry = 5;
   };
 
+  systemd.timers."data-backup" = {
+    wantedBy = [ "timers.target" ];
+    timerConfig = {
+      OnCalendar = "daily";
+      Persistent = true;
+      Unit = "data-backup.service";
+    };
+  };
+  systemd.services."data-backup" = {
+    script = builtins.readFile ./scripts/backup_data.sh;
+
+    path = with pkgs; [
+      podman
+      gzip
+      rsync
+      gnutar
+    ];
+
+    serviceConfig = {
+      Type = "oneshot";
+      User = "root";
+    };
+  };
+
   virtualisation = {
     podman = {
       enable = true;
