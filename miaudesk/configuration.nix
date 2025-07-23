@@ -31,7 +31,9 @@
     (python312.withPackages (ps: with ps; [
       llm
       llm-ollama
+      llm-gemini
       llm-tools-simpleeval
+      llm-pdf-to-images
       datasette
       jupyterlab
       jupytext
