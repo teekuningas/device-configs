@@ -170,9 +170,12 @@
 
   nix.settings.trusted-users = [ "erpipehe" ];
 
-  virtualisation.podman = {
-    enable = true;
-    dockerCompat = lib.mkDefault true;
+  virtualisation = {
+    containers.containersConf.settings.network.default_rootless_network_cmd = "slirp4netns";
+    podman = {
+      enable = true;
+      dockerCompat = lib.mkDefault true;
+    };
   };
   # To mitigate problem with "trigger-limit-hit" for podman.service
   systemd.user.sockets.podman.socketConfig = {
