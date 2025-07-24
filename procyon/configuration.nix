@@ -159,6 +159,7 @@
     spotify
     teams-for-linux
     aider-chat
+    gemini-cli
     devenv
   ];
 
