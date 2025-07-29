@@ -255,7 +255,7 @@
         cmd = [ "--config" "/app/config.yaml" ];
       };
       openWebui = {
-        image = "miaucloud-nixos/open-webui:0.6.15";
+        image = "miaucloud-nixos/open-webui:0.6.18";
         ports = [ "127.0.0.1:8081:8080" ];
         extraOptions =
           [ "--net=host" "--env-file=/var/data/.secrets/openwebui.env" ];
