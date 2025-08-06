@@ -15,6 +15,20 @@
         #   };
         #   buildInputs = oldAttrs.buildInputs ++ [ super.libebur128 ];
         # });
+        # codex = super.codex.overrideAttrs (oldAttrs: rec {
+        #   version = "0.13.0";
+        #   src = super.fetchFromGitHub {
+        #     owner = "openai";
+        #     repo = "codex";
+        #     tag = "rust-v${version}";
+        #     hash = "sha256-A9o6qsw0f3v0nSCjyHaMIsm+udz/S4TR10K48vFR7Cc=";
+        #   };
+        #   cargoDeps = self.rustPlatform.fetchCargoVendor {
+        #     inherit src;
+        #     sourceRoot = super.codex.sourceRoot;
+        #     hash = "sha256-oPWkxEMnffDZ7cmjWmmYGurYnHn4vYu64BhG7NhrxhE=";
+        #   };
+        # });
       })
   ];
 
@@ -160,6 +174,7 @@
     teams-for-linux
     aider-chat
     gemini-cli
+    codex
     devenv
   ];
 
