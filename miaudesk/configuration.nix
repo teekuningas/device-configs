@@ -62,6 +62,7 @@
     nvidia-container-toolkit
     aider-chat
     gemini-cli
+    codex
   ];
 
   # set ssh-agent to cache keys for e.g. jupyterlab-git
