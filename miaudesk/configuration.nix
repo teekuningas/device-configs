@@ -1,4 +1,4 @@
-{ config, lib, pkgs, inputs, ... }:
+{ config, options, lib, pkgs, inputs, ... }:
 
 {
   wsl.enable = true;
@@ -9,7 +9,26 @@
   wsl.useWindowsDriver = true;
 
   # Set up nix-ld to allow using non-native nvidia drivers.
-  programs.nix-ld.enable = true;
+  programs.nix-ld = {
+    enable = true;
+    # for uv
+    libraries = options.programs.nix-ld.libraries.default ++ (
+      with pkgs; [
+        dbus
+        fontconfig
+        freetype
+        glib
+        libGL
+        libxkbcommon
+        xorg.libxcb
+        xorg.libX11
+        xorg.xcbutilwm
+        xorg.xcbutilimage
+        xorg.xcbutilkeysyms
+        xorg.xcbutilrenderutil
+      ]
+    );
+  };
   environment.variables = {
     # for nvidia-smi / cuda to work
     NIX_LD_LIBRARY_PATH = lib.mkForce (lib.makeLibraryPath [
@@ -53,11 +72,8 @@
       (ps.callPackage "${inputs.teepkgs}/pkgs/ospeak/default.nix" {python3Packages = ps;})
       (ps.callPackage "${inputs.teepkgs}/pkgs/files-to-prompt/default.nix" {python3Packages = ps;})
     ]))
-    (pkgs.buildFHSEnv {
-      name = "uv";
-      targetPkgs = pkgs: with pkgs; [ uv zlib ];
-      runScript = "uv";
-    })
+    llama-cpp-vulkan
+    uv
     cudatoolkit
     nvidia-container-toolkit
     aider-chat
