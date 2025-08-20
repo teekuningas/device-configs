@@ -1,4 +1,4 @@
-{ config, pkgs, lib, inputs, ... }:
+{ config, pkgs, options, lib, inputs, ... }:
 
 {
   nixpkgs.overlays = [
@@ -157,14 +157,7 @@
       (ps.callPackage "${inputs.teepkgs}/pkgs/ospeak/default.nix" {python3Packages = ps;})
       (ps.callPackage "${inputs.teepkgs}/pkgs/files-to-prompt/default.nix" {python3Packages = ps;})
     ]))
-    (pkgs.buildFHSEnv {
-      name = "uv";
-      targetPkgs = pkgs: with pkgs; [ uv zlib ];
-      runScript = "uv";
-      profile = ''
-        export LD_LIBRARY_PATH="${config.hardware.nvidia.package}/lib"
-      '';
-    })
+    uv
     nodejs
     obsidian
     podman
@@ -184,6 +177,27 @@
   # };
 
   # networking.extraHosts = "130.234.6.208 moniviestin.jyu.fi";
+
+  # For uv
+  programs.nix-ld = {
+    enable = true;
+    libraries = options.programs.nix-ld.libraries.default ++ (
+      with pkgs; [
+        dbus
+        fontconfig
+        freetype
+        glib
+        libGL
+        libxkbcommon
+        xorg.libxcb
+        xorg.libX11
+        xorg.xcbutilwm
+        xorg.xcbutilimage
+        xorg.xcbutilkeysyms
+        xorg.xcbutilrenderutil
+      ]
+    );
+  };
 
   nix.settings.trusted-users = [ "erpipehe" ];
 
