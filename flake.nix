@@ -3,6 +3,7 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs-25-05.url = "github:NixOS/nixpkgs/nixos-25.05";
     nixpkgs-small.url = "github:NixOS/nixpkgs/nixos-unstable-small";
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
     nixos-wsl.url = "github:nix-community/NixOS-WSL/main";
@@ -10,7 +11,7 @@
   };
 
   outputs =
-    { self, nixpkgs, nixpkgs-small, nixos-hardware, nixos-wsl, ... }@inputs: {
+    { self, nixpkgs, nixpkgs-25-05, nixpkgs-small, nixos-hardware, nixos-wsl, ... }@inputs: {
       nixosConfigurations.procyon-nixos = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
         specialArgs = { inherit inputs; };

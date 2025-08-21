@@ -95,7 +95,7 @@
   # container toolkit
   hardware.nvidia-container-toolkit.enable = true;
 
-  boot.kernelPackages = pkgs.linuxPackages_latest;
+  # boot.kernelPackages = pkgs.linuxPackages_latest;
 
   # Enable swap space
   swapDevices = [{
@@ -157,7 +157,6 @@
       (ps.callPackage "${inputs.teepkgs}/pkgs/ospeak/default.nix" {python3Packages = ps;})
       (ps.callPackage "${inputs.teepkgs}/pkgs/files-to-prompt/default.nix" {python3Packages = ps;})
     ]))
-    llama-cpp-vulkan
     uv
     nodejs
     obsidian
@@ -171,6 +170,7 @@
     codex
     devenv
     google-chrome
+    # llama-cpp-vulkan # not yet present with the current lockfile. but cannot update it to not break video and audio.
   ];
 
   # services.ollama = {
@@ -180,26 +180,26 @@
 
   # networking.extraHosts = "130.234.6.208 moniviestin.jyu.fi";
 
-  # # For uv (seems to break videos, bluetooth etc, so not optimal..)
-  # programs.nix-ld = {
-  #   enable = true;
-  #   libraries = options.programs.nix-ld.libraries.default ++ (
-  #     with pkgs; [
-  #       dbus
-  #       fontconfig
-  #       freetype
-  #       glib
-  #       libGL
-  #       libxkbcommon
-  #       xorg.libxcb
-  #       xorg.libX11
-  #       xorg.xcbutilwm
-  #       xorg.xcbutilimage
-  #       xorg.xcbutilkeysyms
-  #       xorg.xcbutilrenderutil
-  #     ]
-  #   );
-  # };
+  # For uv
+  programs.nix-ld = {
+    enable = true;
+    libraries = options.programs.nix-ld.libraries.default ++ (
+      with pkgs; [
+        dbus
+        fontconfig
+        freetype
+        glib
+        libGL
+        libxkbcommon
+        xorg.libxcb
+        xorg.libX11
+        xorg.xcbutilwm
+        xorg.xcbutilimage
+        xorg.xcbutilkeysyms
+        xorg.xcbutilrenderutil
+      ]
+    );
+  };
 
   nix.settings.trusted-users = [ "erpipehe" ];
 
