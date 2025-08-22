@@ -12,7 +12,7 @@
 
   outputs =
     { self, nixpkgs, nixpkgs-25-05, nixpkgs-small, nixos-hardware, nixos-wsl, ... }@inputs: {
-      nixosConfigurations.procyon-nixos = nixpkgs.lib.nixosSystem {
+      nixosConfigurations.procyon-nixos = nixpkgs-25-05.lib.nixosSystem {
         system = "x86_64-linux";
         specialArgs = { inherit inputs; };
         modules = [

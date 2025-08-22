@@ -2,34 +2,10 @@
 
 {
   nixpkgs.overlays = [
-    (self: super:
-      {
-        # pipewire = super.pipewire.overrideAttrs (oldAttrs: rec {
-        #   version = "1.3.83";
-        #   src = super.fetchFromGitLab {
-        #     domain = "gitlab.freedesktop.org";
-        #     owner = "pipewire";
-        #     repo = "pipewire";
-        #     rev = version;
-        #     sha256 = "sha256-atOvk7AMWZ7A9DnQQunVXlzGAVK3ITU85DkUfUsAJr4=";
-        #   };
-        #   buildInputs = oldAttrs.buildInputs ++ [ super.libebur128 ];
-        # });
-        # codex = super.codex.overrideAttrs (oldAttrs: rec {
-        #   version = "0.13.0";
-        #   src = super.fetchFromGitHub {
-        #     owner = "openai";
-        #     repo = "codex";
-        #     tag = "rust-v${version}";
-        #     hash = "sha256-A9o6qsw0f3v0nSCjyHaMIsm+udz/S4TR10K48vFR7Cc=";
-        #   };
-        #   cargoDeps = self.rustPlatform.fetchCargoVendor {
-        #     inherit src;
-        #     sourceRoot = super.codex.sourceRoot;
-        #     hash = "sha256-oPWkxEMnffDZ7cmjWmmYGurYnHn4vYu64BhG7NhrxhE=";
-        #   };
-        # });
-      })
+    (final: prev: {
+      gemini-cli = inputs.nixpkgs.legacyPackages.${prev.system}.gemini-cli;
+      codex = inputs.nixpkgs.legacyPackages.${prev.system}.codex;
+    })
   ];
 
   # Bootloader.
@@ -169,14 +145,7 @@
     gemini-cli
     codex
     devenv
-    google-chrome
-    # llama-cpp-vulkan # not yet present with the current lockfile. but cannot update it to not break video and audio.
   ];
-
-  # services.ollama = {
-  #   enable = true;
-  #   acceleration = "cuda";
-  # };
 
   # networking.extraHosts = "130.234.6.208 moniviestin.jyu.fi";
 
