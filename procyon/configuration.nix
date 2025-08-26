@@ -5,6 +5,12 @@
     (final: prev: {
       gemini-cli = inputs.nixpkgs.legacyPackages.${prev.system}.gemini-cli;
       codex = inputs.nixpkgs.legacyPackages.${prev.system}.codex;
+      llm = inputs.nixpkgs.legacyPackages.${prev.system}.llm;
+
+      # python312 = prev.python312.override {
+      #   packageOverrides = python-final: python-prev: {
+      #   };
+      # };
     })
   ];
 
@@ -113,8 +119,6 @@
 
   environment.systemPackages = with pkgs; [
     (python312.withPackages (ps: with ps; [
-      llm
-      llm-ollama
       datasette
       jupyterlab
       jupytext
@@ -128,11 +132,12 @@
       geopandas
       folium
       twine
-      (ps.callPackage "${inputs.teepkgs}/pkgs/llm-azure/default.nix" {python3Packages = ps;})
-      (ps.callPackage "${inputs.teepkgs}/pkgs/llm-echo/default.nix" {python3Packages = ps;})
-      (ps.callPackage "${inputs.teepkgs}/pkgs/ospeak/default.nix" {python3Packages = ps;})
-      (ps.callPackage "${inputs.teepkgs}/pkgs/files-to-prompt/default.nix" {python3Packages = ps;})
+      # (ps.callPackage "${inputs.teepkgs}/pkgs/llm-azure/default.nix" {python3Packages = ps;})
+      # (ps.callPackage "${inputs.teepkgs}/pkgs/llm-echo/default.nix" {python3Packages = ps;})
+      # (ps.callPackage "${inputs.teepkgs}/pkgs/ospeak/default.nix" {python3Packages = ps;})
+      # (ps.callPackage "${inputs.teepkgs}/pkgs/files-to-prompt/default.nix" {python3Packages = ps;})
     ]))
+    (llm.withPlugins { llm-ollama = true; })
     uv
     nodejs
     obsidian
