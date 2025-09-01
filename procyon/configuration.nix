@@ -110,7 +110,7 @@
   users.users.erpipehe = {
     isNormalUser = true;
     description = "Erkka";
-    extraGroups = [ "networkmanager" "wheel" ];
+    extraGroups = [ "networkmanager" "wheel" "libvirtd" ];
     packages = with pkgs; [ ];
   };
 
@@ -150,6 +150,7 @@
     gemini-cli
     codex
     devenv
+    vagrant
   ];
 
   # networking.extraHosts = "130.234.6.208 moniviestin.jyu.fi";
@@ -191,6 +192,9 @@
   };
   # To remove problem of missing newuidmap binary for podman.service
   systemd.user.services.podman.path = [ "/run/wrappers/" ];
+
+  # libvirt
+  virtualisation.libvirtd.enable = true;
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions
