@@ -118,13 +118,23 @@
       }
     '';
 
+    virtualHosts."suvannossa.fi".extraConfig = ''
+      root * /var/data/static/suvannossa.fi
+      file_server
+    '';
+
+    virtualHosts."www.suvannossa.fi".extraConfig = ''
+      root * /var/data/static/suvannossa.fi
+      file_server
+    '';
+
     virtualHosts."teekuningas.net".extraConfig = ''
-      root * /var/data/static
+      root * /var/data/static/teekuningas.net
       file_server
     '';
 
     virtualHosts."www.teekuningas.net".extraConfig = ''
-      root * /var/data/static
+      root * /var/data/static/teekuningas.net
       file_server
     '';
 
