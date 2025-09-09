@@ -3,14 +3,13 @@
 {
   nixpkgs.overlays = [
     (final: prev: {
+      # up-to-date versions
       gemini-cli = inputs.nixpkgs.legacyPackages.${prev.system}.gemini-cli;
       codex = inputs.nixpkgs.legacyPackages.${prev.system}.codex;
       llm = inputs.nixpkgs.legacyPackages.${prev.system}.llm;
 
-      # python312 = prev.python312.override {
-      #   packageOverrides = python-final: python-prev: {
-      #   };
-      # };
+      # Does not build otherwise
+      tailscale = inputs.nixpkgs.legacyPackages.${prev.system}.tailscale;
     })
   ];
 

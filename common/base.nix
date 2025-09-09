@@ -21,5 +21,6 @@
     tmux
     wget
     tree
+    ripgrep
   ];
 }
