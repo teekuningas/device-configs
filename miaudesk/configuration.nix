@@ -37,6 +37,15 @@
     ]);
   };
 
+  nixpkgs.overlays = [
+    (final: prev: {
+      # up-to-date versions
+      gemini-cli = inputs.nixpkgs.legacyPackages.${prev.system}.gemini-cli;
+      codex = inputs.nixpkgs.legacyPackages.${prev.system}.codex;
+      llm = inputs.nixpkgs.legacyPackages.${prev.system}.llm;
+    })
+  ];
+
   # Note, to make nvidia work within containers, it was necessary to run nvidia-ctk.
   # To run nvidia-ctk, we needed nvidia-container-toolkit as a package (not just enabled hardware).
   # To get a nvidia-ctk without contaminating docker binary, a recent enough nixpkgs (e.g unstable) was needed.
@@ -48,11 +57,6 @@
   };
   environment.systemPackages = with pkgs; [
     (python312.withPackages (ps: with ps; [
-      llm
-      llm-ollama
-      llm-gemini
-      llm-tools-simpleeval
-      llm-pdf-to-images
       datasette
       jupyterlab
       jupytext
@@ -66,13 +70,8 @@
       geopandas
       folium
       twine
-      (ps.callPackage "${inputs.teepkgs}/pkgs/llm-azure/default.nix" {python3Packages = ps;})
-      (ps.callPackage "${inputs.teepkgs}/pkgs/llm-echo/default.nix" {python3Packages = ps;})
-      (ps.callPackage "${inputs.teepkgs}/pkgs/llm-fragments-site-text/default.nix" {python3Packages = ps;})
-      (ps.callPackage "${inputs.teepkgs}/pkgs/ospeak/default.nix" {python3Packages = ps;})
-      (ps.callPackage "${inputs.teepkgs}/pkgs/files-to-prompt/default.nix" {python3Packages = ps;})
     ]))
-    llama-cpp-vulkan
+    llm
     uv
     cudatoolkit
     nvidia-container-toolkit

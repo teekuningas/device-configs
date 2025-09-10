@@ -35,7 +35,7 @@
           ./miaucloud/users.nix
         ];
       };
-      nixosConfigurations.miaudesk-nixos = nixpkgs.lib.nixosSystem {
+      nixosConfigurations.miaudesk-nixos = nixpkgs-25-05.lib.nixosSystem {
         system = "x86_64-linux";
         specialArgs = { inherit inputs; };
         modules = [
