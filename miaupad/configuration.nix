@@ -20,6 +20,8 @@
   networking.wireless.enable =
     true; # Enables wireless support via wpa_supplicant.
   networking.wireless.userControlled.enable = true;
+  networking.wireless.networks.unifihome.pskRaw = 
+    "8b194126ceb598afe9bfbdc7d8be4aa1527007c548bcb9200ff543acce760e9c";
   networking.wireless.networks.miaurouter.pskRaw =
     "0b965df6955e2bb67e616eb784b6d750774424a72fe24cd747885ca366f60dd0";
   networking.wireless.networks.Kahvipoytaverkko.pskRaw =
