@@ -19,6 +19,7 @@
           nixos-hardware.nixosModules.dell-precision-5490
           ./common/base.nix
           ./common/graphical.nix
+          ./common/llm.nix
           ./procyon/hardware-configuration.nix
           ./procyon/configuration.nix
         ];
@@ -42,6 +43,7 @@
           nixos-wsl.nixosModules.default
           ./common/base.nix
           ./common/graphical.nix
+          ./common/llm.nix
           ./miaudesk/configuration.nix
         ];
       };

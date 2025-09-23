@@ -42,7 +42,6 @@
       # up-to-date versions
       gemini-cli = inputs.nixpkgs.legacyPackages.${prev.system}.gemini-cli;
       codex = inputs.nixpkgs.legacyPackages.${prev.system}.codex;
-      llm = inputs.nixpkgs.legacyPackages.${prev.system}.llm;
     })
   ];
 
@@ -70,8 +69,10 @@
       geopandas
       folium
       twine
+      llm
+      llm-azure
     ]))
-    llm
+    # llm
     uv
     cudatoolkit
     nvidia-container-toolkit
