@@ -6,7 +6,6 @@
       # up-to-date versions
       gemini-cli = inputs.nixpkgs.legacyPackages.${prev.system}.gemini-cli;
       codex = inputs.nixpkgs.legacyPackages.${prev.system}.codex;
-      llm = inputs.nixpkgs.legacyPackages.${prev.system}.llm;
 
       # Does not build otherwise
       tailscale = inputs.nixpkgs.legacyPackages.${prev.system}.tailscale;
@@ -133,7 +132,6 @@
       twine
       llm
       llm-azure
-      # (ps.callPackage "${inputs.teepkgs}/pkgs/llm-echo/default.nix" {python3Packages = ps;})
       # (ps.callPackage "${inputs.teepkgs}/pkgs/ospeak/default.nix" {python3Packages = ps;})
       # (ps.callPackage "${inputs.teepkgs}/pkgs/files-to-prompt/default.nix" {python3Packages = ps;})
     ]))
