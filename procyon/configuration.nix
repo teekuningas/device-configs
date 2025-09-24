@@ -6,6 +6,7 @@
       # up-to-date versions
       gemini-cli = inputs.nixpkgs.legacyPackages.${prev.system}.gemini-cli;
       codex = inputs.nixpkgs.legacyPackages.${prev.system}.codex;
+      opencode = inputs.nixpkgs.legacyPackages.${prev.system}.opencode;
 
       # Does not build otherwise
       tailscale = inputs.nixpkgs.legacyPackages.${prev.system}.tailscale;
@@ -146,6 +147,7 @@
     aider-chat
     gemini-cli
     codex
+    opencode
     devenv
     vagrant
   ];
