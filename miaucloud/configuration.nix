@@ -56,7 +56,7 @@
       reverse_proxy http://localhost:4001
     '';
 
-    virtualHosts."luonto.teekuningas.net".extraConfig = ''
+    virtualHosts."luonto.suvannossa.fi".extraConfig = ''
       reverse_proxy http://localhost:5000
     '';
 
