@@ -42,6 +42,7 @@
       # up-to-date versions
       gemini-cli = inputs.nixpkgs.legacyPackages.${prev.system}.gemini-cli;
       codex = inputs.nixpkgs.legacyPackages.${prev.system}.codex;
+      opencode = inputs.nixpkgs.legacyPackages.${prev.system}.opencode;
     })
   ];
 
@@ -79,6 +80,7 @@
     aider-chat
     gemini-cli
     codex
+    opencode
   ];
 
   # set ssh-agent to cache keys for e.g. jupyterlab-git
