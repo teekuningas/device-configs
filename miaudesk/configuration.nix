@@ -8,6 +8,9 @@
   # To make the nvidia-container-toolkit work properly, useWindowsDriver is needed.
   wsl.useWindowsDriver = true;
 
+  # Enable pulseaudio to get working audio.
+  services.pulseaudio.enable = true;
+
   # Set up nix-ld to allow using non-native nvidia drivers.
   programs.nix-ld = {
     enable = true;
