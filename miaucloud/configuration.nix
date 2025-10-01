@@ -391,7 +391,7 @@
         autoStart = true;
       };
       jalkapallo = {
-        image = "ghcr.io/teekuningas/jalkapallo:v1";
+        image = "ghcr.io/teekuningas/jalkapallo:v2";
         ports = [ "127.0.0.1:3012:80" ];
         autoStart = true;
       };
