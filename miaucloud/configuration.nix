@@ -56,6 +56,10 @@
       reverse_proxy http://localhost:4001
     '';
 
+    virtualHosts."pallo.suvannossa.fi".extraConfig = ''
+      reverse_proxy http://localhost:3012
+    '';
+
     virtualHosts."luonto.suvannossa.fi".extraConfig = ''
       reverse_proxy http://localhost:5000
     '';
@@ -384,6 +388,11 @@
       clothinv = {
         image = "ghcr.io/teekuningas/clothinv:0.3.2";
         ports = [ "127.0.0.1:3011:80" ];
+        autoStart = true;
+      };
+      jalkapallo = {
+        image = "ghcr.io/teekuningas/jalkapallo:v1";
+        ports = [ "127.0.0.1:3012:80" ];
         autoStart = true;
       };
     };
