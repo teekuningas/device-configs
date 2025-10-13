@@ -39,6 +39,7 @@
       "/usr/lib/wsl"
     ]);
   };
+  environment.sessionVariables.LD_LIBRARY_PATH = ["/run/opengl-driver/lib/"];
 
   nixpkgs.overlays = [
     (final: prev: {
@@ -46,6 +47,7 @@
       gemini-cli = inputs.nixpkgs.legacyPackages.${prev.system}.gemini-cli;
       codex = inputs.nixpkgs.legacyPackages.${prev.system}.codex;
       opencode = inputs.nixpkgs.legacyPackages.${prev.system}.opencode;
+      llama-cpp-vulkan = inputs.nixpkgs.legacyPackages.${prev.system}.llama-cpp-vulkan;
     })
   ];
 
@@ -84,6 +86,7 @@
     gemini-cli
     codex
     opencode
+    llama-cpp-vulkan
   ];
 
   # set ssh-agent to cache keys for e.g. jupyterlab-git
