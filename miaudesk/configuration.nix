@@ -77,6 +77,7 @@
       twine
       llm
       llm-azure
+      llm-gemini
     ]))
     # llm
     uv
