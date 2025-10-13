@@ -7,9 +7,7 @@
       gemini-cli = inputs.nixpkgs.legacyPackages.${prev.system}.gemini-cli;
       codex = inputs.nixpkgs.legacyPackages.${prev.system}.codex;
       opencode = inputs.nixpkgs.legacyPackages.${prev.system}.opencode;
-
-      # Does not build otherwise
-      tailscale = inputs.nixpkgs.legacyPackages.${prev.system}.tailscale;
+      llama-cpp-vulkan = inputs.nixpkgs.legacyPackages.${prev.system}.llama-cpp-vulkan;
     })
   ];
 
@@ -150,6 +148,7 @@
     opencode
     devenv
     vagrant
+    llama-cpp-vulkan
   ];
 
   # networking.extraHosts = "130.234.6.208 moniviestin.jyu.fi";
