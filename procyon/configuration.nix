@@ -136,6 +136,7 @@
     ]))
     uv
     nodejs
+    pnpm
     obsidian
     podman
     podman-compose
