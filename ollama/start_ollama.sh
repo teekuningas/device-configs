@@ -7,4 +7,4 @@ sudo docker run -d \
     -e OLLAMA_NUM_THREADS=2 \
     -e OLLAMA_MAX_LOADED=1 \
     -v /opt/ollama:/root/.ollama \
-    docker.io/ollama/ollama:0.9.0
+    docker.io/ollama/ollama:0.12.6
