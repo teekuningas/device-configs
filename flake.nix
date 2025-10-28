@@ -13,7 +13,7 @@
   outputs =
     { self, nixpkgs, nixpkgs-25-05, nixpkgs-small, nixos-hardware, nixos-wsl, ... }@inputs:
     let
-      unstable-pkgs-for = system: import nixpkgs {
+      unstable-pkgs-for = system: import nixpkgs-small {
         inherit system;
         config.allowUnfree = true;
       };
