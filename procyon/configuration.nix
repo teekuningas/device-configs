@@ -177,6 +177,9 @@
     );
   };
 
+  # set ssh-agent to cache keys
+  programs.ssh.startAgent = true;
+
   nix.settings.trusted-users = [ "erpipehe" ];
 
   virtualisation = {
