@@ -1,4 +1,4 @@
-{ config, options, lib, pkgs, inputs, ... }:
+{ config, options, lib, pkgs, inputs, unstable-pkgs, ... }:
 
 {
   wsl.enable = true;
@@ -44,10 +44,10 @@
   nixpkgs.overlays = [
     (final: prev: {
       # up-to-date versions
-      gemini-cli = inputs.nixpkgs.legacyPackages.${prev.system}.gemini-cli;
-      codex = inputs.nixpkgs.legacyPackages.${prev.system}.codex;
-      opencode = inputs.nixpkgs.legacyPackages.${prev.system}.opencode;
-      llama-cpp-vulkan = inputs.nixpkgs.legacyPackages.${prev.system}.llama-cpp-vulkan;
+      gemini-cli = unstable-pkgs.gemini-cli;
+      codex = unstable-pkgs.codex;
+      opencode = unstable-pkgs.opencode;
+      llama-cpp-vulkan = unstable-pkgs.llama-cpp-vulkan;
     })
   ];
 

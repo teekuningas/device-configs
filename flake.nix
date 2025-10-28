@@ -44,7 +44,7 @@
       };
       nixosConfigurations.miaudesk-nixos = nixpkgs-25-05.lib.nixosSystem {
         system = "x86_64-linux";
-        specialArgs = { inherit inputs; };
+        specialArgs = { inherit inputs; unstable-pkgs = unstable-pkgs-for "x86_64-linux"; };
         modules = [
           nixos-wsl.nixosModules.default
           ./common/base.nix
