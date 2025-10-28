@@ -1,13 +1,14 @@
-{ config, pkgs, options, lib, inputs, ... }:
+{ config, pkgs, options, lib, inputs, unstable-pkgs, ... }:
 
 {
   nixpkgs.overlays = [
     (final: prev: {
       # up-to-date versions
-      gemini-cli = inputs.nixpkgs.legacyPackages.${prev.system}.gemini-cli;
-      codex = inputs.nixpkgs.legacyPackages.${prev.system}.codex;
-      opencode = inputs.nixpkgs.legacyPackages.${prev.system}.opencode;
-      llama-cpp-vulkan = inputs.nixpkgs.legacyPackages.${prev.system}.llama-cpp-vulkan;
+      gemini-cli = unstable-pkgs.gemini-cli;
+      codex = unstable-pkgs.codex;
+      opencode = unstable-pkgs.opencode;
+      llama-cpp-vulkan = unstable-pkgs.llama-cpp-vulkan;
+      github-copilot-cli = unstable-pkgs.github-copilot-cli;
     })
   ];
 
@@ -150,6 +151,7 @@
     devenv
     vagrant
     llama-cpp-vulkan
+    github-copilot-cli
   ];
 
   # networking.extraHosts = "130.234.6.208 moniviestin.jyu.fi";

@@ -11,10 +11,16 @@
   };
 
   outputs =
-    { self, nixpkgs, nixpkgs-25-05, nixpkgs-small, nixos-hardware, nixos-wsl, ... }@inputs: {
+    { self, nixpkgs, nixpkgs-25-05, nixpkgs-small, nixos-hardware, nixos-wsl, ... }@inputs:
+    let
+      unstable-pkgs-for = system: import nixpkgs {
+        inherit system;
+        config.allowUnfree = true;
+      };
+    in {
       nixosConfigurations.procyon-nixos = nixpkgs-25-05.lib.nixosSystem {
         system = "x86_64-linux";
-        specialArgs = { inherit inputs; };
+        specialArgs = { inherit inputs; unstable-pkgs = unstable-pkgs-for "x86_64-linux"; };
         modules = [
           nixos-hardware.nixosModules.dell-precision-5490
           ./common/base.nix
