@@ -47,7 +47,7 @@
       gemini-cli = unstable-pkgs.gemini-cli;
       codex = unstable-pkgs.codex;
       opencode = unstable-pkgs.opencode;
-      llama-cpp-vulkan = unstable-pkgs.llama-cpp-vulkan;
+      llama-cpp = unstable-pkgs.llama-cpp;
       github-copilot-cli = unstable-pkgs.github-copilot-cli;
     })
   ];
@@ -88,7 +88,7 @@
     gemini-cli
     codex
     opencode
-    llama-cpp-vulkan
+    llama-cpp
     github-copilot-cli
   ];
 
