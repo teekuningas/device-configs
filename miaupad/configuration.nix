@@ -83,7 +83,16 @@
   powerManagement.powertop.enable = true;
   services.upower.enable = true;
 
-  environment.systemPackages = with pkgs; [ powertop upower ];
+  environment.systemPackages = with pkgs; [
+    powertop
+    upower
+    (python312.withPackages (ps: with ps; [
+      numpy
+      requests
+      flake8
+      twine
+    ]))
+  ];
 
   # Enable the OpenSSH daemon.
   services.openssh.enable = true;

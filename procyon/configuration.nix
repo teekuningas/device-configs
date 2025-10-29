@@ -117,19 +117,19 @@
 
   environment.systemPackages = with pkgs; [
     (python312.withPackages (ps: with ps; [
+      numpy
+      requests
+      flake8
+      twine
       datasette
       jupyterlab
       jupytext
       ipywidgets
       matplotlib
-      numpy
-      requests
-      flake8
       scipy
       pandas
       geopandas
       folium
-      twine
       llm
       llm-azure
       # (ps.callPackage "${inputs.teepkgs}/pkgs/ospeak/default.nix" {python3Packages = ps;})

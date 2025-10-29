@@ -48,6 +48,7 @@
       codex = unstable-pkgs.codex;
       opencode = unstable-pkgs.opencode;
       llama-cpp-vulkan = unstable-pkgs.llama-cpp-vulkan;
+      github-copilot-cli = unstable-pkgs.github-copilot-cli;
     })
   ];
 
@@ -62,19 +63,19 @@
   };
   environment.systemPackages = with pkgs; [
     (python312.withPackages (ps: with ps; [
+      numpy
+      requests
+      flake8
+      twine
       datasette
       jupyterlab
       jupytext
       ipywidgets
       matplotlib
-      numpy
-      requests
-      flake8
       scipy
       pandas
       geopandas
       folium
-      twine
       llm
       llm-azure
       llm-gemini
@@ -88,6 +89,7 @@
     codex
     opencode
     llama-cpp-vulkan
+    github-copilot-cli
   ];
 
   # set ssh-agent to cache keys for e.g. jupyterlab-git

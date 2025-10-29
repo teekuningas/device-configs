@@ -35,7 +35,6 @@
         specialArgs = { inherit inputs; };
         modules = [
           ./common/base.nix
-          ./common/python.nix
           ./miaucloud/configuration.nix
           ./miaucloud/hardware-configuration.nix
           ./miaucloud/networking.nix
@@ -59,7 +58,6 @@
         modules = [
           ./common/base.nix
           ./common/graphical.nix
-          ./common/python.nix
           ./miaupad/configuration.nix
           ./miaupad/hardware-configuration.nix
         ];

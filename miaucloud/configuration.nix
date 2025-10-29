@@ -1,7 +1,15 @@
 { config, pkgs, lib, ... }:
 
 {
-  environment.systemPackages = with pkgs; [ weechat ];
+  environment.systemPackages = with pkgs; [
+    weechat
+    (python312.withPackages (ps: with ps; [
+      numpy
+      requests
+      flake8
+      twine
+    ]))
+  ];
 
   boot.tmp.cleanOnBoot = true;
   zramSwap.enable = true;
