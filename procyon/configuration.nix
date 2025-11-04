@@ -128,6 +128,7 @@
       matplotlib
       scipy
       pandas
+      seaborn
       geopandas
       folium
       llm
