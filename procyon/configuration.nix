@@ -133,8 +133,6 @@
       folium
       llm
       llm-azure
-      # (ps.callPackage "${inputs.teepkgs}/pkgs/ospeak/default.nix" {python3Packages = ps;})
-      # (ps.callPackage "${inputs.teepkgs}/pkgs/files-to-prompt/default.nix" {python3Packages = ps;})
     ]))
     uv
     nodejs
