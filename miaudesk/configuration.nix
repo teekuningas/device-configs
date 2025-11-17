@@ -52,15 +52,30 @@
     })
   ];
 
-  # Note, to make nvidia work within containers, it was necessary to run nvidia-ctk.
-  # To run nvidia-ctk, we needed nvidia-container-toolkit as a package (not just enabled hardware).
-  # To get a nvidia-ctk without contaminating docker binary, a recent enough nixpkgs (e.g unstable) was needed.
-  # The command to generate the cdi was:
-  # $ nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml
+  ## Note, to make nvidia work within containers, it was necessary to run nvidia-ctk.
+  ## To run nvidia-ctk, we needed nvidia-container-toolkit as a package (not just enabled hardware).
+  ## To get a nvidia-ctk without contaminating docker binary, a recent enough nixpkgs (e.g unstable) was needed.
+  ## The command to generate the cdi was:
+  ## $ nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml
   virtualisation.docker = {
     enable = true;
     daemon.settings.features.cdi = true;
   };
+
+  #virtualisation = {
+  #  containers.enable = true;
+  #  podman = {
+  #    enable = true;
+  #    dockerCompat = true;
+  #    defaultNetwork.settings.dns_enabled = true;
+  #  };
+  #};
+  #users.users.zairex = {
+  #  extraGroups = [
+  #    "podman"
+  #  ];
+  #};
+
   environment.systemPackages = with pkgs; [
     (python312.withPackages (ps: with ps; [
       numpy
@@ -90,6 +105,7 @@
     opencode
     llama-cpp
     github-copilot-cli
+    devenv
   ];
 
   # set ssh-agent to cache keys for e.g. jupyterlab-git
