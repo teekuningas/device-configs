@@ -147,10 +147,11 @@
     gemini-cli
     codex
     opencode
-    devenv
     vagrant
     llama-cpp-vulkan
     github-copilot-cli
+    devenv
+    devcontainer
   ];
 
   # networking.extraHosts = "130.234.6.208 moniviestin.jyu.fi";
