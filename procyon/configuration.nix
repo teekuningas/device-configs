@@ -9,6 +9,22 @@
       opencode = unstable-pkgs.opencode;
       llama-cpp-vulkan = unstable-pkgs.llama-cpp-vulkan;
       github-copilot-cli = unstable-pkgs.github-copilot-cli;
+
+      # Override devcontainer to use podman instead of docker
+      devcontainer = prev.devcontainer.overrideAttrs (oldAttrs: {
+        postInstall = ''
+          makeWrapper "${prev.lib.getExe prev.nodejs_20}" "$out/bin/devcontainer" \
+            --add-flags "$out/libexec/devcontainer.js" \
+            --prefix PATH : ${
+              prev.lib.makeBinPath [
+                prev.git
+                prev.podman
+                prev.podman-compose
+              ]
+            } \
+            --set DEVCONTAINER_DOCKER_PATH "${prev.podman}/bin/podman"
+        '';
+      });
     })
   ];
 
@@ -152,6 +168,7 @@
     github-copilot-cli
     devenv
     devcontainer
+    slirp4netns
   ];
 
   # networking.extraHosts = "130.234.6.208 moniviestin.jyu.fi";
@@ -186,7 +203,7 @@
     containers.containersConf.settings.network.default_rootless_network_cmd = "slirp4netns";
     podman = {
       enable = true;
-      dockerCompat = lib.mkDefault true;
+      dockerCompat = true;
     };
   };
   # To mitigate problem with "trigger-limit-hit" for podman.service
