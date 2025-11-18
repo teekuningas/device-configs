@@ -106,6 +106,7 @@
     llama-cpp
     github-copilot-cli
     devenv
+    devcontainer
   ];
 
   # set ssh-agent to cache keys for e.g. jupyterlab-git
