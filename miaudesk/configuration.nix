@@ -49,27 +49,53 @@
       opencode = unstable-pkgs.opencode;
       llama-cpp = unstable-pkgs.llama-cpp;
       github-copilot-cli = unstable-pkgs.github-copilot-cli;
+
+      # Override devcontainer to use podman instead of docker
+      devcontainer = unstable-pkgs.devcontainer.overrideAttrs (oldAttrs: {
+        postInstall = ''
+          makeWrapper "${prev.lib.getExe prev.nodejs_20}" "$out/bin/devcontainer" \
+            --add-flags "$out/libexec/devcontainer.js" \
+            --prefix PATH : ${
+              prev.lib.makeBinPath [
+                prev.git
+                prev.podman
+                prev.podman-compose
+              ]
+            } \
+            --set DEVCONTAINER_DOCKER_PATH "${prev.podman}/bin/podman"
+        '';
+      });
     })
   ];
 
   ## Note, to make nvidia work within containers, it was necessary to run nvidia-ctk.
-  ## To run nvidia-ctk, we needed nvidia-container-toolkit as a package (not just enabled hardware).
-  ## To get a nvidia-ctk without contaminating docker binary, a recent enough nixpkgs (e.g unstable) was needed.
   ## The command to generate the cdi was:
-  ## $ nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml
-  virtualisation.docker = {
-    enable = true;
-    daemon.settings.features.cdi = true;
-  };
+  ## $ sudo nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml
+  ##
+  ## IMPORTANT: After generating the CDI, you MUST run the patch script to fix paths for NixOS:
+  ## $ ./miaudesk/scripts/patch-nvidia-cdi.sh
+  # virtualisation.docker = {
+  #   enable = true;
+  #   daemon.settings.features.cdi = true;
+  # };
 
-  #virtualisation = {
-  #  containers.enable = true;
-  #  podman = {
-  #    enable = true;
-  #    dockerCompat = true;
-  #    defaultNetwork.settings.dns_enabled = true;
-  #  };
-  #};
+  virtualisation = {
+    containers.containersConf.settings.network.default_rootless_network_cmd = "slirp4netns";
+    podman = {
+      enable = true;
+      dockerCompat = true;
+      defaultNetwork.settings.dns_enabled = true;
+    };
+  };
+  
+  # To mitigate problem with "trigger-limit-hit" for podman.service
+  systemd.user.sockets.podman.socketConfig = {
+    TriggerLimitIntervalSec = "10s";
+    TriggerLimitBurst = 1000;
+  };
+  # To remove problem of missing newuidmap binary for podman.service
+  systemd.user.services.podman.path = [ "/run/wrappers/" ];
+
   #users.users.zairex = {
   #  extraGroups = [
   #    "podman"
@@ -107,10 +133,14 @@
     github-copilot-cli
     devenv
     devcontainer
+    podman-compose
+    slirp4netns
   ];
 
   # set ssh-agent to cache keys for e.g. jupyterlab-git
   programs.ssh.startAgent = true;
+
+  nix.settings.trusted-users = [ "zairex" ];
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions
