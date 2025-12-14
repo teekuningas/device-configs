@@ -134,6 +134,7 @@
   environment.systemPackages = with pkgs; [
     (python312.withPackages (ps: with ps; [
       numpy
+      cryptography
       requests
       flake8
       twine
