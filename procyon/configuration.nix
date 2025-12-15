@@ -171,6 +171,7 @@
     devcontainer
     slirp4netns
     gh
+    pavucontrol
   ];
 
   # networking.extraHosts = "130.234.6.208 moniviestin.jyu.fi";
