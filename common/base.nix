@@ -22,5 +22,6 @@
     wget
     tree
     ripgrep
+    pciutils
   ];
 }
