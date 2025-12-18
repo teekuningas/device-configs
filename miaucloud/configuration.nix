@@ -159,10 +159,6 @@
       reverse_proxy http://localhost:8081
     '';
 
-    virtualHosts."lobe.teekuningas.net".extraConfig = ''
-      reverse_proxy http://localhost:3210
-    '';
-
     virtualHosts."s3-api.teekuningas.net".extraConfig = ''
       reverse_proxy http://localhost:9090
     '';
@@ -292,34 +288,6 @@
         environment = { PORT = "8081"; };
         volumes = [ "/var/data/openwebui_data:/app/backend/data" ];
       };
-      lobechat = {
-        # See: https://lobehub.com/docs/self-hosting/server-database/docker-compose
-        # After postgres, logto and minio have been configured,
-        # this should just work.
-        image = "docker.io/lobehub/lobe-chat-database:1.73.0";
-        ports = [ "127.0.0.1:3210:3210" ];
-        extraOptions =
-          [ "--net=host" "--env-file=/var/data/.secrets/lobechat.env" ];
-        environment = {
-          APP_URL = "https://lobe.teekuningas.net";
-          S3_BUCKET = "lobe";
-          S3_ENDPOINT = "https://s3-api.teekuningas.net";
-          S3_PUBLIC_DOMAIN = "https://s3-api.teekuningas.net";
-          S3_ENABLE_PATH_STYLE = "1";
-          NEXT_AUTH_SSO_PROVIDERS = "logto";
-          NEXTAUTH_URL = "https://lobe.teekuningas.net/api/auth";
-          AUTH_LOGTO_ISSUER = "https://auth-api.teekuningas.net/oidc";
-
-          ENABLED_OPENAI = "0";
-          ENABLED_OLLAMA = "0";
-
-          ENABLED_AZURE_OPENAI = "1";
-          AZURE_API_VERSION = "2024-08-01-preview";
-          AZURE_ENDPOINT = "https://erpipehe-openai.openai.azure.com";
-          AZURE_MODEL_LIST = "gpt-4o,gpt-4o-mini";
-        };
-        autoStart = true;
-      };
       postgres = {
         image = "docker.io/pgvector/pgvector:pg16";
         volumes = [ "/var/data/postgres_data:/var/lib/postgresql/data" ];
@@ -336,34 +304,11 @@
         extraOptions =
           [ "--net=host" "--env-file=/var/data/.secrets/postgrest.env" ];
       };
-      minio = {
-        # See: https://lobehub.com/docs/self-hosting/server-database/docker-compose
-        # Must create a bucket "lobe" through ui.
-        image = "docker.io/minio/minio:latest";
-        extraOptions =
-          [ "--net=host" "--env-file=/var/data/.secrets/minio.env" ];
-        volumes = [ "/var/data/minio_data:/etc/minio/data" ];
-        environment = {
-          MINIO_DOMAIN = "s3-api.teekuningas.net";
-          MINIO_API_CORS_ALLOW_ORIGIN = "https://lobe.teekuningas.net";
-        };
-        autoStart = true;
-        cmd = [
-          "server"
-          "/etc/minio/data"
-          "--address"
-          "127.0.0.1:9090"
-          "--console-address"
-          "127.0.0.1:9091"
-        ];
-      };
       logto = {
-        # See: https://lobehub.com/docs/self-hosting/server-database/docker-compose
         # To init the logto db, go inside container:
         # $ sudo podman run --net=host --env-file=/var/data/.secrets/logto.env --entrypoint="sh" -it svhd/logto:<version>
         # and run:
         # $ npm run cli db seed
-        # Then navigate to ui and create app for lobe.
         # Sometimes this is needed too:
         # $ npm run cli db alt deploy
         image = "docker.io/svhd/logto:1.25";
@@ -414,7 +359,7 @@
   };
   # Require password for sudo (security hardening)
   # Uncomment the line below if you need passwordless sudo
-  # security.sudo.wheelNeedsPassword = false;
+  security.sudo.wheelNeedsPassword = false;
 
   system.stateVersion = "22.11";
 }
