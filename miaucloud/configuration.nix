@@ -184,7 +184,7 @@
     enable = true;
     settings = {
       PasswordAuthentication = false;
-      PermitRootLogin = "no";
+      PermitRootLogin = "prohibit-password";  # Allow root login with keys only
       KbdInteractiveAuthentication = false;
     };
   };
