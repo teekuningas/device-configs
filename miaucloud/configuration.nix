@@ -180,7 +180,14 @@
     '';
   };
 
-  services.openssh.enable = true;
+  services.openssh = {
+    enable = true;
+    settings = {
+      PasswordAuthentication = false;
+      PermitRootLogin = "no";
+      KbdInteractiveAuthentication = false;
+    };
+  };
   services.fail2ban = {
     enable = true;
     maxretry = 5;
@@ -405,7 +412,9 @@
       };
     };
   };
-  security.sudo.wheelNeedsPassword = false;
+  # Require password for sudo (security hardening)
+  # Uncomment the line below if you need passwordless sudo
+  # security.sudo.wheelNeedsPassword = false;
 
   system.stateVersion = "22.11";
 }
