@@ -68,6 +68,10 @@
       reverse_proxy http://localhost:3012
     '';
 
+    virtualHosts."sartre.suvannossa.fi".extraConfig = ''
+      reverse_proxy http://localhost:3013
+    '';
+
     virtualHosts."luonto.suvannossa.fi".extraConfig = ''
       reverse_proxy http://localhost:5000
     '';
@@ -353,6 +357,11 @@
       jalkapallo = {
         image = "ghcr.io/teekuningas/jalkapallo:v2";
         ports = [ "127.0.0.1:3012:80" ];
+        autoStart = true;
+      };
+      sartre = {
+        image = "ghcr.io/teekuningas/sartre:v0.40";
+        ports = [ "127.0.0.1:3013:80" ];
         autoStart = true;
       };
     };
