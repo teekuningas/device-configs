@@ -146,6 +146,7 @@
       scipy
       pandas
       seaborn
+      statsmodels
       geopandas
       folium
       llm
