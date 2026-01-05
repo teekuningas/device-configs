@@ -147,6 +147,7 @@
       pandas
       seaborn
       statsmodels
+      rasterio
       geopandas
       folium
       llm
