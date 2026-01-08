@@ -360,7 +360,7 @@
         autoStart = true;
       };
       sartre = {
-        image = "ghcr.io/teekuningas/sartre:v0.40";
+        image = "ghcr.io/teekuningas/sartre:v0.41";
         ports = [ "127.0.0.1:3013:80" ];
         autoStart = true;
       };
