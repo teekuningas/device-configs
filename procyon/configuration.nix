@@ -9,6 +9,7 @@
       opencode = unstable-pkgs.opencode;
       llama-cpp-vulkan = unstable-pkgs.llama-cpp-vulkan;
       github-copilot-cli = unstable-pkgs.github-copilot-cli;
+      mistral-vibe = unstable-pkgs.mistral-vibe;
 
       # Override devcontainer to use podman instead of docker
       devcontainer = prev.devcontainer.overrideAttrs (oldAttrs: {
@@ -162,13 +163,13 @@
     powertop
     spotify
     teams-for-linux
-    aider-chat
     gemini-cli
     codex
     opencode
     vagrant
     llama-cpp-vulkan
     github-copilot-cli
+    mistral-vibe
     devenv
     devcontainer
     slirp4netns
