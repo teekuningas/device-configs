@@ -50,11 +50,13 @@
       llama-cpp = unstable-pkgs.llama-cpp;
       github-copilot-cli = unstable-pkgs.github-copilot-cli;
 
-      # Override devcontainer to use podman instead of docker
-      devcontainer = unstable-pkgs.devcontainer.overrideAttrs (oldAttrs: {
-        postInstall = ''
-          makeWrapper "${prev.lib.getExe prev.nodejs_20}" "$out/bin/devcontainer" \
-            --add-flags "$out/libexec/devcontainer.js" \
+      # Wrap devcontainer with podman via symlinkJoin to avoid rebuilding from source.
+      devcontainer = prev.symlinkJoin {
+        name = "devcontainer-with-podman";
+        paths = [ prev.devcontainer ];
+        nativeBuildInputs = [ prev.makeWrapper ];
+        postBuild = ''
+          wrapProgram $out/bin/devcontainer \
             --prefix PATH : ${
               prev.lib.makeBinPath [
                 prev.git
@@ -64,7 +66,7 @@
             } \
             --set DEVCONTAINER_DOCKER_PATH "${prev.podman}/bin/podman"
         '';
-      });
+      };
     })
   ];
 
