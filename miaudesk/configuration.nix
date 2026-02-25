@@ -49,24 +49,6 @@
       opencode = unstable-pkgs.opencode;
       llama-cpp = unstable-pkgs.llama-cpp;
       github-copilot-cli = unstable-pkgs.github-copilot-cli;
-
-      # Wrap devcontainer with podman via symlinkJoin to avoid rebuilding from source.
-      devcontainer = prev.symlinkJoin {
-        name = "devcontainer-with-podman";
-        paths = [ prev.devcontainer ];
-        nativeBuildInputs = [ prev.makeWrapper ];
-        postBuild = ''
-          wrapProgram $out/bin/devcontainer \
-            --prefix PATH : ${
-              prev.lib.makeBinPath [
-                prev.git
-                prev.podman
-                prev.podman-compose
-              ]
-            } \
-            --set DEVCONTAINER_DOCKER_PATH "${prev.podman}/bin/podman"
-        '';
-      };
     })
   ];
 
