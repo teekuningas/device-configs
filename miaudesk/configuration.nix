@@ -110,7 +110,6 @@
     uv
     cudatoolkit
     nvidia-container-toolkit
-    aider-chat
     gemini-cli
     codex
     opencode
@@ -133,5 +132,10 @@
   # this value at the release version of the first install of this system.
   # Before changing this value read the documentation for this option
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
+  programs.safepilot = {
+    enable = true;
+    geminiSupport = true;
+  };
+
   system.stateVersion = "24.05"; # Did you read the comment?
 }

@@ -1,7 +1,7 @@
-{ pkgs, lib }:
+{ pkgs, lib, copilotSupport ? true, geminiSupport ? false, gitSupport ? true }:
 
 let
-  tools = with pkgs; [
+  baseTools = with pkgs; [
     bashInteractive
     coreutils
     findutils
@@ -11,8 +11,6 @@ let
     which
     procps
     less
-    git
-    gh
     curl
     wget
     ripgrep
@@ -22,9 +20,12 @@ let
     vim
     nano
     tmux
-    github-copilot-cli
-    gemini-cli
   ];
+
+  tools = baseTools
+    ++ lib.optionals gitSupport     (with pkgs; [ git gh ])
+    ++ lib.optionals copilotSupport (with pkgs; [ github-copilot-cli ])
+    ++ lib.optionals geminiSupport  (with pkgs; [ gemini-cli ]);
 
   image = pkgs.dockerTools.buildLayeredImage {
     name = "safepilot";
@@ -128,28 +129,36 @@ let
     done
 
     # Implicit mounts: only what tools need to function
+    ${lib.optionalString geminiSupport ''
     mkdir -p "$HOME/.gemini"
     mounts+=("-v" "$HOME/.gemini:/home/user/.gemini:rw")
-
+    ''}
+    ${lib.optionalString copilotSupport ''
     mkdir -p "$HOME/.copilot"
     mounts+=("-v" "$HOME/.copilot:/home/user/.copilot:rw")
-
+    ''}
+    ${lib.optionalString gitSupport ''
     [[ -f "$HOME/.gitconfig" ]] && mounts+=("-v" "$HOME/.gitconfig:/home/user/.gitconfig:ro")
+    ''}
 
     # Auth tokens extracted on host before entering container
+    ${lib.optionalString copilotSupport ''
     token=$(${pkgs.gh}/bin/gh auth token 2>/dev/null || true)
     [[ -n "$token" ]] && env_args+=("-e" "COPILOT_GITHUB_TOKEN=$token")
-
+    ''}
+    ${lib.optionalString geminiSupport ''
     gemini_token=$(${pkgs.jq}/bin/jq -r '.access_token // empty' "$HOME/.gemini/oauth_creds.json" 2>/dev/null || true)
     if [[ -n "$gemini_token" ]]; then
       env_args+=("-e" "GOOGLE_GENAI_USE_GCA=true")
       env_args+=("-e" "GOOGLE_CLOUD_ACCESS_TOKEN=$gemini_token")
     fi
-
+    ''}
+    ${lib.optionalString gitSupport ''
     git_name=$(${pkgs.git}/bin/git config --global user.name 2>/dev/null || true)
     git_email=$(${pkgs.git}/bin/git config --global user.email 2>/dev/null || true)
     [[ -n "$git_name" ]]  && env_args+=("-e" "GIT_AUTHOR_NAME=$git_name"   "-e" "GIT_COMMITTER_NAME=$git_name")
     [[ -n "$git_email" ]] && env_args+=("-e" "GIT_AUTHOR_EMAIL=$git_email" "-e" "GIT_COMMITTER_EMAIL=$git_email")
+    ''}
 
     env_args+=("-e" "TERM=''${TERM:-xterm-256color}")
     [[ -n "''${COLORTERM:-}" ]] && env_args+=("-e" "COLORTERM=$COLORTERM")

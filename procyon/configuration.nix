@@ -9,25 +9,6 @@
       opencode = unstable-pkgs.opencode;
       llama-cpp-vulkan = unstable-pkgs.llama-cpp-vulkan;
       github-copilot-cli = unstable-pkgs.github-copilot-cli;
-      mistral-vibe = unstable-pkgs.mistral-vibe;
-
-      # Wrap devcontainer with podman via symlinkJoin to avoid rebuilding from source.
-      devcontainer = prev.symlinkJoin {
-        name = "devcontainer-with-podman";
-        paths = [ prev.devcontainer ];
-        nativeBuildInputs = [ prev.makeWrapper ];
-        postBuild = ''
-          wrapProgram $out/bin/devcontainer \
-            --prefix PATH : ${
-              prev.lib.makeBinPath [
-                prev.git
-                prev.podman
-                prev.podman-compose
-              ]
-            } \
-            --set DEVCONTAINER_DOCKER_PATH "${prev.podman}/bin/podman"
-        '';
-      };
     })
   ];
 
@@ -171,11 +152,8 @@
     vagrant
     llama-cpp-vulkan
     github-copilot-cli
-    mistral-vibe
     devenv
-    devcontainer
     slirp4netns
-    gh
     pavucontrol
   ];
 
@@ -231,6 +209,11 @@
   # this value at the release version of the first install of this system.
   # Before changing this value read the documentation for this option
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
+  programs.safepilot = {
+    enable = true;
+    geminiSupport = true;
+  };
+
   system.stateVersion = "24.05"; # Did you read the comment?
 
 }
