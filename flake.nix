@@ -49,6 +49,7 @@
           ./common/base.nix
           ./common/graphical.nix
           ./common/llm.nix
+          ./common/safepilot.nix
           ./miaudesk/configuration.nix
         ];
       };
