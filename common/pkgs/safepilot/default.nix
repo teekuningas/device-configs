@@ -9,17 +9,21 @@ let
     gnused
     gawk
     which
-    procps
-    less
     curl
     wget
     ripgrep
     fd
-    fzf
     jq
+    diffutils
+    patch
+    file
+    tree
+    gnutar
+    gzip
+    unzip
+    python3
+    gnumake
     vim
-    nano
-    tmux
   ];
 
   tools = baseTools
