@@ -34,7 +34,7 @@
       22 # SSH
       80 # HTTP
       443 # HTTPS
-      9000 # Weechat
+      113 # Oidentd
     ];
 
     # needed to fix podman dns
@@ -44,6 +44,9 @@
     # networking.firewall.allowedUDPPorts = [ ... ];
     # networking.firewall.allowedUDPPortRanges = [ { from = 32768; to = 61000; } ];
   };
+
+  # Enable oidentd for IRCNet
+  services.oidentd.enable = true;
 
   # Enable tailscale.
   # Currently must run manually "sudo tailscale up --advertise-exit-node".
