@@ -24,6 +24,8 @@ let
     python3
     gnumake
     vim
+    nix
+    devenv
   ];
 
   tools = baseTools
@@ -31,26 +33,69 @@ let
     ++ lib.optionals copilotSupport (with pkgs; [ github-copilot-cli ])
     ++ lib.optionals geminiSupport  (with pkgs; [ gemini-cli ]);
 
-  image = pkgs.dockerTools.buildLayeredImage {
+  nixConf = pkgs.writeTextFile {
+    name = "nix-conf";
+    destination = "/etc/nix/nix.conf";
+    text = ''
+      sandbox = false
+      filter-syscalls = false
+      experimental-features = nix-command flakes
+    '';
+  };
+
+  # All paths baked into the image root, shared between copyToRoot and
+  # closureInfo so they stay in sync.
+  containerPaths = tools ++ [ pkgs.dockerTools.fakeNss pkgs.cacert nixConf ];
+
+  # Loaded into the nix DB on first container start so nix treats baked-in
+  # store paths as valid and won't attempt to re-substitute them.
+  storeRegistration = pkgs.closureInfo { rootPaths = containerPaths; };
+
+  entrypoint = pkgs.writeShellScript "safepilot-entrypoint" ''
+    if [[ ! -f /nix/var/nix/db/db.sqlite ]]; then
+      nix-store --load-db < /nix/registration
+    fi
+    exec "$@"
+  '';
+
+  image = pkgs.dockerTools.buildImage {
     name = "safepilot";
     tag = "latest";
 
-    contents = tools ++ [ pkgs.dockerTools.fakeNss pkgs.cacert ];
+    copyToRoot = pkgs.buildEnv {
+      name = "safepilot-root";
+      paths = containerPaths;
+    };
 
     extraCommands = ''
       mkdir -p home/user
-      chmod 755 home/user
+      chmod 1777 home/user
       mkdir -p workspace
       mkdir -p tmp
       chmod 1777 tmp
+
+      mkdir -p nix/store
+      chmod 1777 nix/store
+
+      mkdir -p nix/var/nix/db
+      mkdir -p nix/var/nix/profiles
+      mkdir -p nix/var/nix/gcroots/profiles
+      mkdir -p nix/var/nix/temproots
+      mkdir -p nix/var/nix/userpool
+      mkdir -p nix/var/log/nix/drvs
+      chmod -R 1777 nix/var
+
+      cp ${storeRegistration}/registration nix/registration
     '';
 
     config = {
       WorkingDir = "/workspace";
+      Entrypoint = [ "${entrypoint}" ];
       Cmd = [ "${pkgs.bashInteractive}/bin/bash" ];
       Env = [
         "PATH=${lib.makeBinPath tools}"
         "HOME=/home/user"
+        "USER=user"
         "TERM=xterm-256color"
         "SSL_CERT_FILE=${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
         "NIX_SSL_CERT_FILE=${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
