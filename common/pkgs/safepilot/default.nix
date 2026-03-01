@@ -27,6 +27,8 @@ let
     vim
     nix
     devenv
+    stdenv.cc.cc.lib
+    zlib
   ];
 
   tools = baseTools
@@ -95,6 +97,7 @@ let
       Cmd = [ "${pkgs.bashInteractive}/bin/bash" ];
       Env = [
         "PATH=${lib.makeBinPath tools}"
+        "LD_LIBRARY_PATH=${lib.makeLibraryPath [ pkgs.stdenv.cc.cc.lib pkgs.zlib ]}"
         "HOME=/home/user"
         "USER=user"
         "TERM=xterm-256color"
