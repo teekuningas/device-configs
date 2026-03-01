@@ -9,7 +9,7 @@ in {
     copilotSupport = lib.mkOption {
       type = lib.types.bool;
       default = true;
-      description = "Include github-copilot-cli in the container, mount ~/.copilot, and pass Copilot auth tokens.";
+      description = "Include github-copilot-cli in the container and mount ~/.copilot for auth.";
     };
 
     geminiSupport = lib.mkOption {

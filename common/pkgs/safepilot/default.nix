@@ -22,6 +22,7 @@ let
     gzip
     unzip
     python3
+    uv
     gnumake
     vim
     nix
@@ -188,12 +189,6 @@ let
     ''}
     ${lib.optionalString gitSupport ''
     [[ -f "$HOME/.gitconfig" ]] && mounts+=("-v" "$HOME/.gitconfig:/home/user/.gitconfig:ro")
-    ''}
-
-    # Auth tokens extracted on host before entering container
-    ${lib.optionalString copilotSupport ''
-    token=$(${pkgs.gh}/bin/gh auth token 2>/dev/null || true)
-    [[ -n "$token" ]] && env_args+=("-e" "COPILOT_GITHUB_TOKEN=$token")
     ''}
 
     ${lib.optionalString gitSupport ''
