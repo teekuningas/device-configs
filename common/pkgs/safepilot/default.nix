@@ -118,15 +118,22 @@ let
   '';
 
   # Usage:
-  #   safepilot
-  #   safepilot -v .:.:rw
-  #   safepilot -v /etc/nixos:nixos:r
-  #   safepilot -v .:.:rw -v ~/docs:docs:r
+  #   safepilot [PODMAN_ARGS...]
   #
-  # Mount spec: host_path:dest:mode
-  #   host_path  path on host; "." expands to $PWD, "~" is expanded
-  #   dest       name under /workspace; "." means /workspace itself
-  #   mode       r (read-only) or rw (read-write)
+  # All arguments are passed through to podman run as-is, with one convenience:
+  # relative paths in -v specs are expanded automatically.
+  #
+  # -v SOURCE:DEST[:OPTIONS]  standard podman volume mount
+  #   SOURCE  relative paths are expanded to absolute ($PWD/...)
+  #   DEST    relative paths are prefixed with /workspace/
+  #           use "." as DEST to mean /workspace itself
+  #
+  # Examples:
+  #   safepilot -v .:/workspace:rw          # mount CWD as /workspace
+  #   safepilot -v .:.:rw                   # same, using relative dest
+  #   safepilot -v ./src:src:ro             # mount ./src as /workspace/src
+  #   safepilot -v ~/docs:/home/user/docs:rw  # absolute dest, no prefix added
+  #   safepilot --network=host              # any podman flag works
   launcher = pkgs.writeShellScriptBin "safepilot" ''
     set -euo pipefail
 
@@ -146,42 +153,40 @@ let
     printf 'user:x:%s:\n' "$(id -g)" >> "$group_tmp"
     printf 'nobody:x:65534:\n' >> "$group_tmp"
 
+    # Expand relative paths in a -v spec; absolute paths pass through unchanged.
+    # SOURCE: relative → $PWD/..., "." → $PWD, "~" prefix → $HOME/...
+    # DEST:   relative → /workspace/..., "." → /workspace
+    expand_v() {
+      local spec="$1"
+      local src dest opts
+      IFS=':' read -r src dest opts <<< "$spec"
+
+      src="''${src/#\~/$HOME}"
+      [[ "$src" == "." ]] && src="$PWD"
+      [[ "$src" != /* ]] && src="$PWD/$src"
+
+      if [[ -n "$dest" && "$dest" != /* ]]; then
+        [[ "$dest" == "." ]] && dest="/workspace" || dest="/workspace/$dest"
+      fi
+
+      echo "$src:$dest''${opts:+:$opts}"
+    }
+
     mounts=()
     env_args=()
+    extra_args=()
 
     mounts+=("-v" "$passwd_tmp:/etc/passwd:ro")
     mounts+=("-v" "$group_tmp:/etc/group:ro")
 
-    # Parse -v host:dest:mode arguments
+    # Intercept -v to expand relative paths; pass everything else to podman.
     while [[ $# -gt 0 ]]; do
       case "$1" in
-        -v)  shift; spec="$1" ;;
-        -v*) spec="''${1#-v}" ;;
-        *)
-          echo "Error: unknown argument '$1'" >&2
-          echo "Usage: safepilot [-v host:dest:mode ...]" >&2
-          echo "  mode: r (read-only) or rw (read-write)" >&2
-          echo "  dest: name under /workspace, or '.' for /workspace itself" >&2
-          exit 1 ;;
+        -v)  shift; mounts+=("-v" "$(expand_v "$1")") ;;
+        -v*) mounts+=("-v" "$(expand_v "''${1#-v}")") ;;
+        *)   extra_args+=("$1") ;;
       esac
       shift
-
-      IFS=':' read -r host_path dest mode <<< "$spec"
-      if [[ -z "$host_path" || -z "$dest" || -z "$mode" ]]; then
-        echo "Error: invalid mount spec '$spec'" >&2
-        echo "  Format: -v host_path:dest:mode" >&2
-        exit 1
-      fi
-
-      [[ "$host_path" == "." ]] && host_path="$PWD"
-      host_path="''${host_path/#\~/$HOME}"
-      [[ "$dest" == "." ]] && dest_path="/workspace" || dest_path="/workspace/$dest"
-
-      case "$mode" in
-        rw) mounts+=("-v" "$host_path:$dest_path:rw") ;;
-        r)  mounts+=("-v" "$host_path:$dest_path:ro") ;;
-        *)  echo "Error: mode must be 'r' or 'rw', got: '$mode'" >&2; exit 1 ;;
-      esac
     done
 
     # Implicit mounts: only what tools need to function
@@ -216,6 +221,7 @@ let
       -e HOME=/home/user \
       "''${mounts[@]}" \
       "''${env_args[@]}" \
+      "''${extra_args[@]}" \
       localhost/safepilot:latest \
       bash
   '';
