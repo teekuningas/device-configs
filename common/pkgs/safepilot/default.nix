@@ -29,6 +29,7 @@ let
     devenv
     stdenv.cc.cc.lib
     zlib
+    glibcLocales
   ];
 
   tools = baseTools
@@ -103,6 +104,8 @@ let
         "TERM=xterm-256color"
         "SSL_CERT_FILE=${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
         "NIX_SSL_CERT_FILE=${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
+        "LANG=en_US.UTF-8"
+        "LOCALE_ARCHIVE=${pkgs.glibcLocales}/lib/locale/locale-archive"
       ];
     };
   };
