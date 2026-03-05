@@ -337,7 +337,7 @@
         environment = { LUONTOPELI_HOST = "0.0.0.0"; };
       };
       vellubot = {
-        image = "ghcr.io/teekuningas/vellubot/vellubot:v0.20.0";
+        image = "ghcr.io/teekuningas/vellubot/vellubot:v0.30.0";
         autoStart = true;
         extraOptions = [ "--env-file=/var/data/.secrets/vellubot.env" ];
         environment = {
@@ -346,9 +346,10 @@
           BOT_SERVER = "irc.libera.chat";
           BOT_PORT = "6667";
           SETTINGS_FNAME = "/data/settings.json";
-          OPENAI_MAX_TOKENS_IN = "2048";
-          OPENAI_MAX_TOKENS_OUT = "1024";
+          OPENAI_MAX_TOKENS_OUT = "2048";
           OPENAI_MODEL = "gpt-4o";
+          URGE_TRIGGER_COST = "0.5";
+          LOG_LEVEL = "DEBUG";
         };
         volumes = [ "/var/data/vellubot:/data" ];
       };
