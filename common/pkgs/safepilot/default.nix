@@ -12,6 +12,7 @@ let
     curl
     wget
     ripgrep
+    procps
     fd
     jq
     diffutils
