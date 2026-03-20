@@ -8,7 +8,9 @@
       codex = unstable-pkgs.codex;
       opencode = unstable-pkgs.opencode;
       llama-cpp-vulkan = unstable-pkgs.llama-cpp-vulkan;
-      github-copilot-cli = unstable-pkgs.github-copilot-cli;
+      github-copilot-cli = final.callPackage ../common/pkgs/github-copilot-cli {
+        github-copilot-cli = unstable-pkgs.github-copilot-cli;
+      };
     })
   ];
 
