@@ -35,7 +35,7 @@ let
 
   tools = baseTools
     ++ lib.optionals gitSupport     (with pkgs; [ git gh ])
-    ++ lib.optionals copilotSupport [ (pkgs.callPackage ../github-copilot-cli { }) ]
+    ++ lib.optionals copilotSupport (with pkgs; [ github-copilot-cli ])
     ++ lib.optionals geminiSupport  (with pkgs; [ gemini-cli ]);
 
   nixConf = pkgs.writeTextFile {
