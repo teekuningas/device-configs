@@ -1,5 +1,23 @@
 { config, pkgs, options, lib, inputs, unstable-pkgs, ... }:
 
+let
+  # Build electron 39 with the system's mesa/libs to avoid GPU driver mismatch
+  mkElectron = pkgs.callPackage
+    "${pkgs.path}/pkgs/development/tools/electron/binary/generic.nix" {};
+  electron-39 = mkElectron "39.0.0" {
+    x86_64-linux = "sha256-RSDL2S7u03DXz9KxxgE1ZHwCuPY01hedipo/ZLZLry8=";
+  };
+
+  vasara-pkg = inputs.vasara-pkgs.packages.x86_64-linux.camunda-modeler;
+  camunda-modeler = pkgs.runCommand "camunda-modeler" {
+    nativeBuildInputs = [ pkgs.makeWrapper ];
+  } ''
+    mkdir -p $out/bin
+    makeWrapper ${electron-39}/bin/electron $out/bin/camunda-modeler \
+      --prefix PATH : "${unstable-pkgs.temurin-jre-bin-11}/bin" \
+      --add-flags "${vasara-pkg}/var/lib/camunda/app.asar"
+  '';
+in
 {
   nixpkgs.overlays = [
     (final: prev: {
@@ -155,6 +173,7 @@
     devenv
     slirp4netns
     pavucontrol
+    camunda-modeler
   ];
 
   # networking.extraHosts = "130.234.6.208 moniviestin.jyu.fi";
