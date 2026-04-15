@@ -231,6 +231,7 @@ in
   programs.safepilot = {
     enable = true;
     geminiSupport = true;
+    opencodeSupport = true;
   };
 
   system.stateVersion = "24.05"; # Did you read the comment?
