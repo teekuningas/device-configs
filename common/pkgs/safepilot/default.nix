@@ -1,4 +1,4 @@
-{ pkgs, lib, copilotSupport ? true, geminiSupport ? false, gitSupport ? true }:
+{ pkgs, lib, copilotSupport ? true, geminiSupport ? false, gitSupport ? true, opencodeSupport ? false }:
 
 let
   baseTools = with pkgs; [
@@ -36,7 +36,8 @@ let
   tools = baseTools
     ++ lib.optionals gitSupport     (with pkgs; [ git gh ])
     ++ lib.optionals copilotSupport (with pkgs; [ github-copilot-cli ])
-    ++ lib.optionals geminiSupport  (with pkgs; [ gemini-cli ]);
+    ++ lib.optionals geminiSupport  (with pkgs; [ gemini-cli ])
+    ++ lib.optionals opencodeSupport (with pkgs; [ opencode ]);
 
   nixConf = pkgs.writeTextFile {
     name = "nix-conf";
@@ -75,6 +76,11 @@ let
     extraCommands = ''
       mkdir -p home/user
       chmod 1777 home/user
+      mkdir -p home/user/.local/share
+      mkdir -p home/user/.local/state
+      mkdir -p home/user/.config
+      mkdir -p home/user/.cache
+      chmod 1777 home/user/.local home/user/.local/share home/user/.local/state home/user/.config home/user/.cache
       mkdir -p workspace
       mkdir -p tmp
       chmod 1777 tmp
@@ -198,6 +204,14 @@ let
     ${lib.optionalString copilotSupport ''
     mkdir -p "$HOME/.copilot"
     mounts+=("-v" "$HOME/.copilot:/home/user/.copilot:rw")
+    ''}
+    ${lib.optionalString opencodeSupport ''
+    mkdir -p "$HOME/.local/share/opencode"
+    mounts+=("-v" "$HOME/.local/share/opencode:/home/user/.local/share/opencode:rw")
+    mkdir -p "$HOME/.config/opencode"
+    mounts+=("-v" "$HOME/.config/opencode:/home/user/.config/opencode:rw")
+    mkdir -p "$HOME/.cache/opencode"
+    mounts+=("-v" "$HOME/.cache/opencode:/home/user/.cache/opencode:rw")
     ''}
     ${lib.optionalString gitSupport ''
     [[ -f "$HOME/.gitconfig" ]] && mounts+=("-v" "$HOME/.gitconfig:/home/user/.gitconfig:ro")
