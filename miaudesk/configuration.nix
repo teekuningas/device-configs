@@ -123,6 +123,8 @@
     devcontainer
     podman-compose
     slirp4netns
+    chromium
+    nodejs
   ];
 
   # set ssh-agent to cache keys for e.g. jupyterlab-git
