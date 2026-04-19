@@ -29,16 +29,23 @@ in {
       default = false;
       description = "Include opencode in the container and mount ~/.local/share/opencode + ~/.config/opencode for auth and config.";
     };
+
+    mcpSupport = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = "Include nodejs in the container and mount ~/.npm for running node-based MCP servers.";
+    };
   };
 
   config = lib.mkIf cfg.enable {
     nixpkgs.overlays = [
       (final: prev: {
         safepilot = final.callPackage ./pkgs/safepilot {
-          copilotSupport  = cfg.copilotSupport;
-          geminiSupport   = cfg.geminiSupport;
-          gitSupport      = cfg.gitSupport;
-          opencodeSupport = cfg.opencodeSupport;
+          copilotSupport       = cfg.copilotSupport;
+          geminiSupport        = cfg.geminiSupport;
+          gitSupport           = cfg.gitSupport;
+          opencodeSupport      = cfg.opencodeSupport;
+          mcpSupport           = cfg.mcpSupport;
         };
       })
     ];
