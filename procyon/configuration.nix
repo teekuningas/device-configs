@@ -174,6 +174,11 @@ in
     slirp4netns
     pavucontrol
     camunda-modeler
+    (chromium.override {
+      commandLineArgs = [
+        "--remote-debugging-port=9222"
+      ];
+    })
   ];
 
   # networking.extraHosts = "130.234.6.208 moniviestin.jyu.fi";
