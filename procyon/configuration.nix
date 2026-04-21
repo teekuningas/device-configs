@@ -232,6 +232,7 @@ in
     enable = true;
     copilotSupport = true;
     geminiSupport = true;
+    mcpSupport = true;
   };
 
   system.stateVersion = "24.05"; # Did you read the comment?
