@@ -237,6 +237,7 @@ in
     enable = true;
     copilotSupport = true;
     geminiSupport = true;
+    opencodeSupport = true;
     mcpSupport = true;
   };
 

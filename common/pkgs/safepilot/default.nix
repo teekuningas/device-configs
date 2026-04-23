@@ -2,6 +2,7 @@
 
 let
   baseTools = with pkgs; [
+    openssh
     bashInteractive
     coreutils
     findutils
