@@ -75,6 +75,10 @@
       reverse_proxy http://localhost:3013
     '';
 
+    virtualHosts."imdb.suvannossa.fi".extraConfig = ''
+      reverse_proxy http://localhost:3014
+    '';
+
     virtualHosts."luonto.suvannossa.fi".extraConfig = ''
       reverse_proxy http://localhost:5000
     '';
@@ -373,6 +377,12 @@
         ports = [ "127.0.0.1:3013:80" ];
         autoStart = true;
       };
+      imdbDemographics = {
+        image = "ghcr.io/teekuningas/imdb-demographics:v1";
+        ports = [ "127.0.0.1:3014:80" ];
+        autoStart = true;
+      };
+
     };
   };
   # Require password for sudo (security hardening)
