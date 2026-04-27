@@ -6,34 +6,28 @@ in {
   options.programs.safepilot = {
     enable = lib.mkEnableOption "safepilot sandboxed AI coding environment";
 
-    copilotSupport = lib.mkOption {
-      type = lib.types.bool;
-      default = true;
-      description = "Include github-copilot-cli in the container and mount ~/.copilot for auth.";
+    defaultArgs = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [];
+      description = "Default arguments to pass to the safepilot launcher (e.g. [ \"--git\" \"--ssh\" ]). Use --plain to ignore these.";
     };
 
-    geminiSupport = lib.mkOption {
+    withCopilot = lib.mkOption {
       type = lib.types.bool;
       default = false;
-      description = "Include gemini-cli in the container, mount ~/.gemini, and pass Gemini auth tokens.";
+      description = "Include github-copilot-cli in the container.";
     };
 
-    gitSupport = lib.mkOption {
-      type = lib.types.bool;
-      default = true;
-      description = "Include git and gh in the container, mount ~/.gitconfig, and pass git author env vars.";
-    };
-
-    opencodeSupport = lib.mkOption {
+    withGemini = lib.mkOption {
       type = lib.types.bool;
       default = false;
-      description = "Include opencode in the container and mount ~/.local/share/opencode + ~/.config/opencode for auth and config.";
+      description = "Include gemini-cli in the container.";
     };
 
-    mcpSupport = lib.mkOption {
+    withOpencode = lib.mkOption {
       type = lib.types.bool;
       default = false;
-      description = "Include nodejs in the container and mount ~/.npm for running node-based MCP servers.";
+      description = "Include opencode in the container.";
     };
   };
 
@@ -41,11 +35,10 @@ in {
     nixpkgs.overlays = [
       (final: prev: {
         safepilot = final.callPackage ./pkgs/safepilot {
-          copilotSupport       = cfg.copilotSupport;
-          geminiSupport        = cfg.geminiSupport;
-          gitSupport           = cfg.gitSupport;
-          opencodeSupport      = cfg.opencodeSupport;
-          mcpSupport           = cfg.mcpSupport;
+          defaultArgs  = cfg.defaultArgs;
+          withCopilot  = cfg.withCopilot;
+          withGemini   = cfg.withGemini;
+          withOpencode = cfg.withOpencode;
         };
       })
     ];

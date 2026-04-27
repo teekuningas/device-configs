@@ -235,10 +235,9 @@ in
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
   programs.safepilot = {
     enable = true;
-    copilotSupport = true;
-    geminiSupport = true;
-    opencodeSupport = true;
-    mcpSupport = true;
+    defaultArgs = [ "--git" "--copilot" "--gemini" "--npm" ];
+    withCopilot = true;
+    withGemini = true;
   };
 
   system.stateVersion = "24.05"; # Did you read the comment?

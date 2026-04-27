@@ -1,4 +1,4 @@
-{ pkgs, lib, copilotSupport ? true, geminiSupport ? false, gitSupport ? true, opencodeSupport ? false, mcpSupport ? false }:
+{ pkgs, lib, defaultArgs ? [], withCopilot ? false, withGemini ? false, withOpencode ? false }:
 
 let
   baseTools = with pkgs; [
@@ -29,17 +29,18 @@ let
     vim
     nix
     devenv
+    git
+    gh
+    nodejs
     stdenv.cc.cc.lib
     zlib
     glibcLocales
   ];
 
   tools = baseTools
-    ++ lib.optionals gitSupport     (with pkgs; [ git gh ])
-    ++ lib.optionals copilotSupport (with pkgs; [ github-copilot-cli ])
-    ++ lib.optionals geminiSupport  (with pkgs; [ gemini-cli ])
-    ++ lib.optionals opencodeSupport (with pkgs; [ opencode ])
-    ++ lib.optionals mcpSupport (with pkgs; [ nodejs ]);
+    ++ lib.optionals withCopilot (with pkgs; [ github-copilot-cli ])
+    ++ lib.optionals withGemini  (with pkgs; [ gemini-cli ])
+    ++ lib.optionals withOpencode (with pkgs; [ opencode ]);
 
   nixConf = pkgs.writeTextFile {
     name = "nix-conf";
@@ -156,46 +157,72 @@ let
       exit 1
     fi
 
-    # Temp passwd/group so tools resolve username correctly inside container
-    passwd_tmp=$(mktemp)
-    group_tmp=$(mktemp)
-    trap 'rm -f "$passwd_tmp" "$group_tmp"' EXIT
-    printf 'root:x:0:0:root:/root:/bin/sh\n' > "$passwd_tmp"
-    printf 'user:x:%s:%s::/home/user:/bin/bash\n' "$(id -u)" "$(id -g)" >> "$passwd_tmp"
-    printf 'nobody:x:65534:65534:Nobody:/:/bin/sh\n' >> "$passwd_tmp"
-    printf 'root:x:0:\n' > "$group_tmp"
-    printf 'user:x:%s:\n' "$(id -g)" >> "$group_tmp"
-    printf 'nobody:x:65534:\n' >> "$group_tmp"
+    # Defaults passed from Nix
+    default_args=(${lib.escapeShellArgs defaultArgs})
 
-    # Expand relative paths in a -v spec; absolute paths pass through unchanged.
-    # SOURCE: relative → $PWD/..., "." → $PWD, "~" prefix → $HOME/...
-    # DEST:   relative → /workspace/..., "." → /workspace
+    # Expand relative paths in -v specs
     expand_v() {
       local spec="$1"
       local src dest opts
       IFS=':' read -r src dest opts <<< "$spec"
-
       src="''${src/#\~/$HOME}"
       [[ "$src" == "." ]] && src="$PWD"
       [[ "$src" != /* ]] && src="$PWD/$src"
-
       if [[ -n "$dest" && "$dest" != /* ]]; then
         [[ "$dest" == "." ]] && dest="/workspace" || dest="/workspace/$dest"
       fi
-
       echo "$src:$dest''${opts:+:$opts}"
     }
 
     mounts=()
     env_args=()
     extra_args=()
+    use_defaults=true
 
-    mounts+=("-v" "$passwd_tmp:/etc/passwd:ro")
-    mounts+=("-v" "$group_tmp:/etc/group:ro")
+    # Check for --plain before processing anything
+    for arg in "$@"; do [[ "$arg" == "--plain" ]] && use_defaults=false && break; done
 
-    # Intercept -v to expand relative paths; pass everything else to podman.
+    # Build effective arguments
+    if [[ "$use_defaults" == "true" ]]; then
+      set -- "''${default_args[@]}" "$@"
+    fi
+
     while [[ $# -gt 0 ]]; do
       case "$1" in
+        --plain) ;;
+        --ssh)
+          if [[ -S "''${SSH_AUTH_SOCK:-}" ]]; then
+            mounts+=("-v" "$SSH_AUTH_SOCK:/agent.sock:rw")
+            env_args+=("-e" "SSH_AUTH_SOCK=/agent.sock")
+          fi
+          ;;
+        --git)
+          if [[ -f "$HOME/.gitconfig" ]]; then
+            mounts+=("-v" "$HOME/.gitconfig:/home/user/.gitconfig:ro")
+            git_name=$(${pkgs.git}/bin/git config --global user.name 2>/dev/null || true)
+            git_email=$(${pkgs.git}/bin/git config --global user.email 2>/dev/null || true)
+            [[ -n "$git_name" ]]  && env_args+=("-e" "GIT_AUTHOR_NAME=$git_name"   "-e" "GIT_COMMITTER_NAME=$git_name")
+            [[ -n "$git_email" ]] && env_args+=("-e" "GIT_AUTHOR_EMAIL=$git_email" "-e" "GIT_COMMITTER_EMAIL=$git_email")
+          fi
+          ;;
+        --gemini)
+          mkdir -p "$HOME/.gemini"
+          mounts+=("-v" "$HOME/.gemini:/home/user/.gemini:rw")
+          ;;
+        --copilot)
+          mkdir -p "$HOME/.copilot"
+          mounts+=("-v" "$HOME/.copilot:/home/user/.copilot:rw")
+          ;;
+        --npm)
+          mkdir -p "$HOME/.npm"
+          mounts+=("-v" "$HOME/.npm:/home/user/.npm:rw")
+          ;;
+        --opencode)
+          mkdir -p "$HOME/.local/share/opencode" "$HOME/.config/opencode" "$HOME/.cache/opencode"
+          mounts+=("-v" "$HOME/.local/share/opencode:/home/user/.local/share/opencode:rw")
+          mounts+=("-v" "$HOME/.config/opencode:/home/user/.config/opencode:rw")
+          mounts+=("-v" "$HOME/.cache/opencode:/home/user/.cache/opencode:rw")
+          ;;
         -v)  shift; mounts+=("-v" "$(expand_v "$1")") ;;
         -v*) mounts+=("-v" "$(expand_v "''${1#-v}")") ;;
         *)   extra_args+=("$1") ;;
@@ -203,37 +230,12 @@ let
       shift
     done
 
-    # Implicit mounts: only what tools need to function
-    ${lib.optionalString geminiSupport ''
-    mkdir -p "$HOME/.gemini"
-    mounts+=("-v" "$HOME/.gemini:/home/user/.gemini:rw")
-    ''}
-    ${lib.optionalString copilotSupport ''
-    mkdir -p "$HOME/.copilot"
-    mounts+=("-v" "$HOME/.copilot:/home/user/.copilot:rw")
-    ''}
-    ${lib.optionalString opencodeSupport ''
-    mkdir -p "$HOME/.local/share/opencode"
-    mounts+=("-v" "$HOME/.local/share/opencode:/home/user/.local/share/opencode:rw")
-    mkdir -p "$HOME/.config/opencode"
-    mounts+=("-v" "$HOME/.config/opencode:/home/user/.config/opencode:rw")
-    mkdir -p "$HOME/.cache/opencode"
-    mounts+=("-v" "$HOME/.cache/opencode:/home/user/.cache/opencode:rw")
-    ''}
-    ${lib.optionalString mcpSupport ''
-    mkdir -p "$HOME/.npm"
-    mounts+=("-v" "$HOME/.npm:/home/user/.npm:rw")
-    ''}
-    ${lib.optionalString gitSupport ''
-    [[ -f "$HOME/.gitconfig" ]] && mounts+=("-v" "$HOME/.gitconfig:/home/user/.gitconfig:ro")
-    ''}
-
-    ${lib.optionalString gitSupport ''
-    git_name=$(${pkgs.git}/bin/git config --global user.name 2>/dev/null || true)
-    git_email=$(${pkgs.git}/bin/git config --global user.email 2>/dev/null || true)
-    [[ -n "$git_name" ]]  && env_args+=("-e" "GIT_AUTHOR_NAME=$git_name"   "-e" "GIT_COMMITTER_NAME=$git_name")
-    [[ -n "$git_email" ]] && env_args+=("-e" "GIT_AUTHOR_EMAIL=$git_email" "-e" "GIT_COMMITTER_EMAIL=$git_email")
-    ''}
+    # Temp passwd/group so tools resolve username correctly inside container
+    passwd_tmp=$(mktemp)
+    group_tmp=$(mktemp)
+    trap 'rm -f "$passwd_tmp" "$group_tmp"' EXIT
+    printf 'root:x:0:0:root:/root:/bin/sh\nuser:x:%s:%s::/home/user:/bin/bash\nnobody:x:65534:65534:Nobody:/:/bin/sh\n' "$(id -u)" "$(id -g)" > "$passwd_tmp"
+    printf 'root:x:0:\nuser:x:%s:\nnobody:x:65534:\n' "$(id -g)" > "$group_tmp"
 
     env_args+=("-e" "TERM=''${TERM:-xterm-256color}")
     [[ -n "''${COLORTERM:-}" ]] && env_args+=("-e" "COLORTERM=$COLORTERM")
@@ -245,6 +247,8 @@ let
       --userns=keep-id \
       --workdir /workspace \
       -e HOME=/home/user \
+      -v "$passwd_tmp:/etc/passwd:ro" \
+      -v "$group_tmp:/etc/group:ro" \
       "''${mounts[@]}" \
       "''${env_args[@]}" \
       "''${extra_args[@]}" \
