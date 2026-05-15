@@ -238,18 +238,18 @@
         image = "plone/plone-backend:6.0.14";
         autoStart = true;
         user = "root";
-        extraOptions = [ "--net=host" ];
+        ports = [ "127.0.0.1:8080:8080" ];
         volumes = [ "/var/data/kingofsweden:/data" ];
       };
       volto = {
         image = "plone/plone-frontend:18.4.0";
         user = "root";
         autoStart = true;
-        extraOptions = [ "--net=host" ];
+        ports = [ "127.0.0.1:3000:3000" ];
         environment = {
           COREPACK_INTEGRITY_KEYS = "0";
           RAZZLE_API_PATH = "https://kingofsweden.info";
-          RAZZLE_INTERNAL_API_PATH = "http://127.0.0.1:8080/Plone";
+          RAZZLE_INTERNAL_API_PATH = "http://plone:8080/Plone";
         };
       };
       teehetkiClient = {
@@ -285,16 +285,17 @@
       litellmProxy = {
         # To proxy openai-type requests to azure-like requests.
         image = "ghcr.io/berriai/litellm:main-latest";
+        ports = [ "127.0.0.1:4000:4000" ];
         extraOptions =
-          [ "--net=host" "--env-file=/var/data/.secrets/litellm.env" ];
+          [ "--env-file=/var/data/.secrets/litellm.env" ];
         volumes = [ "/var/data/litellm/config.yaml:/app/config.yaml" ];
         cmd = [ "--config" "/app/config.yaml" ];
       };
       openWebui = {
         image = "miaucloud-nixos/open-webui:0.7.2";
-        ports = [ "127.0.0.1:8081:8080" ];
+        ports = [ "127.0.0.1:8081:8081" ];
         extraOptions =
-          [ "--net=host" "--env-file=/var/data/.secrets/openwebui.env" ];
+          [ "--env-file=/var/data/.secrets/openwebui.env" ];
         autoStart = true;
         environment = { PORT = "8081"; };
         volumes = [ "/var/data/openwebui_data:/app/backend/data" ];
@@ -303,28 +304,29 @@
         image = "docker.io/pgvector/pgvector:pg16";
         volumes = [ "/var/data/postgres_data:/var/lib/postgresql/data" ];
         autoStart = true;
-        extraOptions =
-          [ "--net=host" ];
+        ports = [ "127.0.0.1:5432:5432" ];
       };
       postgrest = {
         image = "docker.io/postgrest/postgrest:latest";
         autoStart = true;
+        ports = [ "127.0.0.1:4001:4001" ];
         environment = {
           PGRST_SERVER_PORT = "4001";
         };
         extraOptions =
-          [ "--net=host" "--env-file=/var/data/.secrets/postgrest.env" ];
+          [ "--env-file=/var/data/.secrets/postgrest.env" ];
       };
       logto = {
         # To init the logto db, go inside container:
-        # $ sudo podman run --net=host --env-file=/var/data/.secrets/logto.env --entrypoint="sh" -it svhd/logto:<version>
+        # $ sudo podman run --env-file=/var/data/.secrets/logto.env --entrypoint="sh" -it svhd/logto:<version>
         # and run:
         # $ npm run cli db seed
         # Sometimes this is needed too:
         # $ npm run cli db alt deploy
         image = "docker.io/svhd/logto:1.25";
+        ports = [ "127.0.0.1:3091:3091" "127.0.0.1:3092:3092" ];
         extraOptions =
-          [ "--net=host" "--env-file=/var/data/.secrets/logto.env" ];
+          [ "--env-file=/var/data/.secrets/logto.env" ];
         environment = {
           TRUST_PROXY_HEADER = "1";
           ENDPOINT = "https://auth-api.teekuningas.net";
