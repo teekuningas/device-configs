@@ -123,7 +123,11 @@
     devcontainer
     podman-compose
     slirp4netns
-    chromium
+    (chromium.override {
+      commandLineArgs = [
+        "--remote-debugging-port=9222"
+      ];
+    })
     nodejs
   ];
 
