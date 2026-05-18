@@ -274,7 +274,7 @@
         };
       };
       soitbeginsFrontend = {
-        image = "ghcr.io/teekuningas/soitbegins/soitbegins-frontend:0.3.0";
+        image = "ghcr.io/teekuningas/soitbegins/soitbegins-frontend:0.5.0";
         ports = [ "127.0.0.1:9011:9000" ];
         autoStart = true;
         environment = {
@@ -282,7 +282,7 @@
         };
       };
       soitbeginsServer = {
-        image = "ghcr.io/teekuningas/soitbegins/soitbegins-server:0.3.0";
+        image = "ghcr.io/teekuningas/soitbegins/soitbegins-server:0.5.0";
         ports = [ "127.0.0.1:8011:8765" ];
         autoStart = true;
         environment = {
@@ -290,7 +290,7 @@
         };
       };
       soitbeginsSimulation = {
-        image = "ghcr.io/teekuningas/soitbegins/soitbegins-simulation:0.3.0";
+        image = "ghcr.io/teekuningas/soitbegins/soitbegins-simulation:0.5.0";
         autoStart = true;
         extraOptions = [ "--memory=256m" "--memory-swap=384m" ];
       };
