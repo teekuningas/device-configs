@@ -1,5 +1,4 @@
 { config, pkgs, lib, ... }:
-
 {
   environment.systemPackages = with pkgs; [
     weechat
@@ -13,6 +12,12 @@
 
   boot.tmp.cleanOnBoot = true;
   zramSwap.enable = true;
+
+  # Disk-backed swap as safety net (zram alone may OOM under load)
+  swapDevices = [{
+    device = "/var/swapfile";
+    size = 2048;  # 2GB
+  }];
 
   # Set your time zone.
   time.timeZone = "Europe/Helsinki";
@@ -269,18 +274,25 @@
         };
       };
       soitbeginsFrontend = {
-        image = "ghcr.io/teekuningas/soitbegins/soitbegins-frontend:0.1.0";
+        image = "ghcr.io/teekuningas/soitbegins/soitbegins-frontend:0.2.0";
         ports = [ "127.0.0.1:9011:9000" ];
         autoStart = true;
         environment = {
           SERVER_API = "wss://soitbegins.teekuningas.net/api";
-          MODEL_EARTH = "https://soitbegins.teekuningas.net/earth.zip";
         };
       };
-      soitbeginsBackend = {
-        image = "ghcr.io/teekuningas/soitbegins/soitbegins-backend:0.1.0";
+      soitbeginsServer = {
+        image = "ghcr.io/teekuningas/soitbegins/soitbegins-server:0.2.0";
         ports = [ "127.0.0.1:8011:8765" ];
         autoStart = true;
+        environment = {
+          SIM_ZMQ_ADDR = "tcp://soitbeginsSimulation:5555";
+        };
+      };
+      soitbeginsSimulation = {
+        image = "ghcr.io/teekuningas/soitbegins/soitbegins-simulation:0.2.0";
+        autoStart = true;
+        extraOptions = [ "--memory=256m" "--memory-swap=384m" ];
       };
       litellmProxy = {
         # To proxy openai-type requests to azure-like requests.
