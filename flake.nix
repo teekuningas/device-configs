@@ -18,7 +18,21 @@
         inherit system;
         config.allowUnfree = true;
       };
+      supportedSystems = [ "x86_64-linux" "aarch64-linux" ];
+      forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
     in {
+      packages = forAllSystems (system:
+        let
+          pkgs = unstable-pkgs-for system;
+          teepkgs = inputs.teepkgs.packages.${system};
+        in {
+          safepilot = teepkgs.safepilot;
+          safepilot-with-copilot = teepkgs.safepilot-with-copilot;
+          safepilot-full = teepkgs.safepilot-full;
+          default = self.packages.${system}.safepilot;
+        }
+      );
+
       nixosConfigurations.procyon-nixos = nixpkgs-25-05.lib.nixosSystem {
         system = "x86_64-linux";
         specialArgs = { inherit inputs; unstable-pkgs = unstable-pkgs-for "x86_64-linux"; };

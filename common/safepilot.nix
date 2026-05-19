@@ -1,4 +1,4 @@
-{ config, pkgs, lib, ... }:
+{ config, pkgs, lib, inputs, ... }:
 
 let
   cfg = config.programs.safepilot;
@@ -34,7 +34,7 @@ in {
   config = lib.mkIf cfg.enable {
     nixpkgs.overlays = [
       (final: prev: {
-        safepilot = final.callPackage ./pkgs/safepilot {
+        safepilot = inputs.teepkgs.packages.${final.system}.safepilot.override {
           defaultArgs  = cfg.defaultArgs;
           withCopilot  = cfg.withCopilot;
           withGemini   = cfg.withGemini;
