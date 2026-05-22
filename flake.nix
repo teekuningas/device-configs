@@ -71,7 +71,7 @@
       };
       nixosConfigurations.miaupad-nixos = nixpkgs-25-05.lib.nixosSystem {
         system = "x86_64-linux";
-        specialArgs = { inherit inputs; };
+        specialArgs = { inherit inputs; unstable-pkgs = unstable-pkgs-for "x86_64-linux"; };
         modules = [
           ./common/base.nix
           ./common/graphical.nix

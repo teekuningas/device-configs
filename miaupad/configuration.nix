@@ -2,12 +2,18 @@
 # your system. Help is available in the configuration.nix(5) man page, on
 # https://search.nixos.org/options and in the NixOS manual (`nixos-help`).
 
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, unstable-pkgs, ... }:
 
 {
   imports = [
     # Include the results of the hardware scan.
     ./hardware-configuration.nix
+  ];
+
+  nixpkgs.overlays = [
+    (final: prev: {
+      gemini-cli = unstable-pkgs.gemini-cli;
+    })
   ];
 
   # Use the GRUB 2 boot loader.
@@ -17,15 +23,8 @@
 
   networking.hostName = "miaupad-nixos"; # Define your hostname.
 
-  networking.wireless.enable =
-    true; # Enables wireless support via wpa_supplicant.
-  networking.wireless.userControlled.enable = true;
-  networking.wireless.networks.unifihome.pskRaw = 
-    "8b194126ceb598afe9bfbdc7d8be4aa1527007c548bcb9200ff543acce760e9c";
-  networking.wireless.networks.miaurouter.pskRaw =
-    "0b965df6955e2bb67e616eb784b6d750774424a72fe24cd747885ca366f60dd0";
-  networking.wireless.networks.Kahvipoytaverkko.pskRaw =
-    "521da256d31acd0ef1e3c33294594c4c30cced0330580ba0a4e6db6ec2b4bfe4";
+  networking.networkmanager.enable = true;
+  programs.nm-applet.enable = true;
 
   # The global useDHCP flag is deprecated, therefore explicitly set to false here.
   # Per-interface useDHCP will be mandatory in the future, so this generated config
@@ -77,7 +76,7 @@
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.zairex = {
     isNormalUser = true;
-    extraGroups = [ "wheel" ];
+    extraGroups = [ "wheel" "networkmanager" ];
   };
 
   powerManagement.powertop.enable = true;
@@ -86,6 +85,7 @@
   environment.systemPackages = with pkgs; [
     powertop
     upower
+    gemini-cli
     (python312.withPackages (ps: with ps; [
       numpy
       requests
