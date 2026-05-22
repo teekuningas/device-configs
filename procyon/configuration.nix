@@ -130,9 +130,6 @@ in
     packages = with pkgs; [ ];
   };
 
-  fonts.packages = builtins.filter lib.attrsets.isDerivation
-    (builtins.attrValues pkgs.nerd-fonts);
-
   environment.systemPackages = with pkgs; [
     (python312.withPackages (ps: with ps; [
       numpy

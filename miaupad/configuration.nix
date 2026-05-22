@@ -49,6 +49,9 @@
     sddm.enable = true;
     defaultSession = "none+awesome";
   };
+  services.xserver.displayManager.sessionCommands = ''
+    ${pkgs.xorg.xrdb}/bin/xrdb -merge <<< "XTerm*termName: xterm-256color"
+  '';
 
   # Enable the X11 windowing system.
   services.xserver = {
@@ -96,6 +99,7 @@
 
   # Enable the OpenSSH daemon.
   services.openssh.enable = true;
+  programs.ssh.startAgent = true;
 
   # Enable CUPS
   services.printing.enable = true;
