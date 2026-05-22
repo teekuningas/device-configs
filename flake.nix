@@ -61,6 +61,7 @@
         system = "x86_64-linux";
         specialArgs = { inherit inputs; unstable-pkgs = unstable-pkgs-for "x86_64-linux"; };
         modules = [
+          nixos-hardware.nixosModules.lenovo-thinkpad-t440s
           ./common/base.nix
           ./common/graphical.nix
           ./miaupad/configuration.nix

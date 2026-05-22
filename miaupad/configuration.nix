@@ -66,7 +66,17 @@
   services.xserver.xkb.layout = "fi";
   services.xserver.xkb.options = "eurosign:e";
 
-  services.libinput.enable = true;
+  services.libinput = {
+    enable = true;
+    touchpad = {
+      clickMethod = "buttonareas";
+      tapping = true;
+      naturalScrolling = true;
+      disableWhileTyping = true;
+    };
+  };
+
+  boot.kernelParams = [ "psmouse.synaptics_intertouch=1" ];
 
   # # Enable opengl
   hardware.graphics.enable = true;
