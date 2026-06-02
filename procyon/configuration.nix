@@ -1,11 +1,11 @@
 { config, pkgs, options, lib, inputs, unstable-pkgs, ... }:
 
 let
-  # Build electron 39 with the system's mesa/libs to avoid GPU driver mismatch
+  # Build electron 40 with the system's mesa/libs to avoid GPU driver mismatch
   mkElectron = pkgs.callPackage
     "${pkgs.path}/pkgs/development/tools/electron/binary/generic.nix" {};
-  electron-39 = mkElectron "39.0.0" {
-    x86_64-linux = "sha256-RSDL2S7u03DXz9KxxgE1ZHwCuPY01hedipo/ZLZLry8=";
+  electron-40 = mkElectron "40.10.2" {
+    x86_64-linux = "sha256-AkYgFABgCsCJxRo28VqARbXbcjukK4ZPcyqbTkhzHpc=";
   };
 
   vasara-pkg = inputs.vasara-pkgs.packages.x86_64-linux.camunda-modeler;
@@ -13,7 +13,7 @@ let
     nativeBuildInputs = [ pkgs.makeWrapper ];
   } ''
     mkdir -p $out/bin
-    makeWrapper ${electron-39}/bin/electron $out/bin/camunda-modeler \
+    makeWrapper ${electron-40}/bin/electron $out/bin/camunda-modeler \
       --prefix PATH : "${unstable-pkgs.temurin-jre-bin-11}/bin" \
       --add-flags "${vasara-pkg}/var/lib/camunda/app.asar"
   '';
@@ -68,8 +68,8 @@ in
   services.xserver.enable = true;
 
   # Enable the GNOME Desktop Environment.
-  services.xserver.displayManager.gdm.enable = true;
-  services.xserver.desktopManager.gnome.enable = true;
+  services.displayManager.gdm.enable = true;
+  services.desktopManager.gnome.enable = true;
 
   services.thermald.enable = true;
   # powerManagement.powertop.enable = true;
@@ -131,7 +131,7 @@ in
   };
 
   environment.systemPackages = with pkgs; [
-    (python312.withPackages (ps: with ps; [
+    (python313.withPackages (ps: with ps; [
       numpy
       cryptography
       requests
@@ -165,7 +165,6 @@ in
     codex
     opencode
     vagrant
-    llama-cpp-vulkan
     github-copilot-cli
     devenv
     slirp4netns
@@ -191,18 +190,15 @@ in
         glib
         libGL
         libxkbcommon
-        xorg.libxcb
-        xorg.libX11
-        xorg.xcbutilwm
-        xorg.xcbutilimage
-        xorg.xcbutilkeysyms
-        xorg.xcbutilrenderutil
+        libxcb
+        libx11
+        libxcb-wm
+        libxcb-image
+        libxcb-keysyms
+        libxcb-render-util
       ]
     );
   };
-
-  # set ssh-agent to cache keys
-  programs.ssh.startAgent = true;
 
   nix.settings.trusted-users = [ "erpipehe" ];
 
