@@ -175,6 +175,7 @@ in
         "--remote-debugging-port=9222"
       ];
     })
+    libreoffice
   ];
 
   # networking.extraHosts = "130.234.6.208 moniviestin.jyu.fi";
