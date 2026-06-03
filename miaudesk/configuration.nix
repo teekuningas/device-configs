@@ -139,9 +139,10 @@
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
   programs.safepilot = {
     enable = true;
-    defaultArgs = [ "--git" "--copilot" "--gemini" ];
+    defaultArgs = [ "--git" "--copilot" "--gemini" "--opencode" ];
     withCopilot = true;
     withGemini = true;
+    withOpencode = true;
   };
 
   system.stateVersion = "24.05"; # Did you read the comment?
