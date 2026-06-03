@@ -48,11 +48,6 @@
       codex = unstable-pkgs.codex;
       opencode = unstable-pkgs.opencode;
       llama-cpp = unstable-pkgs.llama-cpp;
-      github-copilot-cli = unstable-pkgs.github-copilot-cli;
-
-      #github-copilot-cli = final.callPackage ../common/pkgs/github-copilot-cli {
-      #  github-copilot-cli = unstable-pkgs.github-copilot-cli;
-      #};
     })
   ];
 
@@ -91,7 +86,7 @@
   #};
 
   environment.systemPackages = with pkgs; [
-    (python312.withPackages (ps: with ps; [
+    (python313.withPackages (ps: with ps; [
       numpy
       cryptography
       requests

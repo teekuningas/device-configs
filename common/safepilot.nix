@@ -34,7 +34,7 @@ in {
   config = lib.mkIf cfg.enable {
     nixpkgs.overlays = [
       (final: prev: {
-        safepilot = inputs.teepkgs.packages.${final.system}.safepilot.override {
+        safepilot = final.callPackage (inputs.teepkgs + "/pkgs/safepilot") {
           defaultArgs  = cfg.defaultArgs;
           withCopilot  = cfg.withCopilot;
           withGemini   = cfg.withGemini;
