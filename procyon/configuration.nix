@@ -23,7 +23,6 @@ in
     (final: prev: {
       # up-to-date versions
       gemini-cli = unstable-pkgs.gemini-cli;
-      codex = unstable-pkgs.codex;
       opencode = unstable-pkgs.opencode;
       llama-cpp-vulkan = unstable-pkgs.llama-cpp-vulkan;
     })
@@ -161,7 +160,6 @@ in
     spotify
     teams-for-linux
     gemini-cli
-    codex
     opencode
     vagrant
     github-copilot-cli
