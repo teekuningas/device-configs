@@ -45,7 +45,6 @@
     (final: prev: {
       # up-to-date versions
       gemini-cli = unstable-pkgs.gemini-cli;
-      codex = unstable-pkgs.codex;
       opencode = unstable-pkgs.opencode;
       llama-cpp = unstable-pkgs.llama-cpp;
     })
@@ -110,7 +109,6 @@
     cudatoolkit
     nvidia-container-toolkit
     gemini-cli
-    codex
     opencode
     llama-cpp
     github-copilot-cli
