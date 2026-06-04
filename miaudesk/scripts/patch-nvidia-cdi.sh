@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -e
 
+echo "Generating CDI specification..."
+sudo nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml
+
 echo "Patching /etc/cdi/nvidia.yaml..."
 
 # 1. Fix the executable path
@@ -10,7 +13,7 @@ sudo sed -i 's|path: /usr/bin/nvidia-cdi-hook|path: /run/current-system/sw/bin/n
 # 2. Fix the arguments
 # Replaces "- nvidia-cdi-hook" with "- nvidia-ctk" followed by a new line with "- hook"
 # This changes the command from executing "nvidia-cdi-hook ..." to "nvidia-ctk hook ..."
-sudo sed -i 's|    - nvidia-cdi-hook|    - nvidia-ctk\n    - hook|g' /etc/cdi/nvidia.yaml
+sudo sed -i 's|^\([[:space:]]*\)- nvidia-cdi-hook|\1- nvidia-ctk\n\1- hook|g' /etc/cdi/nvidia.yaml
 
 echo "Done. File patched."
 
