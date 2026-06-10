@@ -691,11 +691,11 @@
         "nixpkgs": "nixpkgs_4"
       },
       "locked": {
-        "lastModified": 1780936465,
-        "narHash": "sha256-BacrGHkbK0YXvD2k+3UnlmECu0CV5aQYd3rLW3xP48w=",
+        "lastModified": 1781067844,
+        "narHash": "sha256-f+AC0WA9fo8RlxWg/MzBnULt17D7cVNCh0dBLQ77/fE=",
         "owner": "teekuningas",
         "repo": "pkgs",
-        "rev": "22e978003a3b0a31dc1c243cbdf454fbee68a6e1",
+        "rev": "5f133ffe125e68c8c193ae93cc510a9ddb8e30e5",
         "type": "github"
       },
       "original": {

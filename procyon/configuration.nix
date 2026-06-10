@@ -26,6 +26,7 @@ in
       antigravity-cli = unstable-pkgs.antigravity-cli;
       opencode = unstable-pkgs.opencode;
       llama-cpp-vulkan = unstable-pkgs.llama-cpp-vulkan;
+      agentsview = final.callPackage (inputs.teepkgs + "/pkgs/agentsview") {};
     })
   ];
 
@@ -165,6 +166,7 @@ in
     opencode
     vagrant
     github-copilot-cli
+    agentsview
     devenv
     slirp4netns
     pavucontrol
