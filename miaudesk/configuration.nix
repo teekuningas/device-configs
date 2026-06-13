@@ -46,7 +46,8 @@
       # up-to-date versions
       gemini-cli = unstable-pkgs.gemini-cli;
       opencode = unstable-pkgs.opencode;
-      llama-cpp = unstable-pkgs.llama-cpp;
+      claude-code = unstable-pkgs.claude-code;
+      antigravity-cli = unstable-pkgs.antigravity-cli;
     })
   ];
 
@@ -110,10 +111,9 @@
     nvidia-container-toolkit
     gemini-cli
     opencode
-    llama-cpp
+    claude-code
     github-copilot-cli
     devenv
-    devcontainer
     podman-compose
     slirp4netns
     (chromium.override {
@@ -137,10 +137,11 @@
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
   programs.safepilot = {
     enable = true;
-    defaultArgs = [ "--git" "--copilot" "--gemini" "--opencode" ];
+    defaultArgs = [ "--git" "--copilot" "--claude-code" "--opencode" "--gemini" ];
     withCopilot = true;
     withGemini = true;
     withOpencode = true;
+    withClaudeCode = true;
   };
 
   system.stateVersion = "24.05"; # Did you read the comment?

@@ -29,6 +29,13 @@ in {
       default = false;
       description = "Include opencode in the container.";
     };
+
+    withClaudeCode = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = "Include claude-code in the container.";
+    };
+
   };
 
   config = lib.mkIf cfg.enable {
@@ -39,6 +46,7 @@ in {
           withCopilot  = cfg.withCopilot;
           withGemini   = cfg.withGemini;
           withOpencode = cfg.withOpencode;
+          withClaudeCode = cfg.withClaudeCode;
         };
       })
     ];
