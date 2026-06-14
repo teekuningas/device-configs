@@ -48,6 +48,7 @@
       opencode = unstable-pkgs.opencode;
       claude-code = unstable-pkgs.claude-code;
       antigravity-cli = unstable-pkgs.antigravity-cli;
+      agentsview = unstable-pkgs.callPackage (inputs.teepkgs + "/pkgs/agentsview") {};
     })
   ];
 
@@ -113,6 +114,7 @@
     opencode
     claude-code
     github-copilot-cli
+    agentsview
     devenv
     podman-compose
     slirp4netns
