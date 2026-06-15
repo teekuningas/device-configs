@@ -128,6 +128,9 @@
 
   # set ssh-agent to cache keys for e.g. jupyterlab-git
   programs.ssh.startAgent = true;
+  programs.ssh.extraConfig = ''
+    AddKeysToAgent yes
+  '';
 
   nix.settings.trusted-users = [ "zairex" ];
 
