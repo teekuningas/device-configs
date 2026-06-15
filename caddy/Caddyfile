@@ -1,7 +1,7 @@
 http://pi.hole {
     # pihole dashboard
     handle {
-        reverse_proxy localhost:1080
+        reverse_proxy localhost:8080
     }
 }
 
