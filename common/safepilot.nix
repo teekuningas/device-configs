@@ -36,6 +36,12 @@ in {
       description = "Include claude-code in the container.";
     };
 
+    withPi = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = "Include pi-coding-agent in the container.";
+    };
+
   };
 
   config = lib.mkIf cfg.enable {
@@ -47,6 +53,7 @@ in {
           withGemini   = cfg.withGemini;
           withOpencode = cfg.withOpencode;
           withClaudeCode = cfg.withClaudeCode;
+          withPi = cfg.withPi;
         };
       })
     ];

@@ -47,6 +47,7 @@
       gemini-cli = unstable-pkgs.gemini-cli;
       opencode = unstable-pkgs.opencode;
       claude-code = unstable-pkgs.claude-code;
+      pi-coding-agent = unstable-pkgs.pi-coding-agent;
       antigravity-cli = unstable-pkgs.antigravity-cli;
       agentsview = unstable-pkgs.callPackage (inputs.teepkgs + "/pkgs/agentsview") {};
     })
@@ -113,6 +114,7 @@
     gemini-cli
     opencode
     claude-code
+    pi-coding-agent
     github-copilot-cli
     agentsview
     devenv
@@ -142,11 +144,12 @@
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
   programs.safepilot = {
     enable = true;
-    defaultArgs = [ "--git" "--copilot" "--claude-code" "--opencode" "--gemini" ];
+    defaultArgs = [ "--git" "--copilot" "--claude-code" "--opencode" "--gemini" "--pi" ];
     withCopilot = true;
     withGemini = true;
     withOpencode = true;
     withClaudeCode = true;
+    withPi = true;
   };
 
   system.stateVersion = "24.05"; # Did you read the comment?

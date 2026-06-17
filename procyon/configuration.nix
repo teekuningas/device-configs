@@ -26,6 +26,7 @@ in
       antigravity-cli = unstable-pkgs.antigravity-cli;
       opencode = unstable-pkgs.opencode;
       claude-code = unstable-pkgs.claude-code;
+      pi-coding-agent = unstable-pkgs.pi-coding-agent;
       llama-cpp-vulkan = unstable-pkgs.llama-cpp-vulkan;
       agentsview = final.callPackage (inputs.teepkgs + "/pkgs/agentsview") {};
     })
@@ -166,6 +167,7 @@ in
     antigravity-cli
     opencode
     claude-code
+    pi-coding-agent
     vagrant
     github-copilot-cli
     agentsview
@@ -232,11 +234,12 @@ in
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
   programs.safepilot = {
     enable = true;
-    defaultArgs = [ "--git" "--copilot" "--gemini" "--opencode" "--npm" "--claude-code" ];
+    defaultArgs = [ "--git" "--copilot" "--gemini" "--opencode" "--npm" "--claude-code" "--pi" ];
     withCopilot = true;
     withGemini = true;
     withOpencode = true;
     withClaudeCode = true;
+    withPi = true;
   };
 
   system.stateVersion = "24.05"; # Did you read the comment?
