@@ -139,7 +139,6 @@ in
       requests
       flake8
       twine
-      datasette
       jupyterlab
       jupytext
       ipywidgets
