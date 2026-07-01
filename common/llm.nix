@@ -12,10 +12,10 @@
       ];
 
       github-copilot-cli = unstable-pkgs.github-copilot-cli.overrideAttrs (oldAttrs: rec {
-        version = "1.0.62";
+        version = "1.0.67";
         src = unstable-pkgs.fetchurl {
           url = "https://github.com/github/copilot-cli/releases/download/v${version}/copilot-linux-x64.tar.gz";
-          hash = "sha256-y7SkAMhqGHYx3ta/gXeq358ohvylqeJ5mESRUaKM88g=";
+          hash = "sha256-xtJR3iDRRBXr1q8Av7ao44VAlLSfpJ+3898r+mT22zs=";
         };
         nativeBuildInputs = [ unstable-pkgs.makeBinaryWrapper unstable-pkgs.autoPatchelfHook ];
         buildInputs = [ unstable-pkgs.stdenv.cc.cc.lib ];
