@@ -19,6 +19,30 @@
     size = 2048;  # 2GB
   }];
 
+  # Keep the system lean without being aggressive:
+  # - GC weekly, but retain every generation from the last 30 days so we can
+  #   always roll back a month's worth of rebuilds (current is always kept).
+  # - Hard-link identical store paths to reclaim space.
+  # - Bound the GRUB boot menu so it doesn't grow unbounded.
+  nix.gc = {
+    automatic = true;
+    dates = "weekly";
+    options = "--delete-older-than 30d";
+  };
+  nix.optimise = {
+    automatic = true;
+    dates = [ "weekly" ];
+  };
+  boot.loader.grub.configurationLimit = 20;
+
+  # Prune unused podman images/networks weekly (--all also drops old image
+  # versions left behind by podman-auto-update; running containers keep theirs).
+  virtualisation.podman.autoPrune = {
+    enable = true;
+    dates = "weekly";
+    flags = [ "--all" ];
+  };
+
   # Set your time zone.
   time.timeZone = "Europe/Helsinki";
 
@@ -173,14 +197,6 @@
 
     virtualHosts."openwebui.teekuningas.net".extraConfig = ''
       reverse_proxy http://localhost:8081
-    '';
-
-    virtualHosts."s3-api.teekuningas.net".extraConfig = ''
-      reverse_proxy http://localhost:9090
-    '';
-
-    virtualHosts."s3-ui.teekuningas.net".extraConfig = ''
-      reverse_proxy http://localhost:9091
     '';
 
     virtualHosts."auth-api.teekuningas.net".extraConfig = ''
