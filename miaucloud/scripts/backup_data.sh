@@ -16,7 +16,6 @@ DATA_DIRS=(
   kingofsweden
   litellm
   meggie
-  minio_data
   openwebui_data
   .secrets
   static

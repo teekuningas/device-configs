@@ -1,4 +1,4 @@
-{ config, pkgs, lib, ... }:
+{ pkgs, ... }:
 {
   environment.systemPackages = with pkgs; [
     weechat
@@ -131,7 +131,7 @@
     '';
 
     virtualHosts."teehetki.teekuningas.net".extraConfig = ''
-      basicauth * {
+      basic_auth * {
         plonerules $2a$14$OpYh7I1bR4Uq.c6YAk1S7O1RBxK/1Z2fMPmFRciv72XGdQNmOKpxO
       }
 
@@ -313,6 +313,7 @@
       litellmProxy = {
         # To proxy openai-type requests to azure-like requests.
         image = "ghcr.io/berriai/litellm:main-latest";
+        autoStart = true;
         ports = [ "127.0.0.1:4000:4000" ];
         extraOptions =
           [ "--env-file=/var/data/.secrets/litellm.env" ];
@@ -415,8 +416,7 @@
 
     };
   };
-  # Require password for sudo (security hardening)
-  # Uncomment the line below if you need passwordless sudo
+  # Passwordless sudo for wheel users (SSH access is key-only).
   security.sudo.wheelNeedsPassword = false;
 
   system.stateVersion = "22.11";

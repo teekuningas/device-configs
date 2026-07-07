@@ -1,4 +1,4 @@
-{ config, options, lib, pkgs, inputs, unstable-pkgs, ... }:
+{ lib, pkgs, ... }:
 
 {
   wsl.enable = true;
@@ -11,47 +11,15 @@
   # Enable pulseaudio to get working audio.
   services.pulseaudio.enable = true;
 
-  # Set up nix-ld to allow using non-native nvidia drivers.
-  programs.nix-ld = {
-    enable = true;
-    # for uv
-    libraries = options.programs.nix-ld.libraries.default ++ (
-      with pkgs; [
-        dbus
-        fontconfig
-        freetype
-        glib
-        libGL
-        libxkbcommon
-        xorg.libxcb
-        xorg.libX11
-        xorg.xcbutilwm
-        xorg.xcbutilimage
-        xorg.xcbutilkeysyms
-        xorg.xcbutilrenderutil
-      ]
-    );
-  };
+  # WSL-specific library path overrides so nvidia-smi / cuda work with the
+  # Windows-provided drivers (nix-ld itself is set up in common/workstation.nix).
   environment.variables = {
-    # for nvidia-smi / cuda to work
     NIX_LD_LIBRARY_PATH = lib.mkForce (lib.makeLibraryPath [
       "/run/current-system/sw/share/nix-ld"
       "/usr/lib/wsl"
     ]);
   };
   environment.sessionVariables.LD_LIBRARY_PATH = ["/run/opengl-driver/lib/"];
-
-  nixpkgs.overlays = [
-    (final: prev: {
-      # up-to-date versions
-      gemini-cli = unstable-pkgs.gemini-cli;
-      opencode = unstable-pkgs.opencode;
-      claude-code = unstable-pkgs.claude-code;
-      pi-coding-agent = unstable-pkgs.pi-coding-agent;
-      antigravity-cli = unstable-pkgs.antigravity-cli;
-      agentsview = unstable-pkgs.callPackage (inputs.teepkgs + "/pkgs/agentsview") {};
-    })
-  ];
 
   ## Note, to make nvidia work within containers, it was necessary to run nvidia-ctk.
   ## The command to generate the cdi was:
@@ -64,68 +32,12 @@
   #   daemon.settings.features.cdi = true;
   # };
 
-  virtualisation = {
-    containers.containersConf.settings.network.default_rootless_network_cmd = "slirp4netns";
-    podman = {
-      enable = true;
-      dockerCompat = true;
-      defaultNetwork.settings.dns_enabled = true;
-    };
-  };
-  
-  # To mitigate problem with "trigger-limit-hit" for podman.service
-  systemd.user.sockets.podman.socketConfig = {
-    TriggerLimitIntervalSec = "10s";
-    TriggerLimitBurst = 1000;
-  };
-  # To remove problem of missing newuidmap binary for podman.service
-  systemd.user.services.podman.path = [ "/run/wrappers/" ];
-
-  #users.users.zairex = {
-  #  extraGroups = [
-  #    "podman"
-  #  ];
-  #};
+  # needed to fix podman dns (the rest of podman is in common/workstation.nix)
+  virtualisation.podman.defaultNetwork.settings.dns_enabled = true;
 
   environment.systemPackages = with pkgs; [
-    (python313.withPackages (ps: with ps; [
-      numpy
-      cryptography
-      requests
-      flake8
-      twine
-      datasette
-      jupyterlab
-      jupytext
-      ipywidgets
-      matplotlib
-      scipy
-      pandas
-      geopandas
-      folium
-      llm
-      llm-azure
-      llm-gemini
-    ]))
-    # llm
-    uv
     cudatoolkit
     nvidia-container-toolkit
-    gemini-cli
-    opencode
-    claude-code
-    pi-coding-agent
-    github-copilot-cli
-    agentsview
-    devenv
-    podman-compose
-    slirp4netns
-    (chromium.override {
-      commandLineArgs = [
-        "--remote-debugging-port=9222"
-      ];
-    })
-    nodejs
   ];
 
   # set ssh-agent to cache keys for e.g. jupyterlab-git
@@ -136,21 +48,10 @@
 
   nix.settings.trusted-users = [ "zairex" ];
 
-  # This value determines the NixOS release from which the default
-  # settings for stateful data, like file locations and database versions
-  # on your system were taken. It's perfectly fine and recommended to leave
-  # this value at the release version of the first install of this system.
-  # Before changing this value read the documentation for this option
-  # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
-  programs.safepilot = {
-    enable = true;
-    defaultArgs = [ "--git" "--copilot" "--claude-code" "--opencode" "--gemini" "--pi" ];
-    withCopilot = true;
-    withGemini = true;
-    withOpencode = true;
-    withClaudeCode = true;
-    withPi = true;
-  };
+  # Runtime mount options for the safepilot launcher (see common/agents.nix
+  # for the build-time agent selection).
+  programs.safepilot.defaultArgs =
+    [ "--git" "--copilot" "--claude-code" "--opencode" "--gemini" "--pi" ];
 
-  system.stateVersion = "24.05"; # Did you read the comment?
+  system.stateVersion = "24.05";
 }

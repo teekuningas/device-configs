@@ -2,7 +2,6 @@
   description = "nixos configs";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     nixpkgs-26-05.url = "github:NixOS/nixpkgs/nixos-26.05";
     nixpkgs-25-11.url = "github:NixOS/nixpkgs/nixos-25.11";
     nixpkgs-small.url = "github:NixOS/nixpkgs/nixos-unstable-small";
@@ -13,24 +12,24 @@
   };
 
   outputs =
-    { self, nixpkgs, nixpkgs-26-05, nixpkgs-25-11, nixpkgs-small, nixos-hardware, nixos-wsl, ... }@inputs:
+    { self, nixpkgs-26-05, nixpkgs-25-11, nixpkgs-small, nixos-hardware, nixos-wsl, ... }@inputs:
     let
-      unstable-pkgs-for = system: import nixpkgs-small {
-        inherit system;
+      # Fresh packages (e.g. AI agent CLIs) that shouldn't wait for the
+      # stable release cycle.
+      unstable-pkgs = import nixpkgs-small {
+        system = "x86_64-linux";
         config.allowUnfree = true;
       };
-      supportedSystems = [ "x86_64-linux" "aarch64-linux" ];
-      forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
     in {
       nixosConfigurations.procyon-nixos = nixpkgs-26-05.lib.nixosSystem {
         system = "x86_64-linux";
-        specialArgs = { inherit inputs; unstable-pkgs = unstable-pkgs-for "x86_64-linux"; };
+        specialArgs = { inherit inputs unstable-pkgs; };
         modules = [
           nixos-hardware.nixosModules.dell-precision-5490
           ./common/base.nix
           ./common/graphical.nix
-          ./common/llm.nix
-          ./common/safepilot.nix
+          ./common/workstation.nix
+          ./common/agents.nix
           ./procyon/hardware-configuration.nix
           ./procyon/configuration.nix
         ];
@@ -48,19 +47,19 @@
       };
       nixosConfigurations.miaudesk-nixos = nixpkgs-25-11.lib.nixosSystem {
         system = "x86_64-linux";
-        specialArgs = { inherit inputs; unstable-pkgs = unstable-pkgs-for "x86_64-linux"; };
+        specialArgs = { inherit inputs unstable-pkgs; };
         modules = [
           nixos-wsl.nixosModules.default
           ./common/base.nix
           ./common/graphical.nix
-          ./common/llm.nix
-          ./common/safepilot.nix
+          ./common/workstation.nix
+          ./common/agents.nix
           ./miaudesk/configuration.nix
         ];
       };
       nixosConfigurations.miaupad-nixos = nixpkgs-25-11.lib.nixosSystem {
         system = "x86_64-linux";
-        specialArgs = { inherit inputs; unstable-pkgs = unstable-pkgs-for "x86_64-linux"; };
+        specialArgs = { inherit inputs unstable-pkgs; };
         modules = [
           nixos-hardware.nixosModules.lenovo-thinkpad-t440s
           ./common/base.nix

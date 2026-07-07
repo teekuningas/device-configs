@@ -1,4 +1,4 @@
-{ config, pkgs, options, lib, inputs, unstable-pkgs, ... }:
+{ config, pkgs, inputs, unstable-pkgs, ... }:
 
 let
   # Build electron 40 with the system's mesa/libs to avoid GPU driver mismatch
@@ -21,14 +21,7 @@ in
 {
   nixpkgs.overlays = [
     (final: prev: {
-      # up-to-date versions
-      gemini-cli = unstable-pkgs.gemini-cli;
-      antigravity-cli = unstable-pkgs.antigravity-cli;
-      opencode = unstable-pkgs.opencode;
-      claude-code = unstable-pkgs.claude-code;
-      pi-coding-agent = unstable-pkgs.pi-coding-agent;
       llama-cpp-vulkan = unstable-pkgs.llama-cpp-vulkan;
-      agentsview = final.callPackage (inputs.teepkgs + "/pkgs/agentsview") {};
     })
   ];
 
@@ -129,118 +122,31 @@ in
     isNormalUser = true;
     description = "Erkka";
     extraGroups = [ "networkmanager" "wheel" "libvirtd" ];
-    packages = with pkgs; [ ];
   };
 
   environment.systemPackages = with pkgs; [
-    (python313.withPackages (ps: with ps; [
-      numpy
-      cryptography
-      requests
-      flake8
-      twine
-      jupyterlab
-      jupytext
-      ipywidgets
-      matplotlib
-      scipy
-      pandas
-      seaborn
-      statsmodels
-      rasterio
-      geopandas
-      folium
-      llm
-      llm-azure
-    ]))
-    uv
-    nodejs
     pnpm
     obsidian
-    podman
-    podman-compose
     powertop
     spotify
     teams-for-linux
-    gemini-cli
-    antigravity-cli
-    opencode
-    claude-code
-    pi-coding-agent
     vagrant
-    github-copilot-cli
-    agentsview
-    devenv
-    slirp4netns
     pavucontrol
     camunda-modeler
-    (chromium.override {
-      commandLineArgs = [
-        "--remote-debugging-port=9222"
-      ];
-    })
     libreoffice
   ];
 
   # networking.extraHosts = "130.234.6.208 moniviestin.jyu.fi";
 
-  # For uv
-  programs.nix-ld = {
-    enable = true;
-    libraries = options.programs.nix-ld.libraries.default ++ (
-      with pkgs; [
-        dbus
-        fontconfig
-        freetype
-        glib
-        libGL
-        libxkbcommon
-        libxcb
-        libx11
-        libxcb-wm
-        libxcb-image
-        libxcb-keysyms
-        libxcb-render-util
-      ]
-    );
-  };
-
   nix.settings.trusted-users = [ "erpipehe" ];
-
-  virtualisation = {
-    containers.containersConf.settings.network.default_rootless_network_cmd = "slirp4netns";
-    podman = {
-      enable = true;
-      dockerCompat = true;
-    };
-  };
-  # To mitigate problem with "trigger-limit-hit" for podman.service
-  systemd.user.sockets.podman.socketConfig = {
-    TriggerLimitIntervalSec = "10s";
-    TriggerLimitBurst = 1000;
-  };
-  # To remove problem of missing newuidmap binary for podman.service
-  systemd.user.services.podman.path = [ "/run/wrappers/" ];
 
   # libvirt
   virtualisation.libvirtd.enable = true;
 
-  # This value determines the NixOS release from which the default
-  # settings for stateful data, like file locations and database versions
-  # on your system were taken. It‘s perfectly fine and recommended to leave
-  # this value at the release version of the first install of this system.
-  # Before changing this value read the documentation for this option
-  # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
-  programs.safepilot = {
-    enable = true;
-    defaultArgs = [ "--git" "--copilot" "--gemini" "--opencode" "--npm" "--claude-code" "--pi" ];
-    withCopilot = true;
-    withGemini = true;
-    withOpencode = true;
-    withClaudeCode = true;
-    withPi = true;
-  };
+  # Runtime mount options for the safepilot launcher (see common/agents.nix
+  # for the build-time agent selection).
+  programs.safepilot.defaultArgs =
+    [ "--git" "--copilot" "--gemini" "--opencode" "--npm" "--claude-code" "--pi" ];
 
-  system.stateVersion = "24.05"; # Did you read the comment?
-
+  system.stateVersion = "24.05";
 }
