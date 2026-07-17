@@ -9,6 +9,7 @@
     nixos-wsl.url = "github:nix-community/NixOS-WSL";
     teepkgs.url = "github:teekuningas/pkgs";
     vasara-pkgs.url = "gitlab:vasara-bpm/pkgs";
+    agent-sandbox.url = "github:teekuningas/agent-sandbox/multi-agent";
   };
 
   outputs =

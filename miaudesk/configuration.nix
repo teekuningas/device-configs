@@ -1,4 +1,4 @@
-{ lib, pkgs, ... }:
+{ lib, pkgs, inputs, ... }:
 
 {
   wsl.enable = true;
@@ -38,6 +38,14 @@
   environment.systemPackages = with pkgs; [
     cudatoolkit
     nvidia-container-toolkit
+    (callPackage (inputs.agent-sandbox + "/default.nix") {
+      defaultAgent = "claude-code";
+      defaultArgs = [ "--no-podman" "--no-ssh" "--no-workspace" ];
+      extraAgents = [
+        { name = "claude-code"; package = claude-code; command = [ "claude" ]; state = [ ".claude" ]; stateFiles = [ ".claude.json" ]; }
+        { name = "copilot"; package = github-copilot-cli; command = [ "copilot" ]; state = [ ".copilot" ]; }
+      ];
+    })
   ];
 
   # set ssh-agent to cache keys for e.g. jupyterlab-git
