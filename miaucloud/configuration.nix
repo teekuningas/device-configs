@@ -108,6 +108,10 @@
       reverse_proxy http://localhost:3014
     '';
 
+    virtualHosts."raven.teekuningas.net".extraConfig = ''
+      reverse_proxy http://localhost:3015
+    '';
+
     virtualHosts."luonto.suvannossa.fi".extraConfig = ''
       reverse_proxy http://localhost:5000
     '';
@@ -411,6 +415,13 @@
       imdbDemographics = {
         image = "ghcr.io/teekuningas/imdb-demographics:v1";
         ports = [ "127.0.0.1:3014:80" ];
+        autoStart = true;
+      };
+      ravenRiver = {
+        # Source repo is private; the image is published public to GHCR by CI
+        # on tag push (no pull auth needed, like the others above).
+        image = "ghcr.io/teekuningas/soothing-raven-river:v2";
+        ports = [ "127.0.0.1:3015:80" ];
         autoStart = true;
       };
 
