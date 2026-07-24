@@ -56,10 +56,5 @@
 
   nix.settings.trusted-users = [ "zairex" ];
 
-  # Runtime mount options for the safepilot launcher (see common/agents.nix
-  # for the build-time agent selection).
-  programs.safepilot.defaultArgs =
-    [ "--git" "--copilot" "--claude-code" "--opencode" "--gemini" "--pi" ];
-
   system.stateVersion = "24.05";
 }

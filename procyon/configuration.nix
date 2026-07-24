@@ -25,6 +25,11 @@ in
     })
   ];
 
+  # electron 40 is EOL but required by camunda-modeler (see electron-40 above).
+  nixpkgs.config.permittedInsecurePackages = [
+    "electron-40.10.2"
+  ];
+
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
@@ -134,6 +139,14 @@ in
     pavucontrol
     camunda-modeler
     libreoffice
+    (callPackage (inputs.agent-sandbox + "/default.nix") {
+      defaultAgent = "claude-code";
+      defaultArgs = [ "--no-podman" "--no-ssh" "--no-workspace" ];
+      extraAgents = [
+        { name = "claude-code"; package = claude-code; command = [ "claude" ]; state = [ ".claude" ]; stateFiles = [ ".claude.json" ]; }
+        { name = "copilot"; package = github-copilot-cli; command = [ "copilot" ]; state = [ ".copilot" ]; }
+      ];
+    })
   ];
 
   # networking.extraHosts = "130.234.6.208 moniviestin.jyu.fi";
@@ -142,11 +155,6 @@ in
 
   # libvirt
   virtualisation.libvirtd.enable = true;
-
-  # Runtime mount options for the safepilot launcher (see common/agents.nix
-  # for the build-time agent selection).
-  programs.safepilot.defaultArgs =
-    [ "--git" "--copilot" "--gemini" "--opencode" "--npm" "--claude-code" "--pi" ];
 
   system.stateVersion = "24.05";
 }

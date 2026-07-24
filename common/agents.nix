@@ -1,9 +1,6 @@
 { pkgs, lib, inputs, unstable-pkgs, ... }:
 
 {
-  # The safepilot module provides the programs.safepilot options used below.
-  imports = [ ./safepilot.nix ];
-
   # AI coding agent CLIs, kept fresh from nixos-unstable-small.
   nixpkgs.overlays = [
     (final: prev: {
@@ -47,15 +44,4 @@
     opencode
     pi-coding-agent
   ];
-
-  # Build-time selection of what gets installed inside the safepilot
-  # container; the runtime mount options (defaultArgs) are per-host.
-  programs.safepilot = {
-    enable = true;
-    withCopilot = true;
-    withGemini = true;
-    withOpencode = true;
-    withClaudeCode = true;
-    withPi = true;
-  };
 }
