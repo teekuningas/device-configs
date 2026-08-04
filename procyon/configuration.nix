@@ -139,13 +139,9 @@ in
     pavucontrol
     camunda-modeler
     libreoffice
-    (callPackage (inputs.agent-sandbox + "/default.nix") {
+    (inputs.agent-sandbox.packages.${pkgs.system}.default.override {
       defaultAgent = "claude-code";
       defaultArgs = [ "--no-podman" "--no-ssh" "--no-workspace" ];
-      extraAgents = [
-        { name = "claude-code"; package = claude-code; command = [ "claude" ]; state = [ ".claude" ]; stateFiles = [ ".claude.json" ]; }
-        { name = "copilot"; package = github-copilot-cli; command = [ "copilot" ]; state = [ ".copilot" ]; }
-      ];
     })
   ];
 
