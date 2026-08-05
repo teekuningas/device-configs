@@ -15,6 +15,15 @@ let
       wrapProgram $out/bin/agent-sandbox --add-flags "--no-ssh --no-workspace"
     '';
   };
+
+  # The same sandbox idea rented rather than built: the box is a GitHub
+  # Codespace, so the only local dependency is gh (bundled by its flake) and
+  # the same launcher runs on a phone.  Its CLI is wrapped exactly like
+  # agent-sandbox above — flags are prepended, so a host default can still be
+  # flipped back for one run (agent-codespace --machine basicLinux32gb new) and
+  # --help reports the wrapped state.  No flags are prepended yet; the upstream
+  # defaults (basicLinux32gb, 60m idle, 24h retention) are the ones we want.
+  agent-codespace = inputs.agent-codespace.packages.${pkgs.stdenv.hostPlatform.system}.default;
 in
 {
   # AI coding agent CLIs, kept fresh from nixos-unstable-small.
@@ -52,6 +61,7 @@ in
   ];
 
   environment.systemPackages = with pkgs; [
+    agent-codespace
     agent-sandbox
     agentsview
     antigravity-cli

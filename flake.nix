@@ -10,6 +10,7 @@
     teepkgs.url = "github:teekuningas/pkgs";
     vasara-pkgs.url = "gitlab:vasara-bpm/pkgs";
     agent-sandbox.url = "github:teekuningas/agent-sandbox/main";
+    agent-codespace.url = "github:teekuningas/agent-codespace/main";
   };
 
   outputs =

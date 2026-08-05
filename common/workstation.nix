@@ -76,6 +76,7 @@
     uv
     nodejs
     devenv
+    gh
     podman-compose
     slirp4netns
     (chromium.override {
