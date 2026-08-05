@@ -139,10 +139,6 @@ in
     pavucontrol
     camunda-modeler
     libreoffice
-    (inputs.agent-sandbox.packages.${pkgs.system}.default.override {
-      defaultAgent = "claude-code";
-      defaultArgs = [ "--no-podman" "--no-ssh" "--no-workspace" ];
-    })
   ];
 
   # networking.extraHosts = "130.234.6.208 moniviestin.jyu.fi";

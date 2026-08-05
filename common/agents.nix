@@ -1,5 +1,21 @@
 { pkgs, lib, inputs, unstable-pkgs, ... }:
 
+let
+  # Host defaults for the agent-sandbox launcher.  Its CLI is the contract we
+  # wrap: the flags are prepended, so any of them can still be flipped back for
+  # a single run (agent-sandbox --workspace claude-code) and --help reports the
+  # wrapped state.  Forwarding the host podman socket is opt-in upstream, so
+  # --no-podman is no longer needed here.  Pick the agent per run:
+  # `agent-sandbox claude-code`.  Load the image with `agent-sandbox-ctl load`.
+  agent-sandbox = pkgs.symlinkJoin {
+    name = "agent-sandbox";
+    paths = [ inputs.agent-sandbox.packages.${pkgs.stdenv.hostPlatform.system}.default ];
+    nativeBuildInputs = [ pkgs.makeWrapper ];
+    postBuild = ''
+      wrapProgram $out/bin/agent-sandbox --add-flags "--no-ssh --no-workspace"
+    '';
+  };
+in
 {
   # AI coding agent CLIs, kept fresh from nixos-unstable-small.
   nixpkgs.overlays = [
@@ -36,6 +52,7 @@
   ];
 
   environment.systemPackages = with pkgs; [
+    agent-sandbox
     agentsview
     antigravity-cli
     claude-code

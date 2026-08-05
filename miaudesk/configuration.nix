@@ -1,4 +1,4 @@
-{ lib, pkgs, inputs, ... }:
+{ lib, pkgs, ... }:
 
 {
   wsl.enable = true;
@@ -38,10 +38,6 @@
   environment.systemPackages = with pkgs; [
     cudatoolkit
     nvidia-container-toolkit
-    (inputs.agent-sandbox.packages.${pkgs.system}.default.override {
-      defaultAgent = "claude-code";
-      defaultArgs = [ "--no-podman" "--no-ssh" "--no-workspace" ];
-    })
   ];
 
   # set ssh-agent to cache keys for e.g. jupyterlab-git
