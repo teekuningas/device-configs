@@ -18,3 +18,9 @@ Host miaucloud-nixos
     IdentityFile ~/.ssh/id_ed25519
 ```
 
+Asenna välttämättömät paketit:
+```
+pkg upgrade
+pkg install vim
+pkg install git
+```
