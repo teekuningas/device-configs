@@ -3,7 +3,7 @@
 {
   nixpkgs.overlays = [
     (final: prev: {
-      gemini-cli = unstable-pkgs.gemini-cli;
+      antigravity-cli = unstable-pkgs.antigravity-cli;
     })
   ];
 
@@ -85,11 +85,13 @@
 
   powerManagement.powertop.enable = true;
   services.upower.enable = true;
+  services.udisks2.enable = true;
+  services.udiskie.enable = true;
 
   environment.systemPackages = with pkgs; [
     powertop
     upower
-    gemini-cli
+    antigravity-cli
     (python312.withPackages (ps: with ps; [
       numpy
       requests
