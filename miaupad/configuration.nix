@@ -47,6 +47,7 @@
   # Enable the X11 windowing system.
   services.xserver = {
     enable = true;
+    videoDrivers = [ "intel" ];
     windowManager.awesome = {
       enable = true;
       luaModules = with pkgs.luaPackages; [ luarocks luadbi-mysql ];
@@ -67,12 +68,36 @@
     };
   };
 
-  boot.kernelParams = [ "psmouse.synaptics_intertouch=1" ];
+  # Enable sound with pipewire.
+  services.pulseaudio.enable = false;
+  security.rtkit.enable = true;
+  services.pipewire = {
+    enable = true;
+    alsa.enable = true;
+    alsa.support32Bit = true;
+    pulse.enable = true;
+  };
+
+  # Automatic display management
+  services.autorandr.enable = true;
+
+  boot.kernelParams = [ 
+    "psmouse.synaptics_intertouch=1" 
+    "i915.enable_psr=0"
+    "i915.enable_dp_mst=0"
+    "video=HDMI-A-1:d"
+  ];
+  boot.initrd.kernelModules = [ "i915" ];
 
   # # Enable opengl
   hardware.graphics.enable = true;
   hardware.graphics.enable32Bit = true;
-  hardware.graphics.extraPackages = with pkgs; [ libGL ];
+  hardware.graphics.extraPackages = with pkgs; [ 
+    libGL
+    intel-media-driver
+    vaapiIntel
+  ];
+  hardware.enableRedistributableFirmware = true;
 
   # hardware.bluetooth.enable = true;
   # services.blueman.enable = true;
@@ -80,7 +105,7 @@
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.zairex = {
     isNormalUser = true;
-    extraGroups = [ "wheel" "networkmanager" ];
+    extraGroups = [ "wheel" "networkmanager" "video" "audio" ];
   };
 
   powerManagement.powertop.enable = true;
@@ -92,6 +117,13 @@
     powertop
     upower
     antigravity-cli
+    xfce.xfce4-terminal
+    pulsemixer
+    pavucontrol
+    xlayoutdisplay
+    autorandr
+    arandr
+    spotify
     (python312.withPackages (ps: with ps; [
       numpy
       requests
