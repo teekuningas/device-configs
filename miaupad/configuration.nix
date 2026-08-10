@@ -95,7 +95,7 @@
   hardware.graphics.extraPackages = with pkgs; [ 
     libGL
     intel-media-driver
-    vaapiIntel
+    intel-vaapi-driver
   ];
   hardware.enableRedistributableFirmware = true;
 
