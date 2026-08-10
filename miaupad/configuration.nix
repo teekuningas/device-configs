@@ -111,7 +111,7 @@
   powerManagement.powertop.enable = true;
   services.upower.enable = true;
   services.udisks2.enable = true;
-  services.udiskie.enable = true;
+  services.devmon.enable = true;
 
   environment.systemPackages = with pkgs; [
     powertop
