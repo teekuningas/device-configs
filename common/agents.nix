@@ -12,7 +12,7 @@ let
     paths = [ inputs.agent-sandbox.packages.${pkgs.stdenv.hostPlatform.system}.default ];
     nativeBuildInputs = [ pkgs.makeWrapper ];
     postBuild = ''
-      wrapProgram $out/bin/agent-sandbox --add-flags "--no-ssh --no-workspace"
+      wrapProgram $out/bin/agent-sandbox --add-flags "--podman-args=--add-host=jyu2401-62.tail5b278e.ts.net:100.79.190.50"
     '';
   };
 
