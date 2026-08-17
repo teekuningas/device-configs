@@ -25,18 +25,18 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1786544834,
-        "narHash": "sha256-WfWuWtIR7RwG7WAc1vzSzlplFnWRd3oRIDYjsB4gJ0k=",
-        "owner": "teekuningas",
-        "repo": "agent-sandbox",
-        "rev": "50db3303161457e9629099822cc7c672b2772fbb",
-        "type": "github"
+        "lastModified": 1786959817,
+        "narHash": "sha256-jYtKd50MNHWn/9r8UpHxqRyFk7GiJguyzRrDdcSbFEo=",
+        "ref": "main",
+        "rev": "fdbdd79c684e02e22dc1eb94e914f32df27562d1",
+        "revCount": 148,
+        "type": "git",
+        "url": "https://github.com/datakurre/agent-sandbox"
       },
       "original": {
-        "owner": "teekuningas",
         "ref": "main",
-        "repo": "agent-sandbox",
-        "type": "github"
+        "type": "git",
+        "url": "https://github.com/datakurre/agent-sandbox"
       }
     },
     "antigravity-nix": {
