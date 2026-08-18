@@ -25,11 +25,11 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1787027177,
-        "narHash": "sha256-1iZdrxQCjWvjOS3YsAJPEPHTHoSk5lh5pVpy5HTOJUk=",
+        "lastModified": 1787037113,
+        "narHash": "sha256-i9351MK1qKS5v+LdqJfG99gL239HQsXpAeEV4sr82GQ=",
         "ref": "main",
-        "rev": "9ab287716227bdcd0576461d764e82afae690cfb",
-        "revCount": 150,
+        "rev": "1c049dba35fd5b0f9ea2e79b5229672ef4ca69db",
+        "revCount": 153,
         "type": "git",
         "url": "https://github.com/datakurre/agent-sandbox"
       },
