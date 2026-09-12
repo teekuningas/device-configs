@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 let
   # Each container gets its own user namespace, so container root is an
   # unprivileged host uid instead of real root. Explicit ranges, not
@@ -11,6 +11,20 @@ let
 
   noCaps = [ "--cap-drop=ALL" ];
 
+  # Container-to-container networks. The default podman bridge is flat — every
+  # container could reach postgres — so each dependency gets its own network and
+  # nothing else joins it. Caddy is unaffected: it reaches every app through its
+  # published 127.0.0.1 port, not through these.
+  #   db  postgres + its only two clients      cms  volto -> plone
+  #   sim soitbeginsServer -> Simulation       llm  openWebui -> litellmProxy
+  podmanNetworks = [ "db" "cms" "sim" "llm" ];
+
+  # containers that sit on one of the above, so their units can wait for it
+  networkedContainers = [
+    "postgres" "postgrest" "logto" "plone" "volto"
+    "soitbeginsServer" "soitbeginsSimulation" "litellmProxy" "openWebui"
+  ];
+
   # nginx images chown their cache dirs and bind :80 — tested minimum.
   nginxCaps = noCaps ++ [
     "--cap-add=CHOWN"
@@ -20,6 +34,14 @@ let
   ];
 in
 {
+  # as a separate module so it merges with the systemd.services defined below
+  imports = [{
+    systemd.services = lib.genAttrs (map (c: "podman-${c}") networkedContainers) (_: {
+      after = [ "podman-networks.service" ];
+      wants = [ "podman-networks.service" ];
+    });
+  }];
+
   environment.systemPackages = with pkgs; [
     weechat
     (python312.withPackages (ps: with ps; [
@@ -284,6 +306,7 @@ in
         autoStart = true;
         user = "root";
         ports = [ "127.0.0.1:8080:8080" ];
+        networks = [ "cms" ];
         extraOptions = ns 0;
         # `:idmap` maps ownership through the namespace — no chown needed.
         volumes = [ "/var/data/kingofsweden:/data:idmap" ];
@@ -293,6 +316,7 @@ in
         user = "root";
         autoStart = true;
         ports = [ "127.0.0.1:3000:3000" ];
+        networks = [ "cms" ];
         extraOptions = ns 1;
         environment = {
           COREPACK_INTEGRITY_KEYS = "0";
@@ -332,6 +356,7 @@ in
         image = "ghcr.io/teekuningas/soitbegins/soitbegins-server:0.5.0";
         ports = [ "127.0.0.1:8011:8765" ];
         autoStart = true;
+        networks = [ "sim" ];
         extraOptions = ns 5;
         environment = {
           SIM_ZMQ_ADDR = "tcp://soitbeginsSimulation:5555";
@@ -340,6 +365,7 @@ in
       soitbeginsSimulation = {
         image = "ghcr.io/teekuningas/soitbegins/soitbegins-simulation:0.5.0";
         autoStart = true;
+        networks = [ "sim" ];
         extraOptions = ns 6 ++ noCaps ++ [ "--memory=256m" "--memory-swap=384m" ];
       };
       litellmProxy = {
@@ -347,6 +373,7 @@ in
         image = "ghcr.io/berriai/litellm:main-latest";
         autoStart = true;
         ports = [ "127.0.0.1:4000:4000" ];
+        networks = [ "llm" ];
         extraOptions = ns 7 ++ [ "--env-file=/var/data/.secrets/litellm.env" ];
         # world-readable root-owned file — nothing to map
         volumes = [ "/var/data/litellm/config.yaml:/app/config.yaml" ];
@@ -355,6 +382,7 @@ in
       openWebui = {
         image = "miaucloud-nixos/open-webui:0.7.2";
         ports = [ "127.0.0.1:8081:8081" ];
+        networks = [ "llm" ];
         extraOptions = ns 8 ++ [ "--env-file=/var/data/.secrets/openwebui.env" ];
         autoStart = true;
         environment = { PORT = "8081"; };
@@ -365,6 +393,7 @@ in
         volumes = [ "/var/data/postgres_data:/var/lib/postgresql/data:idmap" ];
         autoStart = true;
         ports = [ "127.0.0.1:5432:5432" ];
+        networks = [ "db" ];
         extraOptions = ns 9;
       };
       postgrest = {
@@ -374,6 +403,7 @@ in
         environment = {
           PGRST_SERVER_PORT = "4001";
         };
+        networks = [ "db" ];
         extraOptions = ns 10 ++ [ "--env-file=/var/data/.secrets/postgrest.env" ];
       };
       logto = {
@@ -385,6 +415,7 @@ in
         # $ npm run cli db alt deploy
         image = "docker.io/svhd/logto:1.25";
         ports = [ "127.0.0.1:3091:3091" "127.0.0.1:3092:3092" ];
+        networks = [ "db" ];
         extraOptions = ns 11 ++ [ "--env-file=/var/data/.secrets/logto.env" ];
         environment = {
           TRUST_PROXY_HEADER = "1";
@@ -458,6 +489,19 @@ in
 
     };
   };
+  # oci-containers does not create networks, so do it here and make the
+  # containers that need one wait for it.
+  systemd.services.podman-networks = {
+    description = "Create the podman networks used by oci-containers";
+    after = [ "network-online.target" ];
+    wants = [ "network-online.target" ];
+    wantedBy = [ "multi-user.target" ];
+    serviceConfig = { Type = "oneshot"; RemainAfterExit = true; };
+    script = lib.concatMapStringsSep "\n" (n:
+      "${pkgs.podman}/bin/podman network exists ${n} || ${pkgs.podman}/bin/podman network create ${n}"
+    ) podmanNetworks;
+  };
+
   # Passwordless sudo for wheel users (SSH access is key-only).
   security.sudo.wheelNeedsPassword = false;
 
