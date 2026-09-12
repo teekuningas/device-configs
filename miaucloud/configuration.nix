@@ -1,4 +1,24 @@
 { pkgs, ... }:
+let
+  # Each container gets its own user namespace, so container root is an
+  # unprivileged host uid instead of real root. Explicit ranges, not
+  # `--userns=auto`: auto needs /etc/subuid and re-randomises every start.
+  ns = n: let base = 200000 + n * 65536; in [
+    "--uidmap=0:${toString base}:65536"
+    "--gidmap=0:${toString base}:65536"
+    "--security-opt=no-new-privileges"
+  ];
+
+  noCaps = [ "--cap-drop=ALL" ];
+
+  # nginx images chown their cache dirs and bind :80 — tested minimum.
+  nginxCaps = noCaps ++ [
+    "--cap-add=CHOWN"
+    "--cap-add=SETUID"
+    "--cap-add=SETGID"
+    "--cap-add=NET_BIND_SERVICE"
+  ];
+in
 {
   environment.systemPackages = with pkgs; [
     weechat
@@ -264,13 +284,16 @@
         autoStart = true;
         user = "root";
         ports = [ "127.0.0.1:8080:8080" ];
-        volumes = [ "/var/data/kingofsweden:/data" ];
+        extraOptions = ns 0;
+        # `:idmap` maps ownership through the namespace — no chown needed.
+        volumes = [ "/var/data/kingofsweden:/data:idmap" ];
       };
       volto = {
         image = "plone/plone-frontend:18.4.0";
         user = "root";
         autoStart = true;
         ports = [ "127.0.0.1:3000:3000" ];
+        extraOptions = ns 1;
         environment = {
           COREPACK_INTEGRITY_KEYS = "0";
           RAZZLE_API_PATH = "https://kingofsweden.info";
@@ -281,13 +304,14 @@
         image = "ghcr.io/teekuningas/teehetki/teehetki-client:v10";
         ports = [ "127.0.0.1:3001:3000" ];
         autoStart = true;
+        extraOptions = ns 2 ++ noCaps;
         environment = { API_ADDRESS = "wss://teehetki.teekuningas.net"; };
       };
       teehetkiServer = {
         image = "ghcr.io/teekuningas/teehetki/teehetki-server:v10";
         ports = [ "127.0.0.1:5001:5000" ];
         autoStart = true;
-        extraOptions = [ "--env-file=/var/data/.secrets/teehetki_server.env" ];
+        extraOptions = ns 3 ++ [ "--env-file=/var/data/.secrets/teehetki_server.env" ];
         environment = {
           API_ADDRESS = "https://erpipehe-openai.openai.azure.com";
           LLM_MODEL = "gpt-4o-mini";
@@ -297,6 +321,7 @@
         image = "ghcr.io/teekuningas/soitbegins/soitbegins-frontend:0.5.0";
         ports = [ "127.0.0.1:9011:9000" ];
         autoStart = true;
+        extraOptions = ns 4 ++ nginxCaps;
         environment = {
           SERVER_API = "wss://soitbegins.teekuningas.net/api";
         };
@@ -305,6 +330,7 @@
         image = "ghcr.io/teekuningas/soitbegins/soitbegins-server:0.5.0";
         ports = [ "127.0.0.1:8011:8765" ];
         autoStart = true;
+        extraOptions = ns 5;
         environment = {
           SIM_ZMQ_ADDR = "tcp://soitbeginsSimulation:5555";
         };
@@ -312,32 +338,32 @@
       soitbeginsSimulation = {
         image = "ghcr.io/teekuningas/soitbegins/soitbegins-simulation:0.5.0";
         autoStart = true;
-        extraOptions = [ "--memory=256m" "--memory-swap=384m" ];
+        extraOptions = ns 6 ++ noCaps ++ [ "--memory=256m" "--memory-swap=384m" ];
       };
       litellmProxy = {
         # To proxy openai-type requests to azure-like requests.
         image = "ghcr.io/berriai/litellm:main-latest";
         autoStart = true;
         ports = [ "127.0.0.1:4000:4000" ];
-        extraOptions =
-          [ "--env-file=/var/data/.secrets/litellm.env" ];
+        extraOptions = ns 7 ++ [ "--env-file=/var/data/.secrets/litellm.env" ];
+        # world-readable root-owned file — nothing to map
         volumes = [ "/var/data/litellm/config.yaml:/app/config.yaml" ];
         cmd = [ "--config" "/app/config.yaml" ];
       };
       openWebui = {
         image = "miaucloud-nixos/open-webui:0.7.2";
         ports = [ "127.0.0.1:8081:8081" ];
-        extraOptions =
-          [ "--env-file=/var/data/.secrets/openwebui.env" ];
+        extraOptions = ns 8 ++ [ "--env-file=/var/data/.secrets/openwebui.env" ];
         autoStart = true;
         environment = { PORT = "8081"; };
-        volumes = [ "/var/data/openwebui_data:/app/backend/data" ];
+        volumes = [ "/var/data/openwebui_data:/app/backend/data:idmap" ];
       };
       postgres = {
         image = "docker.io/pgvector/pgvector:pg16";
-        volumes = [ "/var/data/postgres_data:/var/lib/postgresql/data" ];
+        volumes = [ "/var/data/postgres_data:/var/lib/postgresql/data:idmap" ];
         autoStart = true;
         ports = [ "127.0.0.1:5432:5432" ];
+        extraOptions = ns 9;
       };
       postgrest = {
         image = "docker.io/postgrest/postgrest:latest";
@@ -346,8 +372,7 @@
         environment = {
           PGRST_SERVER_PORT = "4001";
         };
-        extraOptions =
-          [ "--env-file=/var/data/.secrets/postgrest.env" ];
+        extraOptions = ns 10 ++ [ "--env-file=/var/data/.secrets/postgrest.env" ];
       };
       logto = {
         # To init the logto db, go inside container:
@@ -358,8 +383,7 @@
         # $ npm run cli db alt deploy
         image = "docker.io/svhd/logto:1.25";
         ports = [ "127.0.0.1:3091:3091" "127.0.0.1:3092:3092" ];
-        extraOptions =
-          [ "--env-file=/var/data/.secrets/logto.env" ];
+        extraOptions = ns 11 ++ [ "--env-file=/var/data/.secrets/logto.env" ];
         environment = {
           TRUST_PROXY_HEADER = "1";
           ENDPOINT = "https://auth-api.teekuningas.net";
@@ -372,13 +396,13 @@
         image = "ghcr.io/teekuningas/luontopeli/luontopeli:v4";
         ports = [ "127.0.0.1:5000:5000" ];
         autoStart = true;
-        extraOptions = [ "--env-file=/var/data/.secrets/luontopeli.env" ];
+        extraOptions = ns 12 ++ [ "--env-file=/var/data/.secrets/luontopeli.env" ];
         environment = { LUONTOPELI_HOST = "0.0.0.0"; };
       };
       vellubot = {
         image = "ghcr.io/teekuningas/vellubot/vellubot:v0.31.0";
         autoStart = true;
-        extraOptions = [ "--env-file=/var/data/.secrets/vellubot.env" ];
+        extraOptions = ns 13 ++ [ "--env-file=/var/data/.secrets/vellubot.env" ];
         environment = {
           BOT_CHANNEL = "#vellumo";
           BOT_NICKNAME = "vellubot";
@@ -395,34 +419,39 @@
           CHECK_INTERVAL = "300";
           LOG_LEVEL = "DEBUG";
         };
-        volumes = [ "/var/data/vellubot:/data" ];
+        volumes = [ "/var/data/vellubot:/data:idmap" ];
       };
       clothinv = {
         image = "ghcr.io/teekuningas/clothinv:0.3.2";
         ports = [ "127.0.0.1:3011:80" ];
         autoStart = true;
+        extraOptions = ns 14 ++ nginxCaps;
       };
       jalkapallo = {
         image = "ghcr.io/teekuningas/jalkapallo:v2";
         ports = [ "127.0.0.1:3012:80" ];
         autoStart = true;
+        extraOptions = ns 15 ++ nginxCaps;
       };
       sartre = {
         image = "ghcr.io/teekuningas/sartre:v0.41";
         ports = [ "127.0.0.1:3013:80" ];
         autoStart = true;
+        extraOptions = ns 16 ++ nginxCaps;
       };
       imdbDemographics = {
         image = "ghcr.io/teekuningas/imdb-demographics:v1";
         ports = [ "127.0.0.1:3014:80" ];
         autoStart = true;
+        extraOptions = ns 17 ++ nginxCaps;
       };
       ravenRiver = {
         # Source repo is private; the image is published public to GHCR by CI
         # on tag push (no pull auth needed, like the others above).
-        image = "ghcr.io/teekuningas/soothing-raven-river:v6";
+        image = "ghcr.io/teekuningas/soothing-raven-river:v7";
         ports = [ "127.0.0.1:3015:80" ];
         autoStart = true;
+        extraOptions = ns 18 ++ nginxCaps;
       };
 
     };
