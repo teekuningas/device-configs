@@ -25,6 +25,13 @@ let
     "soitbeginsServer" "soitbeginsSimulation" "litellmProxy" "openWebui"
   ];
 
+  # Containers that wait on another to be *ready*, not merely started. `dependsOn`
+  # orders the units, but postgres accepts connections seconds after its unit is
+  # up — on 2026-09-12's reboot logto gave up on `pg` after 30s and exited 0, and
+  # `Restart=on-failure` does not retry a clean exit. So these retry until the
+  # thing they need answers.
+  retryingContainers = [ "logto" "postgrest" "volto" "soitbeginsServer" "openWebui" ];
+
   # nginx images chown their cache dirs and bind :80 — tested minimum.
   nginxCaps = noCaps ++ [
     "--cap-add=CHOWN"
@@ -36,10 +43,19 @@ in
 {
   # as a separate module so it merges with the systemd.services defined below
   imports = [{
-    systemd.services = lib.genAttrs (map (c: "podman-${c}") networkedContainers) (_: {
-      after = [ "podman-networks.service" ];
-      wants = [ "podman-networks.service" ];
-    });
+    systemd.services =
+      lib.genAttrs (map (c: "podman-${c}") networkedContainers) (_: {
+        after = [ "podman-networks.service" ];
+        wants = [ "podman-networks.service" ];
+      })
+      // lib.genAttrs (map (c: "podman-${c}") retryingContainers) (_: {
+        after = [ "podman-networks.service" ];
+        wants = [ "podman-networks.service" ];
+        serviceConfig = {
+          Restart = lib.mkForce "always";
+          RestartSec = "10s";
+        };
+      });
   }];
 
   environment.systemPackages = with pkgs; [
@@ -317,6 +333,7 @@ in
         autoStart = true;
         ports = [ "127.0.0.1:3000:3000" ];
         networks = [ "cms" ];
+        dependsOn = [ "plone" ];
         extraOptions = ns 1;
         environment = {
           COREPACK_INTEGRITY_KEYS = "0";
@@ -357,6 +374,7 @@ in
         ports = [ "127.0.0.1:8011:8765" ];
         autoStart = true;
         networks = [ "sim" ];
+        dependsOn = [ "soitbeginsSimulation" ];
         extraOptions = ns 5;
         environment = {
           SIM_ZMQ_ADDR = "tcp://soitbeginsSimulation:5555";
@@ -383,6 +401,7 @@ in
         image = "miaucloud-nixos/open-webui:0.7.2";
         ports = [ "127.0.0.1:8081:8081" ];
         networks = [ "llm" ];
+        dependsOn = [ "litellmProxy" ];
         extraOptions = ns 8 ++ [ "--env-file=/var/data/.secrets/openwebui.env" ];
         autoStart = true;
         environment = { PORT = "8081"; };
@@ -404,6 +423,7 @@ in
           PGRST_SERVER_PORT = "4001";
         };
         networks = [ "db" ];
+        dependsOn = [ "postgres" ];
         extraOptions = ns 10 ++ [ "--env-file=/var/data/.secrets/postgrest.env" ];
       };
       logto = {
@@ -416,6 +436,7 @@ in
         image = "docker.io/svhd/logto:1.25";
         ports = [ "127.0.0.1:3091:3091" "127.0.0.1:3092:3092" ];
         networks = [ "db" ];
+        dependsOn = [ "postgres" ];
         extraOptions = ns 11 ++ [ "--env-file=/var/data/.secrets/logto.env" ];
         environment = {
           TRUST_PROXY_HEADER = "1";
