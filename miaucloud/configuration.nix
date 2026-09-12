@@ -321,7 +321,9 @@ in
         image = "ghcr.io/teekuningas/soitbegins/soitbegins-frontend:0.5.0";
         ports = [ "127.0.0.1:9011:9000" ];
         autoStart = true;
-        extraOptions = ns 4 ++ nginxCaps;
+        # logs to a real file owned by www-data, not /dev/stdout like the
+        # other nginx images, so container root needs DAC_OVERRIDE to write it
+        extraOptions = ns 4 ++ nginxCaps ++ [ "--cap-add=DAC_OVERRIDE" ];
         environment = {
           SERVER_API = "wss://soitbegins.teekuningas.net/api";
         };
