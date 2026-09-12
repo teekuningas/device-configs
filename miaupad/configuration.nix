@@ -124,7 +124,7 @@
     autorandr
     arandr
     spotify
-    (python312.withPackages (ps: with ps; [
+    (python3.withPackages (ps: with ps; [
       numpy
       requests
       flake8

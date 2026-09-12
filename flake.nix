@@ -36,7 +36,7 @@
           ./procyon/configuration.nix
         ];
       };
-      nixosConfigurations.miaucloud-nixos = nixpkgs-25-11.lib.nixosSystem {
+      nixosConfigurations.miaucloud-nixos = nixpkgs-26-05.lib.nixosSystem {
         system = "x86_64-linux";
         specialArgs = { inherit inputs; };
         modules = [
