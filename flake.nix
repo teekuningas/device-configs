@@ -9,7 +9,10 @@
     nixos-wsl.url = "github:nix-community/NixOS-WSL";
     teepkgs.url = "github:teekuningas/pkgs";
     vasara-pkgs.url = "gitlab:vasara-bpm/pkgs";
-    agent-sandbox.url = "github:datakurre/agent-sandbox/main";
+    agent-sandbox = {
+      url = "github:datakurre/agent-sandbox/main";
+      inputs.nixpkgs.follows = "nixpkgs-small";
+    };
     agent-codespace.url = "github:teekuningas/agent-codespace/main";
   };
 
