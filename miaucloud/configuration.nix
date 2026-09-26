@@ -502,7 +502,7 @@ in
       ravenRiver = {
         # Source repo is private; the image is published public to GHCR by CI
         # on tag push (no pull auth needed, like the others above).
-        image = "ghcr.io/teekuningas/soothing-raven-river:v7";
+        image = "ghcr.io/teekuningas/soothing-raven-river:v8";
         ports = [ "127.0.0.1:3015:80" ];
         autoStart = true;
         extraOptions = ns 18 ++ nginxCaps;
