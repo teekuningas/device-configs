@@ -170,6 +170,10 @@ in
       reverse_proxy http://localhost:3015
     '';
 
+    virtualHosts."roolipeli.suvannossa.fi".extraConfig = ''
+      reverse_proxy http://localhost:3016
+    '';
+
     virtualHosts."luonto.suvannossa.fi".extraConfig = ''
       reverse_proxy http://localhost:5000
     '';
@@ -506,6 +510,12 @@ in
         ports = [ "127.0.0.1:3015:80" ];
         autoStart = true;
         extraOptions = ns 18 ++ nginxCaps;
+      };
+      rope = {
+        image = "ghcr.io/teekuningas/rope:0.1.0";
+        ports = [ "127.0.0.1:3016:80" ];
+        autoStart = true;
+        extraOptions = ns 19 ++ nginxCaps;
       };
 
     };

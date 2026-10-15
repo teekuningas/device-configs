@@ -27,3 +27,4 @@ check pallo.suvannossa.fi             200
 check sartre.suvannossa.fi            200
 check imdb.suvannossa.fi              200
 check luonto.suvannossa.fi            200
+check roolipeli.suvannossa.fi         200
