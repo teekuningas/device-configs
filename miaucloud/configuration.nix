@@ -512,7 +512,7 @@ in
         extraOptions = ns 18 ++ nginxCaps;
       };
       rope = {
-        image = "ghcr.io/teekuningas/rope:0.1.0";
+        image = "ghcr.io/teekuningas/rope:0.1.1";
         ports = [ "127.0.0.1:3016:80" ];
         autoStart = true;
         extraOptions = ns 19 ++ nginxCaps;
