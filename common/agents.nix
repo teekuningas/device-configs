@@ -12,6 +12,7 @@ in
       claude-code = unstable-pkgs.claude-code;
       pi-coding-agent = unstable-pkgs.pi-coding-agent;
       antigravity-cli = unstable-pkgs.antigravity-cli;
+      github-copilot-cli = unstable-pkgs.github-copilot-cli;
       agentsview = unstable-pkgs.callPackage (inputs.teepkgs + "/pkgs/agentsview") { };
     })
   ];

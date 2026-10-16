@@ -34,6 +34,8 @@
 
   # needed to fix podman dns (the rest of podman is in common/workstation.nix)
   virtualisation.podman.defaultNetwork.settings.dns_enabled = true;
+  # Keep slirp4netns here; procyon moved to pasta (untested on WSL).
+  virtualisation.containers.containersConf.settings.network.default_rootless_network_cmd = "slirp4netns";
 
   environment.systemPackages = with pkgs; [
     cudatoolkit
