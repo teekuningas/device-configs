@@ -16,7 +16,7 @@ const Footer = () => {
     >
       <Container>
         <Segment basic inverted color="grey" className="discreet">
-          <p>© {new Date().getFullYear()} King of Sweden. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} King of Sweden.</p>
         </Segment>
       </Container>
     </Segment>

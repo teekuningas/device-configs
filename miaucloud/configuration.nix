@@ -229,6 +229,21 @@ in
           to localhost:8080
         }
       }
+
+      redir /api /api/ permanent
+
+      @classicapi {
+        path /api/*
+      }
+
+      handle @classicapi {
+        uri strip_prefix /api
+        rewrite * /VirtualHostBase/https/kingofsweden.info:443/Plone/VirtualHostRoot/_vh_api{uri}
+        reverse_proxy {
+          to localhost:8080
+        }
+      }
+
       handle {
         reverse_proxy  {
           to localhost:3000
