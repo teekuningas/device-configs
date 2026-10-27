@@ -1,7 +1,25 @@
 { pkgs, lib, inputs, unstable-pkgs, ... }:
 
 let
-  agent-sandbox = inputs.agent-sandbox.packages.${pkgs.stdenv.hostPlatform.system}.default;
+  # Workaround: agent-sandbox commit 393fd15 blacklists emSign roots that
+  # Mozilla already dropped from certdata.txt, causing buildcatrust to fail.
+  raw-agent-sandbox = inputs.agent-sandbox.packages.${pkgs.stdenv.hostPlatform.system}.default;
+  agent-sandbox = raw-agent-sandbox.override (orig: {
+    pkgs = orig.pkgs.extend (final: prev: {
+      cacert = prev.cacert // {
+        override = args: prev.cacert.override (
+          let origArgs = if builtins.isFunction args then args prev.cacert else args;
+          in origArgs // {
+            blacklist = builtins.filter (name: !builtins.elem name [
+              "emSign ECC Root CA - G3"
+              "emSign Root CA - C1"
+              "emSign ECC Root CA - C3"
+            ]) (origArgs.blacklist or []);
+          }
+        );
+      };
+    });
+  });
   agent-codespace = inputs.agent-codespace.packages.${pkgs.stdenv.hostPlatform.system}.default;
 in
 {
