@@ -230,15 +230,12 @@ in
         }
       }
 
-      redir /api /api/ permanent
-
       @classicapi {
-        path /api/*
+        path_regexp classicapi ^/api/?(.*)$
       }
 
       handle @classicapi {
-        uri strip_prefix /api
-        rewrite * /VirtualHostBase/https/kingofsweden.info:443/Plone/VirtualHostRoot/_vh_api{uri}
+        rewrite  @classicapi /VirtualHostBase/https/kingofsweden.info:443/Plone/VirtualHostRoot/_vh_api/{http.regexp.classicapi.1}
         reverse_proxy {
           to localhost:8080
         }
