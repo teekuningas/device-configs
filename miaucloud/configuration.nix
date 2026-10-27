@@ -16,13 +16,13 @@ let
   # nothing else joins it. Caddy is unaffected: it reaches every app through its
   # published 127.0.0.1 port, not through these.
   #   db  postgres + its only two clients      cms  volto -> plone
-  #   sim soitbeginsServer -> Simulation       llm  openWebui -> litellmProxy
-  podmanNetworks = [ "db" "cms" "sim" "llm" ];
+  #   sim soitbeginsServer -> Simulation
+  podmanNetworks = [ "db" "cms" "sim" ];
 
   # containers that sit on one of the above, so their units can wait for it
   networkedContainers = [
     "postgres" "postgrest" "logto" "plone" "volto"
-    "soitbeginsServer" "soitbeginsSimulation" "litellmProxy" "openWebui"
+    "soitbeginsServer" "soitbeginsSimulation"
   ];
 
   # Containers that wait on another to be *ready*, not merely started. `dependsOn`
@@ -30,7 +30,7 @@ let
   # up — on 2026-09-12's reboot logto gave up on `pg` after 30s and exited 0, and
   # `Restart=on-failure` does not retry a clean exit. So these retry until the
   # thing they need answers.
-  retryingContainers = [ "logto" "postgrest" "volto" "soitbeginsServer" "openWebui" ];
+  retryingContainers = [ "logto" "postgrest" "volto" "soitbeginsServer" ];
 
   # nginx images chown their cache dirs and bind :80 — tested minimum.
   nginxCaps = noCaps ++ [
@@ -261,9 +261,6 @@ in
       file_server
     '';
 
-    virtualHosts."openwebui.teekuningas.net".extraConfig = ''
-      reverse_proxy http://localhost:8081
-    '';
 
     virtualHosts."auth-api.teekuningas.net".extraConfig = ''
       reverse_proxy http://localhost:3091
@@ -389,27 +386,6 @@ in
         autoStart = true;
         networks = [ "sim" ];
         extraOptions = ns 6 ++ noCaps ++ [ "--memory=256m" "--memory-swap=384m" ];
-      };
-      litellmProxy = {
-        # To proxy openai-type requests to azure-like requests.
-        image = "ghcr.io/berriai/litellm:main-latest";
-        autoStart = true;
-        ports = [ "127.0.0.1:4000:4000" ];
-        networks = [ "llm" ];
-        extraOptions = ns 7 ++ [ "--env-file=/var/data/.secrets/litellm.env" ];
-        # world-readable root-owned file — nothing to map
-        volumes = [ "/var/data/litellm/config.yaml:/app/config.yaml" ];
-        cmd = [ "--config" "/app/config.yaml" ];
-      };
-      openWebui = {
-        image = "miaucloud-nixos/open-webui:0.7.2";
-        ports = [ "127.0.0.1:8081:8081" ];
-        networks = [ "llm" ];
-        dependsOn = [ "litellmProxy" ];
-        extraOptions = ns 8 ++ [ "--env-file=/var/data/.secrets/openwebui.env" ];
-        autoStart = true;
-        environment = { PORT = "8081"; };
-        volumes = [ "/var/data/openwebui_data:/app/backend/data:idmap" ];
       };
       postgres = {
         image = "docker.io/pgvector/pgvector:pg16";

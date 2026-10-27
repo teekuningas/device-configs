@@ -15,7 +15,6 @@ check vaatteet.teekuningas.net        200
 check clothinv-postgrest.teekuningas.net 400
 check soitbegins.teekuningas.net      200
 check teehetki.teekuningas.net        401
-check openwebui.teekuningas.net       200
 check auth-api.teekuningas.net        302
 check auth-ui.teekuningas.net         302
 check kingofsweden.info               200

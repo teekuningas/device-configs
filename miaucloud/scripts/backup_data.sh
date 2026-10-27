@@ -14,9 +14,7 @@ DATA_ROOT="/var/data"
 # list the sub‐folders you want to back up
 DATA_DIRS=(
   kingofsweden
-  litellm
   meggie
-  openwebui_data
   .secrets
   static
   vellubot
