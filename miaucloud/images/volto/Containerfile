@@ -1,0 +1,21 @@
+# syntax=docker/dockerfile:1
+ARG VOLTO_VERSION=19.5.1
+FROM plone/frontend-builder:${VOLTO_VERSION} AS builder
+
+# Copy add-on package and volto configuration into the pnpm workspace
+COPY --chown=node:node packages/ /app/packages/
+COPY --chown=node:node volto.config.js /app/volto.config.js
+
+USER node
+WORKDIR /app
+ENV CI=true
+
+# Register the workspace add-on in the root project
+RUN pnpm add -w @kingofsweden/volto-kingofsweden --workspace
+
+# Build the Volto application
+RUN pnpm build
+RUN pnpm prune --prod
+
+FROM plone/frontend-prod-config:${VOLTO_VERSION} AS runner
+COPY --from=builder /app/ /app/

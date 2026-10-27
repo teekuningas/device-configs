@@ -1,0 +1,8 @@
+{
+  "name": "@kingofsweden/volto-kingofsweden",
+  "version": "1.0.0",
+  "description": "Custom Volto 19 theme and customizations for King of Sweden",
+  "main": "src/index.js",
+  "license": "MIT",
+  "dependencies": {}
+}

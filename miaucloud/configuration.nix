@@ -319,7 +319,7 @@ in
     oci-containers.backend = "podman";
     oci-containers.containers = {
       plone = {
-        image = "plone/plone-backend:6.0.14";
+        image = "plone/plone-backend:6.2.2.1";
         autoStart = true;
         user = "root";
         ports = [ "127.0.0.1:8080:8080" ];
@@ -329,7 +329,7 @@ in
         volumes = [ "/var/data/kingofsweden:/data:idmap" ];
       };
       volto = {
-        image = "plone/plone-frontend:18.4.0";
+        image = "miaucloud-nixos/kingofsweden-volto:latest";
         user = "root";
         autoStart = true;
         ports = [ "127.0.0.1:3000:3000" ];

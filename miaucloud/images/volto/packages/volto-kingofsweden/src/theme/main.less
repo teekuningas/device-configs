@@ -1,0 +1,78 @@
+// Hide redundant single-tier breadcrumb bar across the site
+.breadcrumbs {
+  display: none !important;
+}
+
+// Header styling polish
+.header-wrapper {
+  .header {
+    align-items: center;
+  }
+  .tools-search-wrapper {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+
+    .tools a {
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: #4a5568;
+      padding: 6px 12px;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+      &:hover {
+        color: #1a202c;
+        background: #f1f5f9;
+        text-decoration: none;
+      }
+    }
+  }
+}
+
+// Clean footer styling
+#footer {
+  padding: 2.5rem 0 !important;
+  .discreet p {
+    margin: 0;
+    font-size: 0.95rem;
+    letter-spacing: 0.03em;
+    opacity: 0.9;
+  }
+}
+
+// Global Streaming & Social Links Grid styles
+.music-streaming-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+  margin: 1.5rem 0 2.5rem 0;
+}
+
+.music-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 18px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  text-decoration: none !important;
+  color: #1a202c !important;
+  font-size: 1rem;
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+    border-color: #cbd5e1;
+    background: #f8fafc;
+  }
+
+  svg {
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+  }
+}
