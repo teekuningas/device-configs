@@ -42,7 +42,7 @@ let
 in
 {
   # as a separate module so it merges with the systemd.services defined below
-  imports = [{
+  imports = [ ./znc.nix {
     systemd.services =
       lib.genAttrs (map (c: "podman-${c}") networkedContainers) (_: {
         after = [ "podman-networks.service" ];
