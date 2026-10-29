@@ -130,6 +130,7 @@ in
   };
 
   environment.systemPackages = with pkgs; [
+    weechat
     pnpm
     obsidian
     powertop

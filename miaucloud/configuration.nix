@@ -1,4 +1,4 @@
-{ pkgs, lib, ... }:
+{ config, pkgs, lib, unstable-pkgs, ... }:
 let
   # Each container gets its own user namespace, so container root is an
   # unprivileged host uid instead of real root. Explicit ranges, not
@@ -41,25 +41,138 @@ let
   ];
 in
 {
-  # as a separate module so it merges with the systemd.services defined below
-  imports = [ ./znc.nix {
-    systemd.services =
-      lib.genAttrs (map (c: "podman-${c}") networkedContainers) (_: {
-        after = [ "podman-networks.service" ];
-        wants = [ "podman-networks.service" ];
-      })
-      // lib.genAttrs (map (c: "podman-${c}") retryingContainers) (_: {
-        after = [ "podman-networks.service" ];
-        wants = [ "podman-networks.service" ];
-        serviceConfig = {
-          Restart = lib.mkForce "always";
-          RestartSec = "10s";
-        };
+  imports = [
+    ./znc.nix
+    # Merge generated container settings with the explicit service units below.
+    {
+      systemd.services =
+        lib.genAttrs (map (c: "podman-${c}") networkedContainers) (_: {
+          after = [ "podman-networks.service" ];
+          wants = [ "podman-networks.service" ];
+        })
+        // lib.genAttrs (map (c: "podman-${c}") retryingContainers) (_: {
+          after = [ "podman-networks.service" ];
+          wants = [ "podman-networks.service" ];
+          serviceConfig = {
+            Restart = lib.mkForce "always";
+            RestartSec = "10s";
+          };
+        });
+    }
+  ];
+
+  nixpkgs.overlays = [
+    (_: _: {
+      znc = unstable-pkgs.znc.overrideAttrs (old: {
+        buildInputs = old.buildInputs ++ [ unstable-pkgs.libargon2 ];
+        cmakeFlags = (old.cmakeFlags or [ ]) ++ [ "-DWANT_ARGON=YES" ];
       });
-  }];
+    })
+  ];
+
+  services.znc =
+    let
+      modules = [ "savebuff @SAVEBUFF_KEY@" "log" ];
+      networks = {
+        libera = {
+          Server = [ "irc.libera.chat +6697" ];
+          TrustAllCerts = false;
+          TrustPKI = true;
+          LoadModule = modules ++ [ "sasl" ];
+          Chan = lib.genAttrs [ "#vellumo" "#nixos" "##math" "#elm" ] (_: { });
+        };
+        quakenet = {
+          AltNick = "Saireks";
+          Server = [ "irc.quakenet.org 6667" ];
+          LoadModule = modules;
+          Chan = lib.genAttrs [ "#siilisota" "#91-syntyneet" "#alajärvi" ] (_: { });
+        };
+        ircnet = {
+          AltNick = "Saireks";
+          Server = [ "irc.atw-inter.net 6667" "irc.fu-berlin.de 6667" "irc.belwue.de 6667" ];
+          LoadModule = modules;
+          Chan = lib.genAttrs [ "#a47" "#hyrskytin" "#Tengen.fi" ] (_: { });
+        };
+      };
+    in {
+      enable = true;
+      dataDir = "/var/data/znc";
+      config = {
+        MaxBufferSize = 500;
+        Listener.l = {
+          Host = "127.0.0.1";
+          Port = 16667;
+          IPv4 = true;
+          IPv6 = false;
+          SSL = false;
+          AllowIRC = true;
+          AllowWeb = false;
+        };
+        User.zairex = {
+          Admin = false;
+          Nick = "Zairex";
+          AltNick = "Zairex_";
+          Ident = "zairex";
+          RealName = "Zairex";
+          MultiClients = true;
+          MaxNetworks = builtins.length (builtins.attrNames networks);
+          ChanBufferSize = 500;
+          QueryBufferSize = 500;
+          AutoClearChanBuffer = false;
+          AutoClearQueryBuffer = false;
+          DenyLoadMod = true;
+          DenySetNetwork = true;
+          DenySetIdent = true;
+          DenySetBindHost = true;
+          DenySetRealName = true;
+          Pass.password = {
+            Method = "Argon2id";
+            Hash = "@PASSWORD_HASH@";
+          };
+          Network = lib.mapAttrs (_: network: { IRCConnectEnabled = true; } // network) networks;
+        };
+      };
+    };
+
+  # Retain existing ownership; changing runtime does not require moving data.
+  users.users.znc.isSystemUser = true;
+  users.users.znc.uid = lib.mkForce 1510820;
+  users.groups.znc.gid = lib.mkForce 1576253;
+  systemd.services.znc.serviceConfig.LoadCredential = [
+    "znc.json:/var/data/.secrets/znc.json"
+    "sasl-libera.json:/var/data/.secrets/znc-libera.json"
+  ];
+
+  services.oidentd.enable = true;
+  environment.etc."oidentd.conf".text = ''
+    user "znc" {
+        fport 6667 { force reply "${config.services.znc.config.User.zairex.Ident}" }
+        fport 6697 { force reply "${config.services.znc.config.User.zairex.Ident}" }
+    }
+  '';
+  systemd.services.oidentd.script = lib.mkForce ''
+    ${pkgs.oidentd}/sbin/oidentd -C /etc/oidentd.conf -u oidentd -g nogroup
+  '';
+
+  systemd.services.znc-tailnet = {
+    description = "Tailnet-only TLS ingress for ZNC";
+    wantedBy = [ "multi-user.target" ];
+    wants = [ "tailscaled.service" "znc.service" ];
+    after = [ "tailscaled.service" "znc.service" ];
+    serviceConfig = {
+      ExecStart = "${lib.getExe config.services.tailscale.package} serve --tls-terminated-tcp=6697 tcp://127.0.0.1:${toString config.services.znc.config.Listener.l.Port}";
+      Restart = "always";
+      RestartSec = "10s";
+      TimeoutStopSec = "15s";
+      NoNewPrivileges = true;
+      ProtectSystem = "strict";
+      ProtectHome = true;
+      PrivateTmp = true;
+      UMask = "0077";
+    };
+  };
 
   environment.systemPackages = with pkgs; [
-    weechat
     (python3.withPackages (ps: with ps; [
       numpy
       requests
@@ -132,9 +245,6 @@ in
     # networking.firewall.allowedUDPPortRanges = [ { from = 32768; to = 61000; } ];
   };
 
-  # Enable oidentd for IRCNet
-  services.oidentd.enable = true;
-
   # Enable tailscale.
   # Currently must run manually "sudo tailscale up --advertise-exit-node".
   services.tailscale = {
@@ -192,27 +302,6 @@ in
       handle {
         reverse_proxy  {
           to localhost:9011
-        }
-      }
-    '';
-
-    virtualHosts."teehetki.teekuningas.net".extraConfig = ''
-      basic_auth * {
-        plonerules $2a$14$OpYh7I1bR4Uq.c6YAk1S7O1RBxK/1Z2fMPmFRciv72XGdQNmOKpxO
-      }
-
-      @socket_io {
-        path /socket.io/*
-      }
-
-      handle @socket_io {
-        reverse_proxy {
-          to localhost:5001
-        }
-      }
-      handle {
-        reverse_proxy  {
-          to localhost:3001
         }
       }
     '';
@@ -352,23 +441,6 @@ in
           COREPACK_INTEGRITY_KEYS = "0";
           RAZZLE_API_PATH = "https://kingofsweden.info";
           RAZZLE_INTERNAL_API_PATH = "http://plone:8080/Plone";
-        };
-      };
-      teehetkiClient = {
-        image = "ghcr.io/teekuningas/teehetki/teehetki-client:v10";
-        ports = [ "127.0.0.1:3001:3000" ];
-        autoStart = true;
-        extraOptions = ns 2 ++ noCaps;
-        environment = { API_ADDRESS = "wss://teehetki.teekuningas.net"; };
-      };
-      teehetkiServer = {
-        image = "ghcr.io/teekuningas/teehetki/teehetki-server:v10";
-        ports = [ "127.0.0.1:5001:5000" ];
-        autoStart = true;
-        extraOptions = ns 3 ++ [ "--env-file=/var/data/.secrets/teehetki_server.env" ];
-        environment = {
-          API_ADDRESS = "https://erpipehe-openai.openai.azure.com";
-          LLM_MODEL = "gpt-4o-mini";
         };
       };
       soitbeginsFrontend = {

@@ -26,6 +26,11 @@
         config.allowUnfree = true;
       };
     in {
+      checks.x86_64-linux.znc = import ./miaucloud/scripts/test_znc.nix {
+        pkgs = nixpkgs-26-05.legacyPackages.x86_64-linux;
+        host = self.nixosConfigurations.miaucloud-nixos.config;
+      };
+
       nixosConfigurations.procyon-nixos = nixpkgs-26-05.lib.nixosSystem {
         system = "x86_64-linux";
         specialArgs = { inherit inputs unstable-pkgs; };
@@ -41,7 +46,7 @@
       };
       nixosConfigurations.miaucloud-nixos = nixpkgs-26-05.lib.nixosSystem {
         system = "x86_64-linux";
-        specialArgs = { inherit inputs; };
+        specialArgs = { inherit inputs unstable-pkgs; };
         modules = [
           ./common/base.nix
           ./miaucloud/configuration.nix

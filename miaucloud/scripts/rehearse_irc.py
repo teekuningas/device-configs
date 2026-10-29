@@ -16,6 +16,7 @@ IMAGES = {
 }
 RESTRICTIONS = [
     "--read-only",
+    "--umask=0077",
     "--cap-drop=ALL",
     "--security-opt=no-new-privileges",
     "--memory=256m",
@@ -26,6 +27,7 @@ RESTRICTIONS = [
 CLIENT_TESTS = r'''
 import datetime
 import json
+from pathlib import Path
 import socket
 import ssl
 import time
@@ -123,13 +125,46 @@ def check_history(client, expected=None):
     return result
 
 
-sender = Client("irc.test", "sender")
+sender = Client("irc.test", "sender-" + settings["phase"])
 whois = wait_upstream(sender, "bouncera")
 wait_upstream(sender, "bouncerb")
 sender.join("#alpha")
 sender.join("#beta")
 
-if settings["phase"] == "initial":
+if settings["phase"] == "watch-rehash":
+    alpha = Client("znc.test", "bouncera", "alpha", "rehash-desktop")
+    beta = Client("znc.test", "bouncerb", "beta", "rehash-mobile")
+    print("READY", flush=True)
+    deadline = time.monotonic() + 30
+    while not Path("/tmp/finish").exists():
+        if time.monotonic() > deadline:
+            raise TimeoutError("Rehash coordinator did not finish")
+        sender.barrier()
+        alpha.barrier()
+        beta.barrier()
+        time.sleep(0.1)
+    sender.send("WHOIS bouncerc")
+    sender.until(lambda line: " 318 " in line and "bouncerc" in line)
+    assert not any(" 311 " in line and "bouncerc" in line for line in sender.lines), (
+        "Re-evaluate the rehash boundary: network definitions unexpectedly reloaded"
+    )
+    sender.barrier()
+    alpha.barrier()
+    beta.barrier()
+    assert not any(
+        any(":" + nick + "!" in line for nick in ("bouncera", "bouncerb"))
+        and (" QUIT " in line or " JOIN " in line)
+        for line in sender.lines
+    ), "An unchanged upstream reconnected during rehash"
+    check_history(alpha, settings["expected"])
+    alpha.close()
+    beta.close()
+    print(json.dumps({"checks": [
+        "SIGHUP does not apply user/network definitions; a controlled restart is required",
+        "attached clients remain connected across rehash",
+        "retained history and original timestamps survive rehash",
+    ]}), flush=True)
+elif settings["phase"] == "initial":
     first = Client("znc.test", "bouncera", "alpha", "desktop")
     second = Client("znc.test", "bouncera", "alpha", "mobile")
     beta = Client("znc.test", "bouncerb", "beta")
@@ -167,6 +202,7 @@ if settings["phase"] == "initial":
         "one client does not clear another client's backlog",
     ], "expected": expected}))
 else:
+    wait_upstream(sender, "bouncerc")
     assert ":Rehearsal " + settings["realname"] in whois, whois
     client = Client("znc.test", "bouncera", "alpha")
     check_history(client, settings["expected"])
@@ -266,6 +302,30 @@ def main():
         print("PASS:", phase, flush=True)
         return report.get("expected")
 
+    def check_logs(state, phase):
+        for network in ("alpha", "beta"):
+            directory = "/znc-data/users/rehearsal/networks/" + network + "/moddata/log"
+            text = volume_command(
+                state,
+                "set -eu\nfind " + directory + " -type f -name '*.log' -exec cat {} +\n",
+                readonly=True,
+            ).decode()
+            if network == "alpha":
+                assert all("bounded-" + str(index) in text for index in range(8))
+                assert "private-offline" in text
+                assert "network-beta-only" not in text
+            else:
+                assert "network-beta-only" in text
+                assert "bounded-0" not in text
+            modes = volume_command(
+                state,
+                "set -eu\nfind " + directory + " -type f -name '*.log' -exec stat -c '%a' {} +\n",
+                readonly=True,
+            ).decode().splitlines()
+            assert modes and set(modes) == {"600"}, "Chat logs are not private"
+        checks.append(phase + ": private permanent channel/query logs retain messages beyond bounded playback")
+        print("PASS:", phase, "permanent logging", flush=True)
+
     try:
         podman("network", "create", "--internal", "--label=irc-rehearsal=" + prefix, network)
         network_created = True
@@ -313,6 +373,7 @@ SSLKeyFile = /znc-data/key.pem
     Ident = rehearsal
     RealName = Rehearsal v1
     MultiClients = true
+    MaxNetworks = 3
     AutoClearChanBuffer = false
     AutoClearQueryBuffer = false
     ChanBufferSize = 5
@@ -324,6 +385,7 @@ SSLKeyFile = /znc-data/key.pem
     <Network alpha>
         Server = irc.test 6667
         LoadModule = savebuff {save_key}
+        LoadModule = log
         <Chan #alpha>
         </Chan>
     </Network>
@@ -331,6 +393,7 @@ SSLKeyFile = /znc-data/key.pem
         Nick = bouncerb
         Server = irc.test 6667
         LoadModule = savebuff {save_key}
+        LoadModule = log
         <Chan #beta>
         </Chan>
     </Network>
@@ -357,8 +420,53 @@ cat > /znc-data/configs/znc.conf <<'CONFIG'
         assert history_setting == "false", "Disable upstream history to avoid false-positive persistence tests"
         checks.append("internal network, no published ports, non-root services, upstream history disabled")
         expected = clients("initial", certificate)
+        check_logs(volume, "initial")
+        watcher = prefix + "-rehash-watch"
+        settings = {
+            "phase": "watch-rehash", "certificate": certificate,
+            "password": password, "expected": expected,
+        }
+        podman(
+            "run", "-d", "--name=" + watcher, "--network=" + network,
+            "--user=65534:65534", *RESTRICTIONS, "--entrypoint=python3",
+            IMAGES["python"], "-u", "-c",
+            "settings = " + repr(settings) + "\n" + CLIENT_TESTS,
+        )
+        containers.append(watcher)
+        for attempt in range(100):
+            output = podman("logs", watcher).decode()
+            if "READY\n" in output:
+                break
+            if not json.loads(podman("inspect", watcher))[0]["State"]["Running"]:
+                raise RuntimeError("Rehash watcher failed: " + output)
+            time.sleep(0.1)
+        else:
+            raise TimeoutError("Rehash watcher was not ready")
+        updated = configuration.replace("    <Network beta>", f"""    <Network gamma>
+        Nick = bouncerc
+        Server = irc.test 6667
+        LoadModule = savebuff {save_key}
+        LoadModule = log
+        <Chan #gamma>
+        </Chan>
+    </Network>
+    <Network beta>""")
+        volume_command(volume, "set -eu\ncat > /znc-data/configs/znc.conf <<'CONFIG'\n" + updated + "CONFIG\n")
+        podman("kill", "--signal=HUP", znc)
+        podman("exec", watcher, "touch", "/tmp/finish")
+        if podman("wait", watcher, timeout=45).decode().strip() != "0":
+            raise RuntimeError(
+                "Synthetic rehash checks failed: " + podman("logs", watcher).decode()
+                + "\nPrivate synthetic ZNC log:\n" + podman("logs", znc).decode()
+            )
+        report = json.loads(podman("logs", watcher).decode().splitlines()[-1])
+        checks.extend(report["checks"])
+        podman("rm", watcher)
+        containers.remove(watcher)
+        print("PASS: SIGHUP boundary; network definitions require restart", flush=True)
         podman("restart", "--time=10", znc)
         clients("restart", certificate, expected)
+        check_logs(volume, "restart")
         remove_znc()
         archive = podman(
             "run", "--rm", "--network=none", "--user=100:65533", *RESTRICTIONS,
@@ -373,9 +481,11 @@ cat > /znc-data/configs/znc.conf <<'CONFIG'
         )
         start_znc(volume)
         clients("recreation", certificate, expected, realname="v2")
+        check_logs(volume, "recreation")
         remove_znc()
         start_znc(restored_volume)
         clients("restored-backup", certificate, expected)
+        check_logs(restored_volume, "restored-backup")
         print(json.dumps({
             "images": IMAGES,
             "checks": checks,
@@ -388,7 +498,7 @@ cat > /znc-data/configs/znc.conf <<'CONFIG'
                 "Test certificate is self-signed and trusted only by the test clients",
                 "Tailnet exposure, certificate renewal and ident are not tested",
                 "Retained buffers replay again on reconnect; per-device unread synchronization is not implemented",
-                "Configuration update tested only while stopped; declarative secret provisioning remains undecided",
+                "Pinned ZNC SIGHUP deliberately skips user/network definitions; network changes require a controlled restart",
                 "Graceful restart tested; crash/power-loss durability is not established",
             ],
         }, indent=2), flush=True)

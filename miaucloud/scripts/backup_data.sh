@@ -1,5 +1,6 @@
 set -euo pipefail
 IFS=$'\n\t'
+umask 0077
 
 ### Configuration ###
 POSTGRES_CONTAINER_NAME="postgres"
@@ -18,6 +19,7 @@ DATA_DIRS=(
   .secrets
   static
   vellubot
+  znc
 )
 FINAL_ARCHIVE="/var/backups/data_backup.tar.gz"
 ######################
@@ -32,8 +34,8 @@ mkdir -p "$BACKUP_DIR"
 # 2) backup Postgres (into $BACKUP_DIR/postgres)
 echo "[INFO] Backing up Postgres"
 
-# Clean up temp file on exit/failure
-trap '[[ -f "$POSTGRES_TMP_FILE" ]] && rm -f "$POSTGRES_TMP_FILE"' EXIT
+# Clean up temporary files on exit/failure
+trap 'rm -f -- "$POSTGRES_TMP_FILE" "$FINAL_ARCHIVE.tmp"' EXIT
 
 # Ensure the backup directory exists
 mkdir -p "$POSTGRES_BACKUP_DIR"
@@ -67,9 +69,14 @@ for d in "${DATA_DIRS[@]}"; do
   fi
 done
 
-# 4) build the single tar.gz (overwriting any existing one)
+rsync -a --delete /home/zairex/.weechat/ "$BACKUP_DIR/weechat/"
+rsync -a --delete /home/zairex/.config/znc/ "$BACKUP_DIR/znc-client/"
+
+# 4) replace the single archive only after the new copy is complete
 echo "[INFO] Creating $FINAL_ARCHIVE"
-tar -C "$BACKUP_DIR" -czf "$FINAL_ARCHIVE" .
+rm -f -- "$FINAL_ARCHIVE.tmp"
+tar -C "$BACKUP_DIR" -czf "$FINAL_ARCHIVE.tmp" .
+mv -f "$FINAL_ARCHIVE.tmp" "$FINAL_ARCHIVE"
 
 echo "[INFO] $(date '+%F %T') Backup complete: $FINAL_ARCHIVE"
 exit 0
