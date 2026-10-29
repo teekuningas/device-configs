@@ -48,7 +48,7 @@ in
           AltNick = "Saireks";
           Server = [ "irc.atw-inter.net 6667" "irc.fu-berlin.de 6667" "irc.belwue.de 6667" ];
           LoadModule = modules;
-          Chan = lib.genAttrs [ "#a47" "#hyrskytin" "#Tengen.fi" ] (_: { });
+          Chan = lib.genAttrs [ "#a47" "#hyrskytin" "#Tengen.fi" "#ohjelmointiputka" ] (_: { });
         };
       };
     };
