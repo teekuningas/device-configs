@@ -6,9 +6,7 @@ umask 0077
 POSTGRES_CONTAINER_NAME="postgres"
 POSTGRES_PGUSER="postgres"
 POSTGRES_BACKUP_DIR="/var/backups/all_data/postgres"
-POSTGRES_FINAL_NAME="pg_dumpall.sql.gz"
-POSTGRES_TMP_FILE="$POSTGRES_BACKUP_DIR/${POSTGRES_FINAL_NAME}.tmp"
-POSTGRES_FINAL_FILE="$POSTGRES_BACKUP_DIR/$POSTGRES_FINAL_NAME"
+POSTGRES_FINAL_FILE="$POSTGRES_BACKUP_DIR/pg_dumpall.sql.gz"
 
 BACKUP_DIR="/var/backups/all_data"
 DATA_ROOT="/var/data"
@@ -20,8 +18,10 @@ DATA_DIRS=(
   static
   vellubot
   znc
+  weechat-logs
 )
-FINAL_ARCHIVE="/var/backups/data_backup.tar.gz"
+# age-encrypted to $BACKUP_RECIPIENT (set by the systemd unit)
+FINAL_ARCHIVE="/var/backups/data_backup.tar.gz.age"
 ######################
 
 echo "[INFO] $(date '+%F %T') Starting full backup"
@@ -34,24 +34,18 @@ mkdir -p "$BACKUP_DIR"
 # 2) backup Postgres (into $BACKUP_DIR/postgres)
 echo "[INFO] Backing up Postgres"
 
-# Clean up temporary files on exit/failure
-trap 'rm -f -- "$POSTGRES_TMP_FILE" "$FINAL_ARCHIVE.tmp"' EXIT
+# Clean up the plaintext staging copy and temporary files on exit/failure
+trap 'rm -rf -- "$BACKUP_DIR" "$FINAL_ARCHIVE.tmp"' EXIT
 
 # Ensure the backup directory exists
 mkdir -p "$POSTGRES_BACKUP_DIR"
 
 echo "[ $(date '+%F %T') ] Starting Postgres full dump from container '$POSTGRES_CONTAINER_NAME'..."
 
-# Run pg_dumpall in the container, compress into a temp file
+# Run pg_dumpall in the container, compressed into the staging copy
 podman exec -i "$POSTGRES_CONTAINER_NAME" \
     pg_dumpall -U "$POSTGRES_PGUSER" \
-  | gzip > "$POSTGRES_TMP_FILE"
-
-# Atomically move the temp file into place, overwriting any previous dump
-mv -f "$POSTGRES_TMP_FILE" "$POSTGRES_FINAL_FILE"
-
-# Ensure data is on disk
-sync
+  | gzip > "$POSTGRES_FINAL_FILE"
 
 echo "[ $(date '+%F %T') ] Backup complete → $POSTGRES_FINAL_FILE"
 
@@ -69,13 +63,10 @@ for d in "${DATA_DIRS[@]}"; do
   fi
 done
 
-rsync -a --delete /home/zairex/.weechat/ "$BACKUP_DIR/weechat/"
-rsync -a --delete /home/zairex/.config/znc/ "$BACKUP_DIR/znc-client/"
-
 # 4) replace the single archive only after the new copy is complete
 echo "[INFO] Creating $FINAL_ARCHIVE"
 rm -f -- "$FINAL_ARCHIVE.tmp"
-tar -C "$BACKUP_DIR" -czf "$FINAL_ARCHIVE.tmp" .
+tar -C "$BACKUP_DIR" -cz . | age -r "$BACKUP_RECIPIENT" > "$FINAL_ARCHIVE.tmp"
 mv -f "$FINAL_ARCHIVE.tmp" "$FINAL_ARCHIVE"
 
 echo "[INFO] $(date '+%F %T') Backup complete: $FINAL_ARCHIVE"

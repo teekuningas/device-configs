@@ -42,7 +42,8 @@ let
 in
 {
   imports = [
-    ./znc.nix
+    ./znc.nix # the IRC bouncer
+    ./znc-host.nix # how miaucloud runs and exposes it
     # Merge generated container settings with the explicit service units below.
     {
       systemd.services =
@@ -60,117 +61,6 @@ in
         });
     }
   ];
-
-  nixpkgs.overlays = [
-    (_: _: {
-      znc = unstable-pkgs.znc.overrideAttrs (old: {
-        buildInputs = old.buildInputs ++ [ unstable-pkgs.libargon2 ];
-        cmakeFlags = (old.cmakeFlags or [ ]) ++ [ "-DWANT_ARGON=YES" ];
-      });
-    })
-  ];
-
-  services.znc =
-    let
-      modules = [ "savebuff @SAVEBUFF_KEY@" "log" ];
-      networks = {
-        libera = {
-          Server = [ "irc.libera.chat +6697" ];
-          TrustAllCerts = false;
-          TrustPKI = true;
-          LoadModule = modules ++ [ "sasl" ];
-          Chan = lib.genAttrs [ "#vellumo" "#nixos" "##math" "#elm" ] (_: { });
-        };
-        quakenet = {
-          AltNick = "Saireks";
-          Server = [ "irc.quakenet.org 6667" ];
-          LoadModule = modules;
-          Chan = lib.genAttrs [ "#siilisota" "#91-syntyneet" "#alajärvi" ] (_: { });
-        };
-        ircnet = {
-          AltNick = "Saireks";
-          Server = [ "irc.atw-inter.net 6667" "irc.fu-berlin.de 6667" "irc.belwue.de 6667" ];
-          LoadModule = modules;
-          Chan = lib.genAttrs [ "#a47" "#hyrskytin" "#Tengen.fi" ] (_: { });
-        };
-      };
-    in {
-      enable = true;
-      dataDir = "/var/data/znc";
-      config = {
-        MaxBufferSize = 500;
-        Listener.l = {
-          Host = "127.0.0.1";
-          Port = 16667;
-          IPv4 = true;
-          IPv6 = false;
-          SSL = false;
-          AllowIRC = true;
-          AllowWeb = false;
-        };
-        User.zairex = {
-          Admin = false;
-          Nick = "Zairex";
-          AltNick = "Zairex_";
-          Ident = "zairex";
-          RealName = "Zairex";
-          MultiClients = true;
-          MaxNetworks = builtins.length (builtins.attrNames networks);
-          ChanBufferSize = 500;
-          QueryBufferSize = 500;
-          AutoClearChanBuffer = false;
-          AutoClearQueryBuffer = false;
-          DenyLoadMod = true;
-          DenySetNetwork = true;
-          DenySetIdent = true;
-          DenySetBindHost = true;
-          DenySetRealName = true;
-          Pass.password = {
-            Method = "Argon2id";
-            Hash = "@PASSWORD_HASH@";
-          };
-          Network = lib.mapAttrs (_: network: { IRCConnectEnabled = true; } // network) networks;
-        };
-      };
-    };
-
-  # Retain existing ownership; changing runtime does not require moving data.
-  users.users.znc.isSystemUser = true;
-  users.users.znc.uid = lib.mkForce 1510820;
-  users.groups.znc.gid = lib.mkForce 1576253;
-  systemd.services.znc.serviceConfig.LoadCredential = [
-    "znc.json:/var/data/.secrets/znc.json"
-    "sasl-libera.json:/var/data/.secrets/znc-libera.json"
-  ];
-
-  services.oidentd.enable = true;
-  environment.etc."oidentd.conf".text = ''
-    user "znc" {
-        fport 6667 { force reply "${config.services.znc.config.User.zairex.Ident}" }
-        fport 6697 { force reply "${config.services.znc.config.User.zairex.Ident}" }
-    }
-  '';
-  systemd.services.oidentd.script = lib.mkForce ''
-    ${pkgs.oidentd}/sbin/oidentd -C /etc/oidentd.conf -u oidentd -g nogroup
-  '';
-
-  systemd.services.znc-tailnet = {
-    description = "Tailnet-only TLS ingress for ZNC";
-    wantedBy = [ "multi-user.target" ];
-    wants = [ "tailscaled.service" "znc.service" ];
-    after = [ "tailscaled.service" "znc.service" ];
-    serviceConfig = {
-      ExecStart = "${lib.getExe config.services.tailscale.package} serve --tls-terminated-tcp=6697 tcp://127.0.0.1:${toString config.services.znc.config.Listener.l.Port}";
-      Restart = "always";
-      RestartSec = "10s";
-      TimeoutStopSec = "15s";
-      NoNewPrivileges = true;
-      ProtectSystem = "strict";
-      ProtectHome = true;
-      PrivateTmp = true;
-      UMask = "0077";
-    };
-  };
 
   environment.systemPackages = with pkgs; [
     (python3.withPackages (ps: with ps; [
@@ -234,7 +124,6 @@ in
       22 # SSH
       80 # HTTP
       443 # HTTPS
-      113 # Oidentd
     ];
 
     # needed to fix podman dns
@@ -401,7 +290,11 @@ in
       gzip
       rsync
       gnutar
+      age
     ];
+
+    # Archives are encrypted to this key; its private half is in Bitwarden.
+    environment.BACKUP_RECIPIENT = "age1tpr0a47tsrnlchpr726df3xe2qlawjr5f28enqgzpnq6exa4euxqdaz2ta";
 
     serviceConfig = {
       Type = "oneshot";

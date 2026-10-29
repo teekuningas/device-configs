@@ -1,62 +1,56 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
-}:
+# The IRC bouncer itself: plain NixOS `services.znc`, nothing else.
+# How miaucloud runs and exposes it lives in znc-host.nix.
+{ lib, pkgs, ... }:
 let
-  cfg = config.services.znc;
-  renderer = "${./scripts/render_znc.py}";
-  userName = builtins.head (builtins.attrNames cfg.config.User);
-  configuredNetworks = cfg.config.User.${userName}.Network;
-  saslNetworks = lib.filterAttrs (
-    _: network: builtins.elem "sasl" (network.LoadModule or [ ])
-  ) configuredNetworks;
-  networkDirectory = name: "${cfg.dataDir}/users/${userName}/networks/${name}";
-  runtimePlan = pkgs.writeText "znc-runtime.json" (
-    builtins.toJSON {
-      networkCount = builtins.length (builtins.attrNames configuredNetworks);
-      sasl = lib.mapAttrsToList (name: _: {
-        credential = "sasl-${name}.json";
-        target = "${networkDirectory name}/moddata/sasl/.registry";
-      }) saslNetworks;
-    }
-  );
+  # Per-device playback, playback that survives restarts, permanent logs.
+  modules = [ "clientbuffer autoadd" "savebuff" "log" ];
 in
 {
-  config = lib.mkIf cfg.enable {
-    assertions = [
-      {
-        assertion = builtins.length (builtins.attrNames cfg.config.User) == 1;
-        message = "The runtime ZNC credential renderer supports exactly one login account.";
-      }
-    ];
+  services.znc = {
+    enable = true;
+    mutable = false; # znc.conf is regenerated from this file on every start
+    useLegacyConfig = false;
+    modulePackages = [ pkgs.zncModules.clientbuffer ];
 
-    services.znc = {
-      useLegacyConfig = false;
-      mutable = false;
-    };
+    config.User.zairex = {
+      Nick = "Zairex";
+      AltNick = "Zairex_";
+      Ident = "zairex";
+      RealName = "Zairex";
+      MaxNetworks = 3;
+      ChanBufferSize = 500;
+      QueryBufferSize = 500;
+      AutoClearChanBuffer = false;
+      AutoClearQueryBuffer = false;
 
-    systemd.tmpfiles.rules = map (directory: "d ${directory} 0700 ${cfg.user} ${cfg.group} -") (
-      [
-        cfg.dataDir
-        "${cfg.dataDir}/configs"
-        "${cfg.dataDir}/users"
-        "${cfg.dataDir}/users/${userName}"
-        "${cfg.dataDir}/users/${userName}/networks"
-      ]
-      ++ lib.concatMap (name: [
-        (networkDirectory name)
-        "${networkDirectory name}/moddata"
-        "${networkDirectory name}/moddata/sasl"
-      ]) (builtins.attrNames saslNetworks)
-    );
+      # From `znc --makepass`: Argon2id of a 256-bit random password, safe to publish.
+      Pass.password = {
+        Method = "Argon2id";
+        Hash = "$argon2id$v=19$m=6144,t=6,p=1$K2t5R0JLKlcoSldwKS42cUppckI$NhhCRM7PR94eFok9+GGJ8IalyivQe7yerqlo2Ndkc+I";
+      };
 
-    systemd.services.znc = {
-      preStart = lib.mkAfter ''
-        ${pkgs.python3}/bin/python3 ${renderer} ${cfg.configFile} "$CREDENTIALS_DIRECTORY/znc.json" ${cfg.dataDir}/configs/znc.conf ${runtimePlan}
-      '';
-      serviceConfig.UMask = lib.mkForce "0077";
+      # Client certificate in users/zairex/moddata/cert/user.pem (Libera SASL EXTERNAL).
+      LoadModule = [ "cert" ];
+
+      Network = {
+        libera = {
+          Server = [ "irc.libera.chat +6697" ];
+          LoadModule = modules ++ [ "sasl" ];
+          Chan = lib.genAttrs [ "#vellumo" "#nixos" "##math" "#elm" ] (_: { });
+        };
+        quakenet = {
+          AltNick = "Saireks";
+          Server = [ "irc.quakenet.org 6667" ];
+          LoadModule = modules;
+          Chan = lib.genAttrs [ "#siilisota" "#91-syntyneet" "#alajärvi" ] (_: { });
+        };
+        ircnet = {
+          AltNick = "Saireks";
+          Server = [ "irc.atw-inter.net 6667" "irc.fu-berlin.de 6667" "irc.belwue.de 6667" ];
+          LoadModule = modules;
+          Chan = lib.genAttrs [ "#a47" "#hyrskytin" "#Tengen.fi" ] (_: { });
+        };
+      };
     };
   };
 }
