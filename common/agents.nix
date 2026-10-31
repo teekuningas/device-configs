@@ -6,6 +6,10 @@ let
   raw-agent-sandbox = inputs.agent-sandbox.packages.${pkgs.stdenv.hostPlatform.system}.default;
   agent-sandbox = raw-agent-sandbox.override (orig: {
     pkgs = orig.pkgs.extend (final: prev: {
+      # Use the host's podman: podman 6 from unstable can't read the
+      # /etc/containers config written by the stable NixOS module (it honors
+      # the rootful graphroot and rejects v1 registries.conf).
+      podman = pkgs.podman;
       cacert = prev.cacert // {
         override = args: prev.cacert.override (
           let origArgs = if builtins.isFunction args then args prev.cacert else args;
