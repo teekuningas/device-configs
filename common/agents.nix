@@ -42,11 +42,8 @@ in
   environment.systemPackages = with pkgs; [
     agent-codespace
     agent-sandbox
-    agentsview
     antigravity-cli
     claude-code
     github-copilot-cli
-    opencode
-    pi-coding-agent
   ];
 }

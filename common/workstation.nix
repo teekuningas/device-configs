@@ -70,7 +70,6 @@
       geopandas
       folium
       llm
-      llm-azure
     ]))
     uv
     nodejs
