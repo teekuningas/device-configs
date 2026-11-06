@@ -67,6 +67,7 @@ done
 echo "[INFO] Creating $FINAL_ARCHIVE"
 rm -f -- "$FINAL_ARCHIVE.tmp"
 tar -C "$BACKUP_DIR" -cz . | age -r "$BACKUP_RECIPIENT" > "$FINAL_ARCHIVE.tmp"
+chmod 0644 "$FINAL_ARCHIVE.tmp"
 mv -f "$FINAL_ARCHIVE.tmp" "$FINAL_ARCHIVE"
 
 echo "[INFO] $(date '+%F %T') Backup complete: $FINAL_ARCHIVE"
