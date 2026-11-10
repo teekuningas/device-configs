@@ -6,7 +6,7 @@
     nixpkgs-25-11.url = "github:NixOS/nixpkgs/nixos-25.11";
     nixpkgs-small.url = "github:NixOS/nixpkgs/nixos-unstable-small";
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
-    nixos-wsl.url = "github:nix-community/NixOS-WSL";
+    nixos-wsl.url = "github:nix-community/NixOS-WSL/release-26.05";
     teepkgs.url = "github:teekuningas/pkgs";
     vasara-pkgs.url = "gitlab:vasara-bpm/pkgs";
     agent-sandbox = {
@@ -50,7 +50,7 @@
           ./miaucloud/users.nix
         ];
       };
-      nixosConfigurations.miaudesk-nixos = nixpkgs-25-11.lib.nixosSystem {
+      nixosConfigurations.miaudesk-nixos = nixpkgs-26-05.lib.nixosSystem {
         system = "x86_64-linux";
         specialArgs = { inherit inputs unstable-pkgs; };
         modules = [
