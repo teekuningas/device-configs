@@ -38,6 +38,7 @@
   virtualisation.containers.containersConf.settings.network.default_rootless_network_cmd = "slirp4netns";
 
   environment.systemPackages = with pkgs; [
+    weechat
     cudatoolkit
     nvidia-container-toolkit
   ];
