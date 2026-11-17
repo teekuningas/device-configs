@@ -41,6 +41,7 @@ in
     wants = [ "tailscaled.service" ];
     after = [ "tailscaled.service" ];
     serviceConfig = {
+      ExecStartPre = "${lib.getExe config.services.tailscale.package} wait --timeout=60s";
       ExecStart = "${lib.getExe config.services.tailscale.package} serve --tls-terminated-tcp=6697 tcp://127.0.0.1:${toString port}";
       Restart = "always";
       RestartSec = "10s";
